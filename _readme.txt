@@ -1,3 +1,7 @@
+2008-08-20
+----------
+- rewrite of audio driver started - RtAudio will be used now
+
 2008-08-15
 ----------
 - added rectangular, triangle, saw generators

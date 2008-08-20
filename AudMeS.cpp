@@ -41,23 +41,18 @@ BEGIN_EVENT_TABLE( MainFrame, wxFrame )
   EVT_BUTTON( ID_AUTOCAL, MainFrame::OnAutoCalClick )
 END_EVENT_TABLE()
 
-double fin_left[FFT_LEN];
-double fin_right[FFT_LEN];
-int fin_changed;
-int finout_changed;
+short * g_OscBuffer_Left;
+short * g_OscBuffer_Right;
+long int g_OscBufferPosition;
 
-BOOL Process( LPWAVEHDR  pwh)
-{
-  for (DWORD dw = 0; dw < FFT_LEN; dw++) {
-    //copy audio signal to fft real component.
-    fin_left[dw] = (double)((short*)pwh->lpData)[2*dw];
-    fin_right[dw] = (double)((short*)pwh->lpData)[2*dw+1];
-  }
+short * g_SpeBuffer_Left;
+short * g_SpeBuffer_Right;
+long int g_SpeBufferPosition;
 
-  fin_changed = 1;
-  return TRUE;
-}
+int g_OscBufferChanged;
+int g_SpeBufferChanged;
 
+///////////////////////////////////////////////////////////////////////
 MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPoint& pos, const wxSize& size, long style):
     wxFrame(parent, id, title, pos, size, wxDEFAULT_FRAME_STYLE|wxFULL_REPAINT_ON_RESIZE)
 {
@@ -425,12 +420,15 @@ void MainFrame::set_custom_props()
   window_1_frm->SetXRange( 10, 10000, 1);
   window_1_frm->SetYRange( -100, 0, 0, 1);
 
-  fin_changed = 0;
+  g_OscBufferChanged = 0;
+  g_SpeBufferChanged = 0;
 
   m_timer = new wxTimer( this, ID_TIMERID);
   m_timer->Start( 200);
 
-  m_rec = new RWAudio( FFT_LEN);
+  m_OscBufferLength = 2048;
+  m_SpeBufferLength = 2048;
+  m_RWAudio = new RWAudio( m_OscBufferLength, m_SpeBufferLength );
 
   m_configfilename = "";
 
@@ -466,17 +464,17 @@ wxMessageBox( "Not yet implemented", _T("About application"),wxICON_INFORMATION 
 
 void MainFrame::OnAutoCalClick( wxCommandEvent& event )
 {
- if ( m_rec->IsRecording()) {
-   int minValueL= 65535;
-   int maxValueL= 0;
-   int minValueR= 65535;
-   int maxValueR= 0;
+ if ( button_osc_start->GetValue()) {
+   short minValueL= 32767;
+   short maxValueL= -32767;
+   short minValueR= 32767;
+   short maxValueR= -32767;
 
-   for (int i = 0 ; i < FFT_LEN; i++) {
-     if ( minValueL > fin_left[i]) minValueL = fin_left[i];
-     if ( maxValueL < fin_left[i]) maxValueL = fin_left[i];
-     if ( minValueR > fin_right[i]) minValueR = fin_right[i];
-     if ( maxValueR < fin_right[i]) maxValueR = fin_right[i];
+   for (int i = 0 ; i < m_OscBufferLength; i++) {
+     if ( minValueL > g_OscBuffer_Left[i]) minValueL = g_OscBuffer_Left[i];
+     if ( maxValueL < g_OscBuffer_Left[i]) maxValueL = g_OscBuffer_Left[i];
+     if ( minValueR > g_OscBuffer_Right[i]) minValueR = g_OscBuffer_Right[i];
+     if ( maxValueR < g_OscBuffer_Right[i]) maxValueR = g_OscBuffer_Right[i];
    }
    int diff = maxValueL - minValueL;
    float lgdiff = log(diff)/log(2) ;
@@ -487,6 +485,9 @@ void MainFrame::OnAutoCalClick( wxCommandEvent& event )
    lgdiff = log(diff)/log(2) ;
    if (lgdiff > 15) lgdiff = 15;
    choice_osc_l_res_copy->SetSelection((int) lgdiff);
+
+   // then center the wave - peaks must be located symetrically from the centre
+
  } else {
    wxMessageBox( "Please start recording", _T("Could not auto calibrate"),wxICON_INFORMATION | wxOK );
  }
@@ -498,10 +499,9 @@ void MainFrame::OnTimer( wxTimerEvent & ev)
   int fvz = 44100;
   double tmpval;
 
-  if ( 0 != fin_changed) {
-
-    if (button_osc_start->GetValue()) {
-      // osciloskop
+  // oscilloscope
+    if ((button_osc_start->GetValue())&&(0 != g_OscBufferChanged)) {
+      
       wxArrayDouble ardbl, ardbl2;
       int i;
       double trigger_edge;
@@ -514,6 +514,7 @@ void MainFrame::OnTimer( wxTimerEvent & ev)
       double range_div2 = pow(2,choice_osc_l_res_copy->GetCurrentSelection());
       double shft_val2 = 20.0*(choice_osc_l_off_copy->GetCurrentSelection()-5)/128.0;
       i = 0;
+      g_OscBufferChanged = 0;
 
       // triggering - re-done a little bit, more or less ...
       trigger_edge = (0 == choice_osc_trig_edge->GetCurrentSelection()) ? 1.0 : -1.0;
@@ -523,14 +524,14 @@ void MainFrame::OnTimer( wxTimerEvent & ev)
 	// left channel - look for the value under hysteresis point and then over 0
 	choice_osc_l_res->GetString(choice_osc_l_res->GetCurrentSelection()).ToLong( &scope_resolution);
 	hysteresis_level = scope_resolution/10.0; // later the hysteresis percent will be maybe settable in the control
-	while (i < FFT_LEN) {
-	  if ((trigger_level-hysteresis_level) > (trigger_edge * fin_left[i])) {
+	while (i < m_OscBufferLength) {
+	  if ((trigger_level-hysteresis_level) > (trigger_edge * g_OscBuffer_Left[i])) {
 	    break;
 	  }
 	  i++;
 	}
-	while (i < FFT_LEN) {
-	  if (trigger_level < (trigger_edge * fin_left[i])) {
+	while (i < m_OscBufferLength) {
+	  if (trigger_level < (trigger_edge * g_OscBuffer_Left[i])) {
 	    break;
 	  }
 	  i++;
@@ -541,14 +542,14 @@ void MainFrame::OnTimer( wxTimerEvent & ev)
 	// right channel
 	choice_osc_l_res_copy->GetString(choice_osc_l_res_copy->GetCurrentSelection()).ToLong( &scope_resolution);
 	hysteresis_level = scope_resolution/10.0; // later the hysteresis percent will be maybe settable in the control
-	while (i < FFT_LEN) {
-	  if ((trigger_level-hysteresis_level) > (trigger_edge * fin_right[i])) {
+	while (i < m_OscBufferLength) {
+	  if ((trigger_level-hysteresis_level) > (trigger_edge * g_OscBuffer_Right[i])) {
 	    break;
 	  }
 	  i++;
 	}
-	while (i < FFT_LEN) {
-	  if (trigger_level < (trigger_edge * fin_right[i])) {
+	while (i < m_OscBufferLength) {
+	  if (trigger_level < (trigger_edge * g_OscBuffer_Right[i])) {
 	    break;
 	  }
 	  i++;
@@ -558,31 +559,31 @@ void MainFrame::OnTimer( wxTimerEvent & ev)
 	// no trigger
 	break;
       }
-      while ( i < FFT_LEN) {
-	ardbl.Add( fin_left[i]/range_div-shft_val);
-	ardbl2.Add( fin_right[i]/range_div2-shft_val2);
+      while ( i < m_OscBufferLength) {
+	ardbl.Add( g_OscBuffer_Left[i]/range_div-shft_val);
+	ardbl2.Add( g_OscBuffer_Right[i]/range_div2-shft_val2);
 	i++;
       }
 
       window_1->SetTrack( ardbl);
       window_1->SetTrack2( ardbl2);
-      fin_changed = 0;
     }
 
-    if (button_osc_start_copy->GetValue()) {
-      // analyzer
+    // Spectrum analyzer
+    if ((button_osc_start_copy->GetValue())&&(0 != g_SpeBufferChanged)) {
+      
       double *realin, *realout, *imagout;
-      int nsampl = FFT_LEN;
+      int nsampl = m_SpeBufferLength;
       realin = (double*) malloc( nsampl*sizeof( double));
       realout = (double*) malloc( nsampl*sizeof( double));
       imagout = (double*) malloc( nsampl*sizeof( double));
 
+      g_SpeBufferChanged = 0;
 
       for( int i=0; i<nsampl;i++){
 	//realin[i] = sin(6.28*689.0625*i/fvz);
-	realin[i] = fin_left[i]/2048.0;
+	realin[i] = g_SpeBuffer_Left[i]/2048.0;
       }
-      fin_changed = 0;
 
       wxArrayDouble ardbl;
       if (fft_double( nsampl, 0, realin, NULL, realout, imagout)) {
@@ -633,7 +634,7 @@ void MainFrame::OnTimer( wxTimerEvent & ev)
     }
  
     //wxMessageBox( _T("Idle event caught"), _T("About application"),wxICON_INFORMATION | wxOK ); 
-  }
+  
   double sweep_div;
   choice_osc_l_swp_copy->GetString(choice_osc_l_swp_copy->GetCurrentSelection()).ToDouble( &sweep_div);
   window_1->SetXRange( 0, sweep_div, 0);
@@ -647,20 +648,20 @@ void MainFrame::OnSpanStart( wxCommandEvent& ev )
   if (button_osc_start_copy->GetValue()) {
     button_osc_start_copy->SetLabel(_T("Stop"));
 
-    if(!button_osc_start->GetValue()) {
-      if ( !m_rec->IsRecDeviceOpened()) {
-	m_rec->RecOpen();
-	m_rec->RecSetBufferFunction( Process);
-      }
-      m_rec->RecStart();
-    }
+//     if(!button_osc_start->GetValue()) {
+//       if ( !m_rec->IsRecDeviceOpened()) {
+// 	m_rec->RecOpen();
+// 	m_rec->RecSetBufferFunction( Process);
+//       }
+//       m_rec->RecStart();
+//     }
 
   } else {
     button_osc_start_copy->SetLabel(_T("Start"));
-    if(!button_osc_start->GetValue()) {
-      m_rec->RecStop();
-      m_rec->RecClose();
-    }
+//     if(!button_osc_start->GetValue()) {
+//       m_rec->RecStop();
+//       m_rec->RecClose();
+//     }
   }
 
 }
@@ -670,15 +671,15 @@ void MainFrame::OnGenStart( wxCommandEvent& ev )
 
   if (button_gen_start->GetValue()) {
     button_gen_start->SetLabel(_T("Stop"));
-    if ( !m_rec->IsPlayDeviceOpened()) {
-      m_rec->PlayOpen();
-    }
-    m_rec->PlayStart();
+//     if ( !m_rec->IsPlayDeviceOpened()) {
+//       m_rec->PlayOpen();
+//     }
+//     m_rec->PlayStart();
     SendGenSettings();
   } else {
     button_gen_start->SetLabel(_T("Start"));
-    m_rec->PlayStop();
-    m_rec->PlayClose();
+//     m_rec->PlayStop();
+//     m_rec->PlayClose();
   }
 }
 
@@ -686,20 +687,20 @@ void MainFrame::OnOscStart( wxCommandEvent& ev )
 {
   if (button_osc_start->GetValue()) {
     button_osc_start->SetLabel(_T("Stop"));
-    if (!button_osc_start_copy->GetValue()) {
-      if ( !m_rec->IsRecDeviceOpened()) {
-	m_rec->RecOpen();
-	m_rec->RecSetBufferFunction( Process);
-      }
-      m_rec->RecStart();
-    }
+//     if (!button_osc_start_copy->GetValue()) {
+//       if ( !m_rec->IsRecDeviceOpened()) {
+// 	m_rec->RecOpen();
+// 	m_rec->RecSetBufferFunction( Process);
+//       }
+//       m_rec->RecStart();
+//     }
 
   } else {
     button_osc_start->SetLabel(_T("Start"));
-    if (!button_osc_start_copy->GetValue()) {
-      m_rec->RecStop();
-      m_rec->RecClose();
-    }
+//     if (!button_osc_start_copy->GetValue()) {
+//       m_rec->RecStop();
+//       m_rec->RecClose();
+//     }
   }
 }
 
@@ -718,32 +719,32 @@ void MainFrame::OnFrmStart( wxCommandEvent& ev )
     if (ipoints < 1) ipoints = 1;
 
     frm_running = 1;
-      if ( !m_rec->IsPlayDeviceOpened()) {
-	m_rec->PlayOpen();
-      }
-      if ( !m_rec->IsRecDeviceOpened()) {
-	m_rec->RecOpen();
-	m_rec->RecSetBufferFunction( Process);
-      }
-      m_rec->RecStart();
+//       if ( !m_rec->IsPlayDeviceOpened()) {
+// 	m_rec->PlayOpen();
+//       }
+//       if ( !m_rec->IsRecDeviceOpened()) {
+// 	m_rec->RecOpen();
+// 	m_rec->RecSetBufferFunction( Process);
+//       }
+//       m_rec->RecStart();
       m_frm_freqs.Clear();
       m_frm_gains.Clear();
     for(int i=0; i<= (int)ipoints; i++) {
       // from 20Hz to 20kHz
       float freq = 20.0*pow(10.0, 3.0*i/ipoints)+50.0;
-      m_rec->PlaySetGenerator( freq, freq, 0, 0, pow(10,slide_l_am->GetValue()/20.0), pow(10,slide_r_am->GetValue()/20.0));
+      m_RWAudio->PlaySetGenerator( freq, freq, 0, 0, pow(10,slide_l_am->GetValue()/20.0), pow(10,slide_r_am->GetValue()/20.0));
       Sleep( 400);
       wxYield();
       Sleep( 400);
       wxYield();
       // find maximum value in the grabbed wave and store it as a result
       m_frm_freqs.Add( freq);
-      double i_min = fin_left[0];
-      double i_max = fin_left[0];
-      for( int ii = 1; ii < FFT_LEN; ii++){
+      double i_min = g_SpeBuffer_Left[0];
+      double i_max = g_SpeBuffer_Left[0];
+      for( int ii = 1; ii < m_SpeBufferLength; ii++){
 	/* zatim pouze prvni kanal */
-	if (fin_left[ii] > i_max ) i_max = fin_left[ii];
-	if (fin_left[ii] < i_min ) i_min = fin_left[ii];
+	if (g_SpeBuffer_Left[ii] > i_max ) i_max = g_SpeBuffer_Left[ii];
+	if (g_SpeBuffer_Left[ii] < i_min ) i_min = g_SpeBuffer_Left[ii];
       }
       m_frm_gains.Add( (i_max-i_min)/65536.0);
 
@@ -757,10 +758,10 @@ void MainFrame::OnFrmStart( wxCommandEvent& ev )
 //     }
 //     fclose( ddbg);
 
-    m_rec->PlayStop();
-    m_rec->PlayClose();
-    m_rec->RecStop();
-    m_rec->RecClose();
+//     m_rec->PlayStop();
+//     m_rec->PlayClose();
+//     m_rec->RecStop();
+//     m_rec->RecClose();
     button_frm_start->SetLabel(_T("Start"));
     button_frm_start->SetValue( false);
 
@@ -857,9 +858,9 @@ void MainFrame::SendGenSettings( )
 
   int shapeleft = choice_l_wav->GetCurrentSelection() ;
   int shaperight = choice_r_wav->GetCurrentSelection() ;
-  m_rec->PlaySetGenerator( freq_l, freq_r, shapeleft, shaperight, 1.0*pow(10,slide_l_am->GetValue()/20.0), 1.0*pow(10,slide_r_am->GetValue()/20.0));
+  m_RWAudio->PlaySetGenerator( freq_l, freq_r, shapeleft, shaperight, 1.0*pow(10,slide_l_am->GetValue()/20.0), 1.0*pow(10,slide_r_am->GetValue()/20.0));
   if( checkbox_gen_sync->IsChecked()){
-    m_rec->PlaySetPhaseDiff( phas2*3.14159/180.0); // should be in degrees now
+    m_RWAudio->PlaySetPhaseDiff( phas2*3.14159/180.0); // should be in degrees now
   }
 }
 
@@ -879,7 +880,7 @@ void MainFrame::OnSelectSndCard( wxCommandEvent& ev )
   //z RWAUDIO ziskat seznam SND karet, otevrit SELECT dialog a pak nastaveni poslat do RW_AUDIO
   arrplstr.Clear();
   arrrecstr.Clear();
-  num = m_rec->GetPlayDevices( &devarr);
+  num = m_RWAudio->GetPlayDevices( &devarr);
   bla = _T("Devices: ");
   for (i = 0; i < num; i++) {
     //bla += wxString::Format("%s ",devarr[i]);
@@ -887,7 +888,7 @@ void MainFrame::OnSelectSndCard( wxCommandEvent& ev )
   }
   //wxMessageBox(bla);
 
-  num = m_rec->GetRecordDevices( &devarr);
+  num = m_RWAudio->GetRecordDevices( &devarr);
   for (i = 0; i < num; i++) {
     arrrecstr.Add(wxString::Format("%s ",devarr[i]));
   }
@@ -896,7 +897,7 @@ void MainFrame::OnSelectSndCard( wxCommandEvent& ev )
   if (wxID_OK == dlg.ShowModal()) {
     // poslat nastaveni do RW_AUDIO
     dlg.GetSelectedDevs( &recdev, &pldev);
-    m_rec->SetSndDevices( recdev, pldev);
+    m_RWAudio->SetSndDevices( recdev, pldev);
   }
 }
 

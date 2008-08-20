@@ -7,13 +7,12 @@
 // end wxGlade
 #include <wx/tglbtn.h>
 
-#include "RWAudio_win.h"
+#include "RWAudio_IO.h"
 #include "OScopeCtrl.h"
 
 #ifndef AUDMES_H
 #define AUDMES_H
 
-#define FFT_LEN 2048
 #define AUDMES_VERSION_STRING "15.8.2008 beta"
 
 class MainFrame: public wxFrame {
@@ -120,7 +119,7 @@ protected:
   wxToggleButton* button_frm_start;
   OScopeCtrl* window_1_frm;
 
-  RWAudio *  m_rec;
+  RWAudio *  m_RWAudio;
   wxTimer * m_timer;
   //RWPlayer i_pl;
   int frm_running;
@@ -129,8 +128,11 @@ protected:
   wxArrayDouble m_frm_gains;
 
   wxButton * button_autocalibrate;
-
   wxString m_configfilename;
+
+  long int m_OscBufferLength;
+  long int m_SpeBufferLength;
+
 };
 
 

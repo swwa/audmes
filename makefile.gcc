@@ -42,7 +42,7 @@ RCFILESRC=audmes.rc
 
 PROGRAM=AudMeS.exe
 
-OBJECTS=$(OBJECTPATH)/_AudMeS.o $(OBJECTPATH)/dlg_audiointerface.o $(OBJECTPATH)/RWAudio.o $(OBJECTPATH)/OScopeCtrl.o $(OBJECTPATH)/fourier.o  $(OBJECTPATH)/$(RCFILEOBJ)
+OBJECTS=$(OBJECTPATH)/_AudMeS.o $(OBJECTPATH)/dlg_audiointerface.o $(OBJECTPATH)/RWAudio.o $(OBJECTPATH)/RtAudio.o $(OBJECTPATH)/OScopeCtrl.o $(OBJECTPATH)/fourier.o  audiolib/libdsound.a $(OBJECTPATH)/$(RCFILEOBJ)
 
 
 all:	$(OBJECTPATH)
@@ -77,7 +77,10 @@ $(OBJECTPATH)/fourier.o:	fourier.c
 $(OBJECTPATH)/dlg_audiointerface.o:	dlg_audiointerface.cpp
 	$(CXX) -c -o $@ $(CPPFLAGS) $(GCCFLAGS) $(DEBUGFLAGS) $(OPTFLAGS) $(WARNINGFLAGS) $(CPPINC) $<
 
-$(OBJECTPATH)/RWAudio.o:	RWAudio_win.cpp
+$(OBJECTPATH)/RWAudio.o:	RWAudio_IO.cpp
+	$(CXX) -c -o $@ $<
+
+$(OBJECTPATH)/RtAudio.o:	audiolib/RtAudio.cpp
 	$(CXX) -c -o $@ $<
 
 $(OBJECTPATH)/$(RCFILEOBJ):	$(RCFILESRC)
