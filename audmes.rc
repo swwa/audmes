@@ -1,0 +1,3 @@
+AudMeSIcon ICON "audmes.ico"
+#include "wx/msw/wx.rc"
+
