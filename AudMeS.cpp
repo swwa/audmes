@@ -671,16 +671,11 @@ void MainFrame::OnGenStart( wxCommandEvent& ev )
 
   if (button_gen_start->GetValue()) {
     button_gen_start->SetLabel(_T("Stop"));
-//     if ( !m_rec->IsPlayDeviceOpened()) {
-//       m_rec->PlayOpen();
-//     }
-//     m_rec->PlayStart();
-    SendGenSettings();
   } else {
     button_gen_start->SetLabel(_T("Start"));
-//     m_rec->PlayStop();
-//     m_rec->PlayClose();
   }
+  SendGenSettings();
+
 }
 
 void MainFrame::OnOscStart( wxCommandEvent& ev )
@@ -831,13 +826,13 @@ void MainFrame::SendGenSettings( )
   double phas2;
   double doubleToFreq;
 
-  if(checkbox_l_en->IsChecked()) {
+  if((checkbox_l_en->IsChecked())&&(button_gen_start->GetValue())) {
     txt_freq_l->GetValue().ToDouble(& doubleToFreq);
     freq_l = (float)doubleToFreq;
   } else {
     freq_l = 0.0;
   }
-  if(checkbox_r_en->IsChecked()) {
+  if((checkbox_r_en->IsChecked())&&(button_gen_start->GetValue())) {
     txt_freq_r->GetValue().ToDouble(& doubleToFreq);
     freq_r = (float)doubleToFreq;
   } else {

@@ -1,3 +1,8 @@
+2008-08-21
+----------
+- first working version of AudMeS with RtAudio driver - MinGW compiler
+- Select Sound Card dlg does not work; default device is used
+
 2008-08-20
 ----------
 - rewrite of audio driver started - RtAudio will be used now

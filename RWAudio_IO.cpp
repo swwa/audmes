@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include <math.h>
 
+//#define _DEBUG
+
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
@@ -37,8 +39,12 @@ extern int g_SpeBufferChanged;
 int inout( void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
 		   double streamTime, RtAudioStreamStatus status, void *data )
 {
+#ifdef _DEBUG
+      fprintf(ddbg,"Jsme tady ");
+#endif
+
   RWAudio * aRWAudioClass = (RWAudio *) data;
-  unsigned long bytes = aRWAudioClass->m_bufferBytes;
+  unsigned long i;
 
   // copy input buffer into two L/R channels
   if( 0 != aRWAudioClass->m_Buflen_Changed ) {
@@ -55,24 +61,54 @@ int inout( void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
     g_SpeBuffer_Right = (short *) malloc( aRWAudioClass->m_SpeBufferLen* sizeof(short));
 
   }
-//   for (unsigned long dw = 0; dw < bytes/2; dw++) {
-//     //copy audio signal to fft real component.
-//     g_InBuffer_Left[g_InBufferPosition] = (double)((short*)inputBuffer)[2*dw];
-//     g_InBuffer_Right[g_InBufferPosition] = (double)((short*)inputBuffer)[2*dw+1];
-//     g_InBufferPosition++;
-//     if (g_InBufferPosition == aRWAudioClass->m_InBufferLen) {
-//       g_InBufferPosition = 0;
-//       g_InBufferChanged = 1;
-//     }
-//   }
 
+  short * inBuf = (short *) inputBuffer;
+
+  // make a copy for oscilloscope
+  if ( 0 == g_OscBufferChanged) {
+    for (i = 0; i < nBufferFrames; i++) {
+      //copy audio signal to fft real component.
+      g_OscBuffer_Left[g_OscBufferPosition] = *inBuf++;
+      g_OscBuffer_Right[g_OscBufferPosition] = *inBuf++;
+
+      g_OscBufferPosition++;
+      // if the buffer is over we have to pick the data and then circullary fill the next one
+      if (g_OscBufferPosition == aRWAudioClass->m_OscBufferLen) {
+	g_OscBufferPosition = 0;
+	g_OscBufferChanged = 1;
+	break;
+      }
+    }
+  }
+
+  inBuf = (short *) inputBuffer;
+  // make a copy for spectrum analyzer
+  if ( 0 == g_SpeBufferChanged) {
+
+    for (i = 0; i < nBufferFrames; i++) {
+      //copy audio signal to fft real component.
+      g_SpeBuffer_Left[g_SpeBufferPosition] = *inBuf++;
+      g_SpeBuffer_Right[g_SpeBufferPosition] = *inBuf++;
+
+      g_SpeBufferPosition++;
+      // if the buffer is over we have to pick the data and then circullary fill the next one
+      if (g_SpeBufferPosition == aRWAudioClass->m_SpeBufferLen) {
+	g_SpeBufferPosition = 0;
+	g_SpeBufferChanged = 1;
+	break;
+      }
+    }
+  }
 
 
   // fill output buffer
-  unsigned short * outBuf = (unsigned short *) outputBuffer;
+  short * outBuf = (short *) outputBuffer;
 
+#ifdef _DEBUG
+      fprintf(ddbg,"\n Frames: %d\n ",nBufferFrames);
+#endif
 
-  for ( unsigned long i = 0; i < bytes/2; i=i+4) {
+  for ( unsigned long i = 0; i < nBufferFrames; i++) {
 
     /* tady to obalit podle m_genShape_l/m_genShape_r - obdelnik, pila, trojuhelnik atd. */
     double y = 0;
@@ -137,10 +173,13 @@ int inout( void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
     if ( (2.0*PI) < aRWAudioClass->m_genFI_l) aRWAudioClass->m_genFI_l -= 2.0*PI;
     if ( (2.0*PI) < aRWAudioClass->m_genFI_r) aRWAudioClass->m_genFI_r -= 2.0*PI;
 
-      *outBuf++ = (signed short) (32768.f * y);
-      *outBuf++ = (signed short) (32768.f * y2);
+      *outBuf++ = (short)(32768.f * y);
+      *outBuf++ = (short)(32768.f * y2);
+#ifdef _DEBUG
+      //fprintf(ddbg,"%04X %04X ",(short)(32768.f * y), (short)(32768.f * y2));
+#endif
   }
-
+  return 0;
 }
 
 
@@ -152,14 +191,21 @@ RWAudio::RWAudio( long int oscbufferlen, long int spebufferlen)
 {
   m_DrvRunning = 0;
 
+#ifdef _DEBUG
+  ddbg = fopen("debug.log","wb");
+      fprintf(ddbg,"Novy soubor\n");
+#endif
   // init of RtAudio
   if (m_AudioDriver.getDeviceCount() < 1 ) {
+#ifdef _DEBUG
+      fprintf(ddbg,"No devices??? Nbr = %d  \n",m_AudioDriver.getDeviceCount());
+#endif
   } else {
     // everything is ok
     RtAudio::StreamParameters iParams;
     RtAudio::StreamParameters oParams;
     RtAudio::StreamOptions rtAOptions;
-    unsigned int bufferFrames = 1024;
+    unsigned int bufferFrames = 512;
 
     m_sampleRate = 44100;
 
@@ -173,14 +219,20 @@ RWAudio::RWAudio( long int oscbufferlen, long int spebufferlen)
     rtAOptions.flags |= RTAUDIO_NONINTERLEAVED;
 
     try {
-      m_AudioDriver.openStream( &oParams, &iParams, RTAUDIO_SINT16, m_sampleRate, &bufferFrames, &inout, (void *)this, &rtAOptions );
+#ifdef _DEBUG
+      fprintf(ddbg,"Initing Driver: \n");
+#endif
+      m_AudioDriver.openStream( &oParams, &iParams, RTAUDIO_SINT16, m_sampleRate, &bufferFrames, &inout, (void *)this);//, &rtAOptions );
     }
     catch ( RtError& e ) {
       strcpy( m_ErrorMessage, e.getMessage().c_str() );
       //std::cout << '\n' << e.getMessage() << '\n' << std::endl;
+#ifdef _DEBUG
+      fprintf(ddbg,"Driver error: %s\n", e.getMessage().c_str());
+#endif
       exit( 1 );
     }
-    m_bufferBytes = bufferFrames * iParams.nChannels * sizeof( int );
+    m_bufferBytes = bufferFrames * iParams.nChannels * sizeof( short );
 
     m_genFR_l = m_genFR_r = 0.0;
     m_genShape_l = m_genShape_r = 0;
@@ -203,11 +255,10 @@ RWAudio::RWAudio( long int oscbufferlen, long int spebufferlen)
 
     m_DrvRunning = 1;
 
-  }
-
 #ifdef _DEBUG
-  ddbg = fopen("debug.log","wb");
+      fprintf(ddbg,"Driver is running\n");
 #endif
+  }
 }
 
 RWAudio::~RWAudio()
@@ -281,6 +332,9 @@ int RWAudio::PlaySetGenerator( float f1, float f2, int s1, int s2, float g1, flo
   else m_genFR_l = m_sampleRate/2;
   if ( 2*f2 < m_sampleRate) m_genFR_r = f2;
   else m_genFR_r = m_sampleRate/2;
+
+  // if (f1 < 0.001) m_genFI_l = 0;
+  // if (f2 < 0.001) m_genFI_r = 0;
 
   m_genShape_l = s1;
   m_genShape_r = s2;

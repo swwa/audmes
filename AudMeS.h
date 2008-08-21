@@ -13,7 +13,7 @@
 #ifndef AUDMES_H
 #define AUDMES_H
 
-#define AUDMES_VERSION_STRING "15.8.2008 beta"
+#define AUDMES_VERSION_STRING "21.8.2008 with RtAudio"
 
 class MainFrame: public wxFrame {
     DECLARE_CLASS( MainFrame )

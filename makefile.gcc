@@ -77,11 +77,11 @@ $(OBJECTPATH)/fourier.o:	fourier.c
 $(OBJECTPATH)/dlg_audiointerface.o:	dlg_audiointerface.cpp
 	$(CXX) -c -o $@ $(CPPFLAGS) $(GCCFLAGS) $(DEBUGFLAGS) $(OPTFLAGS) $(WARNINGFLAGS) $(CPPINC) $<
 
-$(OBJECTPATH)/RWAudio.o:	RWAudio_IO.cpp
-	$(CXX) -c -o $@ $<
+$(OUTPUTPATH)/RWAudio.o :	RWAudio_IO.cpp
+	$(CXX) -c -o $@ -D__WINDOWS_DS__ -I"./audiolib" $(CPPFLAGS) $(GCCFLAGS) $(DEBUGFLAGS) $(OPTFLAGS) $(WARNINGFLAGS) $(CPPINC) $<
 
 $(OBJECTPATH)/RtAudio.o:	audiolib/RtAudio.cpp
-	$(CXX) -c -o $@ $<
+	$(CXX) -c -o $@ -D__WINDOWS_DS__ -I"./audiolib" $(CPPFLAGS) $(GCCFLAGS) $(DEBUGFLAGS) $(OPTFLAGS) $(WARNINGFLAGS) $(CPPINC) $<
 
 $(OBJECTPATH)/$(RCFILEOBJ):	$(RCFILESRC)
 	$(RESCOMP) --use-temp-file -i$< -o$@ $(RESPATH) --include-dir . --define NOPCH
