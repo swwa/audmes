@@ -42,7 +42,7 @@ RCFILESRC=audmes.rc
 
 PROGRAM=AudMeS.exe
 
-OBJECTS=$(OBJECTPATH)/_AudMeS.o $(OBJECTPATH)/dlg_audiointerface.o $(OBJECTPATH)/RWAudio.o $(OBJECTPATH)/RtAudio.o $(OBJECTPATH)/OScopeCtrl.o $(OBJECTPATH)/fourier.o  audiolib/libdsound.a $(OBJECTPATH)/$(RCFILEOBJ)
+OBJECTS=$(OBJECTPATH)/_AudMeS.o $(OBJECTPATH)/dlg_audiointerface.o $(OBJECTPATH)/RWAudio.o $(OBJECTPATH)/RtAudio.o $(OBJECTPATH)/CtrlOScope.o $(OBJECTPATH)/fourier.o  audiolib/libdsound.a $(OBJECTPATH)/$(RCFILEOBJ)
 
 
 all:	$(OBJECTPATH)
@@ -64,11 +64,12 @@ all:	$(OUTPUTPATH)/$(PROGRAM)
 
 $(OUTPUTPATH)/$(PROGRAM):	$(OBJECTS)
 	$(CXX) -o $@ $(OBJECTS) $(LIBPATH) $(LINKERFLAGS) $(LIBS)
+	strip $@
 
 $(OBJECTPATH)/_AudMeS.o:	AudMeS.cpp
 	$(CXX) -c -o $@ $(CPPFLAGS) $(GCCFLAGS) $(DEBUGFLAGS) $(OPTFLAGS) $(WARNINGFLAGS) $(CPPINC) $<
 
-$(OBJECTPATH)/OScopeCtrl.o:	OScopeCtrl.cpp
+$(OBJECTPATH)/CtrlOScope.o:	CtrlOScope.cpp
 	$(CXX) -c -o $@ $(CPPFLAGS) $(GCCFLAGS) $(DEBUGFLAGS) $(OPTFLAGS) $(WARNINGFLAGS) $(CPPINC) $<
 
 $(OBJECTPATH)/fourier.o:	fourier.c

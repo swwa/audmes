@@ -8,12 +8,12 @@
 #include <wx/tglbtn.h>
 
 #include "RWAudio_IO.h"
-#include "OScopeCtrl.h"
+#include "CtrlOScope.h"
 
 #ifndef AUDMES_H
 #define AUDMES_H
 
-#define AUDMES_VERSION_STRING "21.8.2008 with RtAudio"
+#define AUDMES_VERSION_STRING "22.8.2008 with RtAudio"
 
 class MainFrame: public wxFrame {
     DECLARE_CLASS( MainFrame )
@@ -53,6 +53,7 @@ private:
   void OnSaveClick( wxCommandEvent& event );
   void OnSaveAsClick( wxCommandEvent& event );
   void OnAutoCalClick( wxCommandEvent& event );
+  void OnOscXScaleChanged( wxCommandEvent& ev );
 
 protected:
     // begin wxGlade: MainFrame::attributes
@@ -79,7 +80,7 @@ protected:
     wxToggleButton* button_gen_start;
 
     wxPanel* notebook_1_gen;
-    OScopeCtrl* window_1;
+    CtrlOScope* window_1;
     wxStaticText* label_5_copy;
     wxChoice* choice_osc_l_swp_copy;
     wxStaticText* label_6;
@@ -100,7 +101,7 @@ protected:
     wxComboBox* combo_box_fft;
     wxStaticText* label_9;
     wxTextCtrl* text_ctrl_fft;
-    OScopeCtrl* window_1_spe;
+    CtrlOScope* window_1_spe;
     wxToggleButton* button_osc_start_copy;
     wxPanel* notebook_1_spe;
     wxNotebook* notebook_1;
@@ -117,7 +118,7 @@ protected:
   wxTextCtrl* text_ctrl1_frm;
   wxTextCtrl* text_ctrl2_frm;
   wxToggleButton* button_frm_start;
-  OScopeCtrl* window_1_frm;
+  CtrlOScope* window_1_frm;
 
   RWAudio *  m_RWAudio;
   wxTimer * m_timer;
@@ -130,9 +131,10 @@ protected:
   wxButton * button_autocalibrate;
   wxString m_configfilename;
 
-  long int m_OscBufferLength;
-  long int m_SpeBufferLength;
+  unsigned long int m_OscBufferLength;
+  unsigned long int m_SpeBufferLength;
 
+  unsigned long int m_SamplingFreq;
 };
 
 

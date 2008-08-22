@@ -1,18 +1,28 @@
-// OScopeCtrl.cpp
-// verze 0.0.1
-//  - X osa logaritmicka
-//  - Y osa linearni
-//  - zadna kontrola rozsahu !!!!
+/* CtrlOScope.cpp
+ * 
+ *  Change Log:
+ *  ===========
+ *  20080822 - renamed from OScopeCtrl (because of mess in the project)
+ *           - added hard-setting of vertical lines for linear plot
+ *           - double buffering !!!
+ *           - added event EVT_ERASE_BACKGROUND
+ *           - some other small improvements
+ *
+ *  verze 0.0.1
+ *   - X osa logaritmicka
+ *   - Y osa linearni
+ *   - zadna kontrola rozsahu !!!!
+ */
 
-#include "OScopeCtrl.h"
-//#include "event_ids.h"
+#include "CtrlOScope.h"
+
 #include <math.h>
 #include <wx/arrimpl.cpp> // this is a magic incantation which must be done!
 WX_DEFINE_OBJARRAY( wxArrayDouble);
 
 /////////////////////////////////////////////////////////////////////////////
-// OScopeCtrl
-OScopeCtrl::OScopeCtrl( wxWindow* parent, wxString xname, wxString yname, int tracks)
+// CtrlOScope
+CtrlOScope::CtrlOScope( wxWindow* parent, wxString xname, wxString yname, int tracks)
   : wxControl(parent,-1,wxDefaultPosition,wxSize(300,200))
 {
   //  int i_cnt;
@@ -29,24 +39,27 @@ OScopeCtrl::OScopeCtrl( wxWindow* parent, wxString xname, wxString yname, int tr
   m_YUnit = yname;
   m_XUnit = xname;
 
-  Connect( -1, wxEVT_SIZE,(wxObjectEventFunction)& OScopeCtrl::OnSize);
-  Connect( -1, wxEVT_PAINT,(wxObjectEventFunction)& OScopeCtrl::OnPaint);
+  m_NumberOfVerticals = 0;
 
-}  // OScopeCtrl
+  Connect( -1, wxEVT_SIZE,(wxObjectEventFunction)& CtrlOScope::OnSize);
+  Connect( -1, wxEVT_PAINT,(wxObjectEventFunction)& CtrlOScope::OnPaint);
+  Connect( -1, wxEVT_ERASE_BACKGROUND,(wxObjectEventFunction)& CtrlOScope::OnEraseBackground);
+
+}  // CtrlOScope
 
 /////////////////////////////////////////////////////////////////////////////
-OScopeCtrl::~OScopeCtrl()
+CtrlOScope::~CtrlOScope()
 {
-} // ~OScopeCtrl
+} // ~CtrlOScope
 
-void OScopeCtrl::SetTrack( wxArrayDouble ardbl)
+void CtrlOScope::SetTrack( wxArrayDouble ardbl)
 {
   m_points = ardbl;
   wxClientDC dc( this);
   PaintAll( dc);
 }
 
-void OScopeCtrl::SetTrack2( wxArrayDouble ardbl)
+void CtrlOScope::SetTrack2( wxArrayDouble ardbl)
 {
   m_points2 = ardbl;
   wxClientDC dc( this);
@@ -54,56 +67,56 @@ void OScopeCtrl::SetTrack2( wxArrayDouble ardbl)
 }
 
 /////////////////////////////////////////////////////////////////////////////
-void OScopeCtrl::SetXRange(double dLower, double dUpper, int logrange)
+void CtrlOScope::SetXRange(double dLower, double dUpper, int logrange)
 {
   m_MinXValue = dLower;
   m_MaxXValue = dUpper;
   m_LogX = logrange;
 }  // SetRange
 
-void OScopeCtrl::SetYRange(double dLower, double dUpper, int logrange, int itrack)
+void CtrlOScope::SetYRange(double dLower, double dUpper, int logrange, int itrack)
 {
   m_MinYValue = dLower;
   m_MaxYValue = dUpper;
   m_LogY = logrange;
 }  // SetRange
 
-void OScopeCtrl::SetXUnits(wxString string, wxString XMin, wxString XMax )
+void CtrlOScope::SetXUnits(wxString string, wxString XMin, wxString XMax )
 {
 }  // SetXUnits
 
-void OScopeCtrl::SetYUnits(wxString string, wxString YMin, wxString YMax )
+void CtrlOScope::SetYUnits(wxString string, wxString YMin, wxString YMax )
 {
 }  // SetYUnits
 
 /////////////////////////////////////////////////////////////////////////////
-void OScopeCtrl::SetGridColor(wxColour color)
+void CtrlOScope::SetGridColor(wxColour color)
 {
 }  // SetGridColor
 
 
 /////////////////////////////////////////////////////////////////////////////
-void OScopeCtrl::SetPlotColor(wxColour color, int iTrack)
+void CtrlOScope::SetPlotColor(wxColour color, int iTrack)
 {
 }  // SetPlotColor
 
 /////////////////////////////////////////////////////////////////////////////
-void OScopeCtrl::SetBackgroundColor(wxColour color)
+void CtrlOScope::SetBackgroundColor(wxColour color)
 {
 }  // SetBackgroundColor
 
 /////////////////////////////////////////////////////////////////////////////
-void OScopeCtrl::AppendPoints(double dNewPoint[], int iTrack )
+void CtrlOScope::AppendPoints(double dNewPoint[], int iTrack )
 {
 } // AppendPoints
  
-wxSize OScopeCtrl::GetSize( void) const
+wxSize CtrlOScope::GetSize( void) const
 {
   //      wxMessageBox("GetSize", "Application Error", wxOK | wxICON_ERROR, this);
   return wxSize( m_width, m_height);
 }
 
-wxSize OScopeCtrl::DoGetBestSize( void) const
+wxSize CtrlOScope::DoGetBestSize( void) const
 {
   //  wxMessageBox("GetBestSize", "Application Error", wxOK | wxICON_ERROR, this);
   return wxSize(  m_width, m_height);
@@ -111,42 +124,81 @@ wxSize OScopeCtrl::DoGetBestSize( void) const
 
 
 ////////////////////////////////////////////////////////////////////////////
-void OScopeCtrl::OnPaint(wxPaintEvent& evt) 
+void CtrlOScope::OnPaint(wxPaintEvent& evt) 
 {
 	wxPaintDC dc(this) ;  // device context for painting
 	PaintAll( dc);
 }
 
-void OScopeCtrl::PaintAll( wxDC & dc)
+void CtrlOScope::PaintAll( wxDC & dc)
+{
+  // here will be the Double Buffer
+  wxRect rec = GetClientRect();
+
+            wxBitmap* bmpBlit = new wxBitmap(rec.width,rec.height);
+            wxMemoryDC* memDC= new wxMemoryDC();
+            //clear the memdc with a certain background color
+            memDC->SelectObject(*bmpBlit);
+            memDC->BeginDrawing();
+            memDC->Clear();
+
+  PaintAllFunction( *memDC, 0, 0);
+
+            memDC->EndDrawing();
+
+            dc.Blit(rec.x,rec.y,rec.width,rec.height,memDC,0,0,wxCOPY);
+            delete bmpBlit;
+            delete memDC;
+
+}
+
+void CtrlOScope::PaintAllFunction( wxDC & dc, int rectX, int rectY)
 {
 	wxRect rec = GetClientRect();
 	wxString bla;
 	int tw, th;
+	int twY, thY;
+	int twX, thX;
 	int bdist, ldist;
 
-	//	bla.Printf ("Rect is %d, %d, %d, %d", rec.x, rec.y, rec.width, rec.height);
+	//	bla.Printf ("Rect is %d, %d, %d, %d", rectX, rectY, rec.width, rec.height);
 	//	wxMessageBox( bla, "Application Error", wxOK | wxICON_ERROR, this);
 
 	// kresli pozadi
 	dc.SetPen( wxPen( m_bgColor,1,1));
 	dc.SetBrush( wxBrush(m_bgColor, wxSOLID));
-	dc.DrawRectangle( rec.x, rec.y, rec.width, rec.height);
+	dc.DrawRectangle( rectX, rectY, rec.width, rec.height);
 
 	dc.SetPen( wxPen( m_plColor,1,1));
 	dc.SetBrush( wxBrush(m_plColor, wxSOLID));
 	dc.SetTextForeground( m_plColor);
       	dc.SetFont(wxFont(8, wxMODERN, wxNORMAL, wxNORMAL, 0, ""));
 	/* spocitat vysku pisma pro spodni odstup a sirky pto odstup zleva */
-	dc.GetTextExtent( m_XUnit, &tw, &th); bdist = th+5;
-	dc.GetTextExtent( m_YUnit, &tw, &th); ldist = tw + 5;
+	dc.GetTextExtent( m_XUnit, &twX, &thX); bdist = thX+5;
+	dc.GetTextExtent( m_YUnit, &twY, &thY); ldist = twY + 5;
 	bla.Printf("%.1f", m_MinYValue); dc.GetTextExtent(bla, &tw, &th);
 	if (ldist < (tw+5)) { ldist = tw+5;}
 	bla.Printf("%.1f", m_MaxYValue); dc.GetTextExtent(bla, &tw, &th);
 	if (ldist < (tw+5)) { ldist = tw+5;}
 
 	/* tisk legendy */
-	dc.DrawText(m_XUnit, rec.x+rec.width/2, rec.y+rec.height-bdist);
-	dc.DrawText(m_YUnit, 5, rec.y+rec.height/2);
+	if (m_YUnit != "") {
+	  dc.SetBrush( wxBrush(m_bgColor, wxSOLID));
+	  dc.DrawRectangle( 3, rectY+rec.height/2-2,twY+4, thY+4);
+	  dc.SetBrush( wxBrush(m_plColor, wxSOLID));
+	  dc.DrawText(m_YUnit, 5, rectY+rec.height/2);
+	} else {
+	  ldist = tw;
+	}
+	if (m_XUnit == "") {
+	  dc.GetTextExtent( _T("T"), &twX, &thX); bdist = thX+5;
+	} else {
+	  dc.GetTextExtent( m_XUnit, &twX, &thX); bdist = thX+5;
+	  dc.SetBrush( wxBrush(m_bgColor, wxSOLID));
+	  dc.DrawRectangle(rectX+rec.width/2-2, rectY+rec.height-bdist-2,twX+4, thX+4);
+	  dc.SetBrush( wxBrush(m_plColor, wxSOLID));
+	  dc.DrawText(m_XUnit, rectX+rec.width/2, rectY+rec.height-bdist);
+	}
 
 	/* spocitat jak casto se budou kreslit horizontalni cary */
 	/* cara bude minimalne kazdych 30 pixelu; pocet 2,5,10,20,50 atd. */
@@ -161,21 +213,21 @@ void OScopeCtrl::PaintAll( wxDC & dc)
 	  }
 	  nline *= 10;
 	}
-	//bla.Printf("ydiv = %d", ydiv); dc.DrawText(bla, rec.x+40,rec.y+20);
+	//bla.Printf("ydiv = %d", ydiv); dc.DrawText(bla, rectX+40,rectY+20);
 	for (int i = 0; i <= ydiv; i++) {
 	  /* kresli vsechny cary */
 	  float ystep = 1.0*(rec.height-bdist-5)/ydiv;
-	  dc.DrawLine(rec.x+ldist, (int)(rec.height+rec.y-ystep*i-bdist),rec.x+rec.width-5, (int)(rec.height+rec.y-ystep*i-bdist));
+	  dc.DrawLine(rectX+ldist, (int)(rec.height+rectY-ystep*i-bdist),rectX+rec.width-5, (int)(rec.height+rectY-ystep*i-bdist));
 	  bla.Printf("%.1f", m_MinYValue+(m_MaxYValue-m_MinYValue)*i/ydiv); dc.GetTextExtent(bla, &tw, &th);
 	  if (ydiv == i) {
-	    dc.DrawText(bla, (int)(rec.x+ldist-tw),(int)(rec.height+rec.y-ystep*i-bdist) );
+	    dc.DrawText(bla, (int)(rectX+ldist-tw),(int)(rec.height+rectY-ystep*i-bdist) );
 	  } else {
-	    dc.DrawText(bla, (int)(rec.x+ldist-tw),(int)(rec.height+rec.y-ystep*i-bdist-th) );
+	    dc.DrawText(bla, (int)(rectX+ldist-tw),(int)(rec.height+rectY-ystep*i-bdist-th) );
 	  }
 	}
-	if ( (m_MinYValue+m_MaxYValue) < 0.01) {
+	if ( ((m_MinYValue+m_MaxYValue) < 0.01)&&(1 == ydiv%2)) {
 	  /* kresli nulovou caru */
-	  dc.DrawLine(rec.x+ldist, rec.y+5+(rec.height-bdist-5)/2,rec.x+rec.width-5, rec.y+5+(rec.height-bdist-5)/2);
+	  dc.DrawLine(rectX+ldist, rectY+5+(rec.height-bdist-5)/2,rectX+rec.width-5, rectY+5+(rec.height-bdist-5)/2);
 	}
 
 	/* spocitat jak casto se budou kreslit vertikalni cary */
@@ -185,7 +237,7 @@ void OScopeCtrl::PaintAll( wxDC & dc)
 	if( 1 == m_LogX) {
 	/* logaritmicke meritko - spocitat pocet dekad a potom neco dale */
 	/* cara bude minimalne kazdych 100 pixelu na dekadu; pak bude 1, 3, 10 */
-	  int ndecs = (int) log10( m_MaxXValue/m_MinXValue);
+	  int ndecs = (int)( log10( m_MaxXValue/m_MinXValue)+.9);
 	  float npix = rec.width/ndecs;
 	  int xdiv;
 
@@ -200,24 +252,24 @@ void OScopeCtrl::PaintAll( wxDC & dc)
 	  float xstep = 1.0*(rec.width-ldist-5)/ndecs; // pocet bodu na dekadu
 	  for (int i = 0; i <= ndecs; i++) {
 	    /* kresli vsechny cary */
-	    dc.DrawLine((int)(rec.x+ldist+xstep*i), rec.y+5, (int)(rec.x+ldist+xstep*i), rec.y+rec.height-bdist);
+	    dc.DrawLine((int)(rectX+ldist+xstep*i), rectY+5, (int)(rectX+ldist+xstep*i), rectY+rec.height-bdist);
 	    /* nakresli vnitrni cary */
 	    if (3 == xdiv) {
-	      dc.DrawLine((int)(rec.x+ldist+xstep*(i+log10(2))), rec.y+5, (int)(rec.x+ldist+xstep*(i+log10(2))), rec.y+rec.height-bdist);
-	      dc.DrawLine((int)(rec.x+ldist+xstep*(i+log10(5))), rec.y+5, (int)(rec.x+ldist+xstep*(i+log10(5))), rec.y+rec.height-bdist);
+	      dc.DrawLine((int)(rectX+ldist+xstep*(i+log10(2))), rectY+5, (int)(rectX+ldist+xstep*(i+log10(2))), rectY+rec.height-bdist);
+	      dc.DrawLine((int)(rectX+ldist+xstep*(i+log10(5))), rectY+5, (int)(rectX+ldist+xstep*(i+log10(5))), rectY+rec.height-bdist);
 	    }
 	    if (10 == xdiv) {
 	      for( int j = 2; j <10; j++) {
-		dc.DrawLine((int)(rec.x+ldist+xstep*(i+log10(j))), rec.y+5, (int)(rec.x+ldist+xstep*(i+log10(j))), rec.y+rec.height-bdist);
+		dc.DrawLine((int)(rectX+ldist+xstep*(i+log10(j))), rectY+5, (int)(rectX+ldist+xstep*(i+log10(j))), rectY+rec.height-bdist);
 	      }
 	    }
 	    bla.Printf("%.1f", m_MinXValue*pow(10,i)); dc.GetTextExtent(bla, &tw, &th);
 	    if ((xstep*i+ldist)<(tw/2)) {
-	      dc.DrawText(bla, (int)(rec.x+ldist+xstep*i), rec.y+rec.height-bdist);
+	      dc.DrawText(bla, (int)(rectX+ldist+xstep*i), rectY+rec.height-bdist);
 	    } else if ((ldist+xstep*i+tw/2) < rec.width) {
-	      dc.DrawText(bla, (int)(rec.x+ldist+xstep*i-tw/2), rec.y+rec.height-bdist);
+	      dc.DrawText(bla, (int)(rectX+ldist+xstep*i-tw/2), rectY+rec.height-bdist);
 	    } else {
-	      dc.DrawText(bla, (int)(rec.x+ldist+xstep*i-tw), rec.y+rec.height-bdist);
+	      dc.DrawText(bla, (int)(rectX+ldist+xstep*i-tw), rectY+rec.height-bdist);
 	    }
 	  }
 
@@ -248,29 +300,31 @@ void OScopeCtrl::PaintAll( wxDC & dc)
 	} else {
 	  /*  **************** linearni meritko *********************** */
 	/* cara bude minimalne kazdych 30 pixelu; pocet 2,5,10,20,50 atd. */
-	int nline = 100; int xdiv = 0; int nstrt = nline;
-	while (xdiv == 0) {
-	  if ( rec.width < nline) {
-	    xdiv = 1*nline/nstrt;
-	  } else if ( rec.width < 2*nline) {
-	    xdiv = 2*nline/nstrt;
-	  } else if ( rec.width < 5*nline) {
-	    xdiv = 5*nline/nstrt;
-	  }
-	  nline *= 10;
-	}
+	  // if we have m_NumberOfVerticals == 0, let's compute steps. But otherwise not
+	    int nline = 100; int xdiv = m_NumberOfVerticals; int nstrt = nline;
+	    while (xdiv == 0) {
+	      if ( rec.width < nline) {
+		xdiv = 1*nline/nstrt;
+	      } else if ( rec.width < 2*nline) {
+		xdiv = 2*nline/nstrt;
+	      } else if ( rec.width < 5*nline) {
+		xdiv = 5*nline/nstrt;
+	      }
+	      nline *= 10;
+	    }
+
 	for (int i = 0; i <= xdiv; i++) {
 	  /* kresli vsechny cary */
 	  float xstep = 1.0*(rec.width-ldist-5)/xdiv;
 
-	  dc.DrawLine((int)(rec.x+xstep*i+ldist),rec.height+rec.y-bdist, (int)(rec.x+xstep*i+ldist),rec.y+5);
+	  dc.DrawLine((int)(rectX+xstep*i+ldist),rec.height+rectY-bdist, (int)(rectX+xstep*i+ldist),rectY+5);
 	  bla.Printf("%.1f", m_MinXValue+(m_MaxXValue-m_MinXValue)*i/xdiv); dc.GetTextExtent(bla, &tw, &th);
 	  if ((xstep*i+ldist)<(tw/2)) {
-	    dc.DrawText(bla, (int)(rec.x+ldist+xstep*i), rec.y+rec.height-bdist);
+	    dc.DrawText(bla, (int)(rectX+ldist+xstep*i), rectY+rec.height-bdist);
 	  } else if ((ldist+xstep*i+tw/2) < rec.width) {
-	    dc.DrawText(bla, (int)(rec.x+ldist+xstep*i-tw/2), rec.y+rec.height-bdist);
+	    dc.DrawText(bla, (int)(rectX+ldist+xstep*i-tw/2), rectY+rec.height-bdist);
 	  } else {
-	    dc.DrawText(bla, (int)(rec.x+ldist+xstep*i-tw), rec.y+rec.height-bdist);
+	    dc.DrawText(bla, (int)(rectX+ldist+xstep*i-tw), rectY+rec.height-bdist);
 	  }
 	}
 	/* kresli body v SetTracks */
@@ -314,7 +368,7 @@ void OScopeCtrl::PaintAll( wxDC & dc)
 } // OnPaint
 
 /////////////////////////////////////////////////////////////////////////////
-void OScopeCtrl::OnSize(wxSizeEvent& evt) //UINT nType, int cx, int cy)
+void CtrlOScope::OnSize(wxSizeEvent& evt) //UINT nType, int cx, int cy)
 {
   evt.Skip();
 } // OnSize

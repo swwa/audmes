@@ -1,8 +1,8 @@
-// OScopeCtrl.h : header file
+// CtrlOScope.h : header file
 //
 
-#ifndef __OSCOPECTRL_H__
-#define __OSCOPECTRL_H__
+#ifndef __CTRLOSCOPE_H__
+#define __CTRLOSCOPE_H__
 
 #include <wx/wx.h>
 #include <wx/dynarray.h>
@@ -10,16 +10,18 @@
 WX_DECLARE_OBJARRAY( double, wxArrayDouble);
 
 
-class OScopeCtrl : public wxControl
+class CtrlOScope : public wxControl
 {
 public:
-	OScopeCtrl( wxWindow* parent, wxString xname = _T("X"), wxString yname = _T("Y"), int tracks = 1);
+	CtrlOScope( wxWindow* parent, wxString xname = _T("X"), wxString yname = _T("Y"), int tracks = 1);
 
-	virtual ~OScopeCtrl();
+	virtual ~CtrlOScope();
 	//void OnTimer(wxTimerEvent& evt);
 	void OnPaint(wxPaintEvent& evt);
 	void OnSize(wxSizeEvent& evt);
 	void PaintAll( wxDC & dc);
+	void PaintAllFunction( wxDC & dc, int rectX, int rectY);
+	void OnEraseBackground( wxEraseEvent& event ) { };
 
 	void AppendPoints(double dNewPoint[], int iTrack = 0);
 	//	void SetRange(double dLower, double dUpper, int iTrack = 0, int logrange = false);
@@ -37,6 +39,7 @@ public:
 	void Reset( int iTrack = 0);
 	void SetTrack( wxArrayDouble ardbl);
 	void SetTrack2( wxArrayDouble ardbl);
+	void SetNumOfVerticals( int num) { m_NumberOfVerticals = num; };
 
 	virtual wxSize GetSize() const;
 	virtual wxSize DoGetBestSize() const;
@@ -64,5 +67,7 @@ protected:
 	wxColour m_plColor;
 	wxColour m_trColor;
 	wxColour m_tr2Color;
+	int m_NumberOfVerticals;
+
 };
-#endif // __OSCOPECTRL_H__
+#endif // __CTRLOSCOPE_H__

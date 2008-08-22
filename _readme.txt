@@ -1,3 +1,8 @@
+2008-08-22
+----------
+- renamed OScopeCtrl->CtrlOScope; double buffering and some other features added
+- #define for switch XScale to microseconds/div - but a lot of problems with strange modulation
+
 2008-08-21
 ----------
 - first working version of AudMeS with RtAudio driver - MinGW compiler
