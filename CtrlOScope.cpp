@@ -277,29 +277,63 @@ void CtrlOScope::PaintAllFunction( wxDC & dc, int rectX, int rectY)
 	  //bla.Printf("Pocet bodu: %d", m_points.GetCount()); wxMessageBox(bla,"D",wxOK);
 	  dc.SetPen( wxPen( m_trColor,1,1));
 	  int lastx = 0, lasty = 0;
-	  float xpoint;
-	  for (unsigned int i = 0; i < m_points.GetCount(); i++) {
-	    /* prepocitat vstupni bod na X osu */
-	    //float xpoint = i+ldist; // linearni zavislost
-	    if ( i < m_MinXValue) {
-	      xpoint = ldist;
-	    } else {
-	      xpoint = ldist+ xstep*log10(i/m_MinXValue);
+          // new plot function - walking through X points and select values from the table
+	  if ( m_points.GetCount() > 0) {
+	    for (long int i = 0; i < rec.width-ldist-5; i++) {
+	      // find the frequency
+	      float xfreq = m_MinXValue*pow(10,i/xstep);
+	      // find the position in the m_points[] array
+	      long int xposit = (long int)((xfreq/m_MaxXValue)*m_points.GetCount());
+
+	      if ( xposit < 0) { xposit = 0; }
+	      if ( xposit < m_points.GetCount() ) { 
+
+		float ydatapoint = m_points[xposit];
+
+		if (ydatapoint > m_MaxYValue) {ydatapoint = m_MaxYValue; }
+		if (ydatapoint < m_MinYValue) { ydatapoint = m_MinYValue; }
+
+		float ypoint = rec.height-bdist - (rec.height-bdist-5)*( ydatapoint-m_MinYValue)/(m_MaxYValue-m_MinYValue);
+		if ( 0 == i ) {
+		  dc.DrawPoint( (int) (i+rectX+ldist),  (int)(ypoint));
+		} else {
+		  dc.DrawLine( lastx, lasty,  (int) (i+rectX+ldist),  (int)(ypoint));
+		}
+		lastx = (int)(i+rectX+ldist); lasty = (int)(ypoint);
+	      } // else skip the frequencies out ot FFT
 	    }
-	    /* prepocitat Y hodnotu na Y osu - orezat hodnoty */
-	    if (m_points[i] > m_MaxYValue) { m_points[i] = m_MaxYValue; }
-	    if (m_points[i] < m_MinYValue) { m_points[i] = m_MinYValue; }
-	    float ypoint = rec.height-bdist - (rec.height-bdist-5)*(m_points[i]-m_MinYValue)/(m_MaxYValue-m_MinYValue);
-	    if ( 0 == i) {
-	      dc.DrawLine( (int)(xpoint),(int)(ypoint),(int)(xpoint),(int)(ypoint));
-	    } else {
-	      dc.DrawLine(lastx, lasty,(int)(xpoint),(int)(ypoint));
-	    }
-	    lastx = (int)(xpoint); lasty = (int)(ypoint);
 	  }
-	} else {
+	  // right channel
+	  dc.SetPen( wxPen( m_tr2Color,1,1));
+	  if ( m_points2.GetCount() > 0) {
+	    for (long int i = 0; i < rec.width-ldist-5; i++) {
+	      // find the frequency
+	      float xfreq = m_MinXValue*pow(10,i/xstep);
+	      // find the position in the m_points[] array
+	      long int xposit = (long int)((xfreq/m_MaxXValue)*m_points2.GetCount());
+
+	      if ( xposit < 0) { xposit = 0; }
+	      if ( xposit < m_points2.GetCount() ) { 
+
+		float ydatapoint = m_points2[xposit];
+
+		if (ydatapoint > m_MaxYValue) {ydatapoint = m_MaxYValue; }
+		if (ydatapoint < m_MinYValue) { ydatapoint = m_MinYValue; }
+
+		float ypoint = rec.height-bdist - (rec.height-bdist-5)*( ydatapoint-m_MinYValue)/(m_MaxYValue-m_MinYValue);
+		if ( 0 == i ) {
+		  dc.DrawPoint( (int) (i+rectX+ldist),  (int)(ypoint));
+		} else {
+		  dc.DrawLine( lastx, lasty,  (int) (i+rectX+ldist),  (int)(ypoint));
+		}
+		lastx = (int)(i+rectX+ldist); lasty = (int)(ypoint);
+	      } // else skip the frequencies out ot FFT
+	    }
+	  }
+
 	  /*  **************** linearni meritko *********************** */
-	/* cara bude minimalne kazdych 30 pixelu; pocet 2,5,10,20,50 atd. */
+	} else {
+	  /* cara bude minimalne kazdych 30 pixelu; pocet 2,5,10,20,50 atd. */
 	  // if we have m_NumberOfVerticals == 0, let's compute steps. But otherwise not
 	    int nline = 100; int xdiv = m_NumberOfVerticals; int nstrt = nline;
 	    while (xdiv == 0) {

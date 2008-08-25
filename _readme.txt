@@ -1,3 +1,9 @@
+2008-08-25
+----------
+- SA - variable FFT length
+- SA - right channel is added
+- SA - averaging of FFT values introduced
+
 2008-08-22
 ----------
 - renamed OScopeCtrl->CtrlOScope; double buffering and some other features added

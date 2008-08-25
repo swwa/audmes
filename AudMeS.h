@@ -13,7 +13,7 @@
 #ifndef AUDMES_H
 #define AUDMES_H
 
-#define AUDMES_VERSION_STRING "22.8.2008 with RtAudio"
+#define AUDMES_VERSION_STRING "25.8.2008 with RtAudio"
 
 class MainFrame: public wxFrame {
     DECLARE_CLASS( MainFrame )
@@ -100,7 +100,7 @@ protected:
     wxStaticText* label_5;
     wxComboBox* combo_box_fft;
     wxStaticText* label_9;
-    wxTextCtrl* text_ctrl_fft;
+    wxChoice* choice_fftlength;
     CtrlOScope* window_1_spe;
     wxToggleButton* button_osc_start_copy;
     wxPanel* notebook_1_spe;

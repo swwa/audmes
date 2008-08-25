@@ -41,6 +41,7 @@ BEGIN_EVENT_TABLE( MainFrame, wxFrame )
   EVT_MENU( wxID_SAVEAS, MainFrame::OnSaveAsClick )
   EVT_BUTTON( ID_AUTOCAL, MainFrame::OnAutoCalClick )
   EVT_CHOICE( ID_OSCXSCALE, MainFrame::OnOscXScaleChanged)
+  EVT_CHOICE( ID_FFTLENGTH, MainFrame::OnOscXScaleChanged)
 END_EVENT_TABLE()
 
 short * g_OscBuffer_Left;
@@ -176,7 +177,12 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
     };
     combo_box_fft = new wxComboBox(notebook_1_spe, -1, wxT(""), wxDefaultPosition, wxDefaultSize, 0, combo_box_fft_choices, wxCB_DROPDOWN);
     label_9 = new wxStaticText(notebook_1_spe, -1, wxT("Number of samples:"));
-    text_ctrl_fft = new wxTextCtrl(notebook_1_spe, -1, wxT("4096"));
+
+    const wxString choice_fftlength_choices[] = {
+      wxT("128"),wxT("256"),wxT("512"),wxT("1024"),wxT("2048"),wxT("4096"),wxT("8192"),wxT("16384"),wxT("32768"),wxT("64536")
+    };
+    choice_fftlength = new wxChoice(notebook_1_spe, ID_FFTLENGTH, wxDefaultPosition, wxDefaultSize, 10, choice_fftlength_choices, 0);
+
     window_1_spe = new CtrlOScope(notebook_1_spe, _T("Hz"), _T("dB"), 1);
     button_osc_start_copy = new wxToggleButton(notebook_1_spe, ID_SPANSTART, wxT("Start"));
 
@@ -218,6 +224,7 @@ void MainFrame::set_properties()
     choice_osc_l_off_copy->SetSelection(0);
     choice_osc_trig_edge->SetSelection(0);
     combo_box_fft->SetSelection(-1);
+    choice_fftlength->SetSelection(4);
     // end wxGlade
 }
 
@@ -362,7 +369,7 @@ void MainFrame::do_layout()
     sizer_17->Add(combo_box_fft, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     sizer_17->Add(20, 20, 0, 0, 0);
     sizer_17->Add(label_9, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    sizer_17->Add(text_ctrl_fft, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    sizer_17->Add(choice_fftlength, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     sizer_17->Add(20, 20, 0, 0, 0);
     sizer_10_copy->Add(sizer_17, 0, wxEXPAND, 0);
     sizer_10_copy->Add(window_1_spe, 1, wxEXPAND, 0);
@@ -408,6 +415,8 @@ void MainFrame::set_custom_props()
 
   SetIcon(wxICON(AudMeSIcon));
 
+  m_SamplingFreq = 44100;
+
   choice_osc_l_res->SetSelection( 15);
   choice_osc_l_res_copy->SetSelection( 15);
   choice_osc_l_off->SetSelection( 5);
@@ -420,7 +429,7 @@ void MainFrame::set_custom_props()
   window_1->SetNumOfVerticals( 10);
 
   /* analyzer */
-  window_1_spe->SetXRange( 10, 20000, 1);
+  window_1_spe->SetXRange( 10, m_SamplingFreq/2, 1);
   window_1_spe->SetYRange( -100, 0, 0, 1);
 
   /* freq response */
@@ -433,9 +442,8 @@ void MainFrame::set_custom_props()
   m_timer = new wxTimer( this, ID_TIMERID);
   m_timer->Start( 200);
 
-  m_SamplingFreq = 44100;
-
-  m_SpeBufferLength = 2048;
+  choice_fftlength->GetString(choice_fftlength->GetCurrentSelection()).ToDouble( &sweep_div);
+  m_SpeBufferLength = (long) (sweep_div);
 
 #ifdef XSCALEINTIME
   m_RWAudio = new RWAudio( (long int)( 1.5 * m_OscBufferLength*m_SamplingFreq/10000 + 10), m_SpeBufferLength );
@@ -508,7 +516,6 @@ void MainFrame::OnAutoCalClick( wxCommandEvent& event )
 
 void MainFrame::OnTimer( wxTimerEvent & ev)
 {
-  int fvz = 44100;
   double tmpval;
 
   // oscilloscope
@@ -608,20 +615,27 @@ void MainFrame::OnTimer( wxTimerEvent & ev)
 	realin = (double*) malloc( nsampl*sizeof( double));
 	realout = (double*) malloc( nsampl*sizeof( double));
 	imagout = (double*) malloc( nsampl*sizeof( double));
+	wxArrayDouble ardbl;
+	wxArrayDouble ardbl2;
 
+	// left channel
 	for( int i=0; i<nsampl;i++){
 	  //realin[i] = sin(6.28*689.0625*i/fvz);
 	  realin[i] = g_SpeBuffer_Left[i]/2048.0;
 	}
 
-	wxArrayDouble ardbl;
 	if (fft_double( nsampl, 0, realin, NULL, realout, imagout)) {
 	  /* everything is correct */
-	  for( int i=0; i<fvz/2;i++){
+	  for( int i=0; i<m_SamplingFreq/2;i++){
 	    /* zobrazeni jen poloviny, tzn. nsampl/2 odpovida fvz/2 */
-	    int fcomp = (int) (1.0*i*nsampl/fvz);
-	    //ardbl.Add( 20.0*log10(sqrt(realout[fcomp]*realout[fcomp]+imagout[fcomp]*imagout[fcomp]))-90);
-	    ardbl.Add( 20.0*log10(sqrt(realout[fcomp]*realout[fcomp]+imagout[fcomp]*imagout[fcomp]))-90);
+	    float ffcomp = 1.0*i*nsampl/m_SamplingFreq;
+	    int ifcomp = (int) (ffcomp);
+	    // make an averaging
+	    float wt_low = ffcomp - 1.0*ifcomp;
+	    float wt_hig = 1.0+ 1.0*ifcomp - ffcomp;
+	    float outval_low = sqrt(realout[ifcomp]*realout[ifcomp]+imagout[ifcomp]*imagout[ifcomp]);
+	    float outval_hig = sqrt(realout[ifcomp+1]*realout[ifcomp+1]+imagout[ifcomp+1]*imagout[ifcomp+1]);
+	    ardbl.Add( 20.0*log10( wt_hig*outval_low + wt_low*outval_hig )-90);
 	  }
 	} else {
 	  /* wrong computation */
@@ -629,7 +643,39 @@ void MainFrame::OnTimer( wxTimerEvent & ev)
 	    ardbl.Add( 25*(sin(0.01*i)+sin(0.012*i)));
 	  }
 	}
+	// right channel
+	for( int i=0; i<nsampl;i++){
+	  realin[i] = g_SpeBuffer_Right[i]/2048.0;
+	}
+
+	if (fft_double( nsampl, 0, realin, NULL, realout, imagout)) {
+	  /* everything is correct */
+	  for( int i=0; i<m_SamplingFreq/2;i++){
+	    /* zobrazeni jen poloviny, tzn. nsampl/2 odpovida fvz/2 */
+	    float ffcomp = 1.0*i*nsampl/m_SamplingFreq;
+	    int ifcomp = (int) (ffcomp);
+	    // make an averaging
+	    float wt_low = ffcomp - 1.0*ifcomp;
+	    float wt_hig = 1.0+ 1.0*ifcomp - ffcomp;
+	    float outval_low = sqrt(realout[ifcomp]*realout[ifcomp]+imagout[ifcomp]*imagout[ifcomp]);
+	    float outval_hig = sqrt(realout[ifcomp+1]*realout[ifcomp+1]+imagout[ifcomp+1]*imagout[ifcomp+1]);
+	    ardbl2.Add( 20.0*log10( wt_hig*outval_low + wt_low*outval_hig )-90);
+	  }
+	} else {
+	  /* wrong computation */
+	  for( int i=0; i<nsampl;i++){
+	    ardbl2.Add( 25*(sin(0.01*i)+sin(0.012*i)));
+	  }
+	}
+
+
+
 	window_1_spe->SetTrack( ardbl);
+	window_1_spe->SetTrack2( ardbl2);
+
+	free (realin);
+	free (realout);
+	free (imagout);
       }
       /* a tady frekvencni analyzer */
       if (button_frm_start->GetValue()) {
@@ -643,7 +689,7 @@ void MainFrame::OnTimer( wxTimerEvent & ev)
 	double botgain = m_frm_gains[0];
 	unsigned long int arrpointer = 1;
 	ardbl.Clear();
-	for( int i=0; i<fvz/2;i++){
+	for( int i=0; i<m_SamplingFreq/2;i++){
 	  if (i > (int) upfreq) {
 	    /* dalsi hodnota z poli */
 	    if ( (arrpointer+1) > m_frm_freqs.GetCount()) {
@@ -673,6 +719,10 @@ void MainFrame::OnOscXScaleChanged( wxCommandEvent& ev )
   choice_osc_l_swp_copy->GetString(choice_osc_l_swp_copy->GetCurrentSelection()).ToDouble( &sweep_div);
   m_OscBufferLength = (long) (10*sweep_div);
   window_1->SetXRange( 0, sweep_div*10, 0);
+
+  choice_fftlength->GetString(choice_fftlength->GetCurrentSelection()).ToDouble( &sweep_div);
+  m_SpeBufferLength = (long) (sweep_div);
+
 #ifdef XSCALEINTIME
   m_RWAudio->ChangeBufLen( (unsigned long) (1.5 * m_OscBufferLength*m_SamplingFreq/10000 + 10), m_SpeBufferLength); // we need bigger buffer because of synchronization
 #else
