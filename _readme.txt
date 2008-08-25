@@ -1,5 +1,9 @@
 2008-08-25
 ----------
+- first Linux port!!! - compilable with wxGTK-2.6.4 wth GTK2 and UNICODE; a plenty of problems:
+   - GEN gauges do not work as expected
+   - glitches in generator
+   - wxTextCtrls do not react to ENTERs
 - SA - variable FFT length
 - SA - right channel is added
 - SA - averaging of FFT values introduced

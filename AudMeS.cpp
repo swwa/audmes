@@ -3,7 +3,10 @@
 #include "AudMeS.h"
 
 #include <math.h>
+
+#ifdef __WXMSW__
 #include <windows.h>
+#endif
 
 #include "fourier.h"
 #include "dlg_audiointerface.h"
@@ -413,8 +416,9 @@ void MainFrame::set_custom_props()
 {
   double sweep_div;
 
+#ifdef __WXMSW__
   SetIcon(wxICON(AudMeSIcon));
-
+#endif
   m_SamplingFreq = 44100;
 
   choice_osc_l_res->SetSelection( 15);
@@ -450,7 +454,7 @@ void MainFrame::set_custom_props()
 #else
   m_RWAudio = new RWAudio( (long int)( 1.5 * m_OscBufferLength), m_SpeBufferLength );
 #endif
-  m_configfilename = "";
+  m_configfilename = wxT("");
 
 }
 
@@ -469,17 +473,17 @@ void MainFrame::OnExitClick( wxCommandEvent& event )
 
 void MainFrame::OnOpenClick( wxCommandEvent& event )
 {
-wxMessageBox( "Not yet implemented", _T("About application"),wxICON_INFORMATION | wxOK );
+wxMessageBox( wxT("Not yet implemented"), _T("About application"),wxICON_INFORMATION | wxOK );
 }
 
 void MainFrame::OnSaveClick( wxCommandEvent& event )
 {
-wxMessageBox( "Not yet implemented", _T("About application"),wxICON_INFORMATION | wxOK );
+wxMessageBox( wxT("Not yet implemented"), _T("About application"),wxICON_INFORMATION | wxOK );
 }
 
 void MainFrame::OnSaveAsClick( wxCommandEvent& event )
 {
-wxMessageBox( "Not yet implemented", _T("About application"),wxICON_INFORMATION | wxOK );
+wxMessageBox( wxT("Not yet implemented"), _T("About application"),wxICON_INFORMATION | wxOK );
 }
 
 void MainFrame::OnAutoCalClick( wxCommandEvent& event )
@@ -509,7 +513,7 @@ void MainFrame::OnAutoCalClick( wxCommandEvent& event )
    // then center the wave - peaks must be located symetrically from the centre
 
  } else {
-   wxMessageBox( "Please start recording", _T("Could not auto calibrate"),wxICON_INFORMATION | wxOK );
+   wxMessageBox( wxT("Please start recording"), _T("Could not auto calibrate"),wxICON_INFORMATION | wxOK );
  }
    
 }
@@ -786,9 +790,15 @@ void MainFrame::OnFrmStart( wxCommandEvent& ev )
       // from 20Hz to 20kHz
       float freq = 20.0*pow(10.0, 3.0*i/ipoints)+50.0;
       m_RWAudio->PlaySetGenerator( freq, freq, 0, 0, pow(10,slide_l_am->GetValue()/20.0), pow(10,slide_r_am->GetValue()/20.0));
+#ifdef __WXMSW__
       Sleep( 400);
       wxYield();
       Sleep( 400);
+#else
+      usleep(400000);
+      wxYield();
+      usleep(400000);
+#endif
       wxYield();
       // find maximum value in the grabbed wave and store it as a result
       m_frm_freqs.Add( freq);
@@ -829,7 +839,7 @@ void MainFrame::OnGenScrollLChanged( wxScrollEvent& ev )
 {
   wxString bla;
 
-  bla.Printf("%.1f", floor(4.0*pow(10.0, 3.0*slide_l_fr->GetValue()/100.0))*5);
+  bla.Printf(wxT("%.1f"), floor(4.0*pow(10.0, 3.0*slide_l_fr->GetValue()/100.0))*5);
   txt_freq_l->SetValue( bla);
   if (button_gen_start->GetValue()) {
     SendGenSettings();
@@ -840,7 +850,7 @@ void MainFrame::OnGenScrollRChanged( wxScrollEvent& ev )
 {
   wxString bla;
 
-  bla.Printf("%.1f", floor(4.0*pow(10.0, 3.0*slide_r_fr->GetValue()/100.0))*5);
+  bla.Printf(wxT("%.1f"), floor(4.0*pow(10.0, 3.0*slide_r_fr->GetValue()/100.0))*5);
   txt_freq_r->SetValue( bla);
   if (button_gen_start->GetValue()) {
     SendGenSettings();
@@ -851,10 +861,10 @@ void MainFrame::OnGenScrollChanged( wxScrollEvent& ev )
 {
   wxString bla;
 
-  bla.Printf("Amplitude: %d dB", slide_l_am->GetValue());
+  bla.Printf(wxT("Amplitude: %d dB"), slide_l_am->GetValue());
   label_3->SetLabel( bla);
 
-  bla.Printf("Amplitude: %d dB", slide_r_am->GetValue());
+  bla.Printf(wxT("Amplitude: %d dB"), slide_r_am->GetValue());
   label_3_copy_1->SetLabel( bla);
 
 
@@ -922,13 +932,13 @@ void MainFrame::OnSelectSndCard( wxCommandEvent& ev )
   bla = _T("Devices: ");
   for (i = 0; i < num; i++) {
     //bla += wxString::Format("%s ",devarr[i]);
-    arrplstr.Add(wxString::Format("%s ",devarr[i]));
+    arrplstr.Add(wxString::Format(wxT("%s "),devarr[i]));
   }
   //wxMessageBox(bla);
 
   num = m_RWAudio->GetRecordDevices( &devarr);
   for (i = 0; i < num; i++) {
-    arrrecstr.Add(wxString::Format("%s ",devarr[i]));
+    arrrecstr.Add(wxString::Format(wxT("%s "),devarr[i]));
   }
   AudioInterfaceDialog dlg( this);
   dlg.SetDevices( arrrecstr, arrplstr);
@@ -964,7 +974,7 @@ IMPLEMENT_APP(AudMeSApp)
 bool AudMeSApp::OnInit()
 {
     wxInitAllImageHandlers();
-    MainFrame* frame_1 = new MainFrame(0, -1, "");
+    MainFrame* frame_1 = new MainFrame(NULL, -1, wxT(""));
     SetTopWindow(frame_1);
     frame_1->Show();
     return true;
