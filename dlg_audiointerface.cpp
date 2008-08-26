@@ -106,24 +106,32 @@ void AudioInterfaceDialog::CreateControls()
     wxBoxSizer* itemBoxSizer2 = new wxBoxSizer(wxVERTICAL);
     itemDialog1->SetSizer(itemBoxSizer2);
 
+    wxStaticBox * itemFreqStaticBox = new wxStaticBox( itemDialog1, wxID_ANY, _("Available Frequencies [kHz]"));
+    wxStaticBoxSizer* itemFreqStaticBoxSizer = new wxStaticBoxSizer(itemFreqStaticBox, wxHORIZONTAL);
+    itemBoxSizer2->Add(itemFreqStaticBoxSizer, 1, wxEXPAND|wxALL, 5);
+    wxString* itemFreqChoiceStrings = NULL;
+    wxChoice* itemFreqChoice = new wxChoice( itemDialog1, ID_FREQ_CHO, wxDefaultPosition, wxDefaultSize, 0, itemFreqChoiceStrings, 0 );
+    itemFreqStaticBoxSizer->Add(itemFreqChoice, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+
+
     wxStaticBox* itemStaticBoxSizer3Static = new wxStaticBox(itemDialog1, wxID_ANY, _("Output Audio Device"));
     wxStaticBoxSizer* itemStaticBoxSizer3 = new wxStaticBoxSizer(itemStaticBoxSizer3Static, wxHORIZONTAL);
-    itemBoxSizer2->Add(itemStaticBoxSizer3, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 5);
+    itemBoxSizer2->Add(itemStaticBoxSizer3, 1, wxEXPAND|wxALL, 5);
 
     wxString* itemChoice4Strings = NULL;
     wxChoice* itemChoice4 = new wxChoice( itemDialog1, ID_OUTDEV_CHO, wxDefaultPosition, wxDefaultSize, 0, itemChoice4Strings, 0 );
-    itemStaticBoxSizer3->Add(itemChoice4, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+    itemStaticBoxSizer3->Add(itemChoice4, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5);
 
     wxStaticBox* itemStaticBoxSizer5Static = new wxStaticBox(itemDialog1, wxID_ANY, _("Input Audio Device"));
     wxStaticBoxSizer* itemStaticBoxSizer5 = new wxStaticBoxSizer(itemStaticBoxSizer5Static, wxHORIZONTAL);
-    itemBoxSizer2->Add(itemStaticBoxSizer5, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 5);
+    itemBoxSizer2->Add(itemStaticBoxSizer5, 0, wxEXPAND|wxALL, 5);
 
     wxString* itemChoice6Strings = NULL;
     wxChoice* itemChoice6 = new wxChoice( itemDialog1, ID_INDEV_CHO, wxDefaultPosition, wxDefaultSize, 0, itemChoice6Strings, 0 );
-    itemStaticBoxSizer5->Add(itemChoice6, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+    itemStaticBoxSizer5->Add(itemChoice6, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5);
 
     wxBoxSizer* itemBoxSizer7 = new wxBoxSizer(wxHORIZONTAL);
-    itemBoxSizer2->Add(itemBoxSizer7, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 5);
+    itemBoxSizer2->Add(itemBoxSizer7, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 10);
 
     wxButton* itemButton8 = new wxButton( itemDialog1, wxID_OK, _("&OK"), wxDefaultPosition, wxDefaultSize, 0 );
     itemBoxSizer7->Add(itemButton8, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
@@ -171,9 +179,9 @@ wxIcon AudioInterfaceDialog::GetIconResource( const wxString& name )
 ////@end AudioInterfaceDialog icon retrieval
 }
 
-void AudioInterfaceDialog::SetDevices( wxArrayString devreclist, wxArrayString devpllist)
+void AudioInterfaceDialog::SetDevices( wxArrayString devreclist, wxArrayString devpllist, wxArrayString freqs)
 {
-  int i;
+  unsigned int i;
 
     wxChoice* p_cho = (wxChoice *) FindWindow( ID_OUTDEV_CHO);
     if(!p_cho) {
@@ -196,6 +204,19 @@ void AudioInterfaceDialog::SetDevices( wxArrayString devreclist, wxArrayString d
       p_cho->Append(devreclist[i]);
     }
     p_cho->SetSelection(0);
+
+    p_cho = (wxChoice *) FindWindow( ID_FREQ_CHO);
+    if(!p_cho) {
+        return;
+    }
+    p_cho->Clear();
+
+    for(i = 0; i< freqs.GetCount(); i++) {
+      p_cho->Append(freqs[i]);
+    }
+    p_cho->SetSelection(freqs.GetCount()-1);
+
+
 }
 
 void AudioInterfaceDialog::GetSelectedDevs( int * recdev, int * playdev)

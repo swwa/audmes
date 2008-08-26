@@ -1,3 +1,10 @@
+2008-08-26
+----------
+- changed colors for numbers in scopes
+- OSC - L channel measures frequency - FFT
+- "Audio Interface" Dlg extended with sampling frequency
+- "Audio Interface" Dlg shows available interfaces but settings do not work yet
+
 2008-08-25
 ----------
 - first Linux port!!! - compilable with wxGTK-2.6.4 wth GTK2 and UNICODE; a plenty of problems:

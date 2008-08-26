@@ -8,7 +8,11 @@
 
 #include "audiolib/RtAudio.h"
 
-typedef char *SndDevArray[5];
+struct RWAudioDevList
+{
+  std::vector<int> card_position;
+  std::vector<std::string> card_name;
+};
 
 class RWAudio
 {
@@ -20,11 +24,7 @@ public:
 
 	void ChangeBufLen( long int oscbuflen, long int spebuflen) { m_OscBufferLen = oscbuflen; m_SpeBufferLen = spebuflen; m_Buflen_Changed = 1; };
 
-	/* recording part */
-	int GetRecordDevices(SndDevArray * devlist);
-
-	/* playing part */
-	int GetPlayDevices(SndDevArray * devlist);
+	int GetRWAudioDevices( RWAudioDevList * play, RWAudioDevList * record, std::vector<long int> * freqs);
 
 	/* parameter settings */
 	int PlaySetGenerator( float, float, int, int, float, float);

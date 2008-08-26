@@ -75,17 +75,17 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
     frame_1_menubar = new wxMenuBar();
     SetMenuBar(frame_1_menubar);
     wxMenu* wxglade_tmp_menu_1 = new wxMenu();
-    wxglade_tmp_menu_1->Append(wxID_OPEN, wxT("&Open config\tAlt+O"), wxT(""), wxITEM_NORMAL);
-    wxglade_tmp_menu_1->Append(wxID_SAVE, wxT("&Save config\tAlt+S"), wxT(""), wxITEM_NORMAL);
+    wxglade_tmp_menu_1->Append(wxID_OPEN, wxT("&Open config...\tAlt+O"), wxT(""), wxITEM_NORMAL);
+    wxglade_tmp_menu_1->Append(wxID_SAVE, wxT("&Save config...\tAlt+S"), wxT(""), wxITEM_NORMAL);
     wxglade_tmp_menu_1->Append(wxID_SAVEAS, wxT("Save &As"), wxT(""), wxITEM_NORMAL);
     wxglade_tmp_menu_1->AppendSeparator();
     wxglade_tmp_menu_1->Append(wxID_EXIT, wxT("&Close\tAlt+F4"), wxT(""), wxITEM_NORMAL);
     frame_1_menubar->Append(wxglade_tmp_menu_1, wxT("&File"));
     wxMenu* wxglade_tmp_menu_2 = new wxMenu();
-    wxglade_tmp_menu_2->Append(ID_SNDCARD, wxT("&Select Sound Card"), wxT(""), wxITEM_NORMAL);
+    wxglade_tmp_menu_2->Append(ID_SNDCARD, wxT("Audio &Interface Configuration..."), wxT(""), wxITEM_NORMAL);
     frame_1_menubar->Append(wxglade_tmp_menu_2, wxT("&Tools"));
     wxMenu* wxglade_tmp_menu_3 = new wxMenu();
-    wxglade_tmp_menu_3->Append(wxID_ABOUT, wxT("&About"), wxT(""), wxITEM_NORMAL);
+    wxglade_tmp_menu_3->Append(wxID_ABOUT, wxT("&About..."), wxT(""), wxITEM_NORMAL);
     frame_1_menubar->Append(wxglade_tmp_menu_3, wxT("&Help"));
     frame_1_statusbar = CreateStatusBar(1, 0);
 
@@ -100,7 +100,7 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
     };
     choice_l_wav = new wxChoice(notebook_1_gen, ID_GENSHP_L, wxDefaultPosition, wxDefaultSize, 4, choice_l_wav_choices, 0);
     label_2 = new wxStaticText(notebook_1_gen, -1, wxT("Frequency [20..20000Hz]: "));
-    slide_l_fr = new wxSlider(notebook_1_gen, ID_GENLFREQ, 40, 0, 100);
+    slide_l_fr = new wxSlider(notebook_1_gen, ID_GENLFREQ, 80, 0, 200);
     label_3 = new wxStaticText(notebook_1_gen, -1, wxT("Amplitude [0..-60dB]: "));
     slide_l_am = new wxSlider(notebook_1_gen, ID_GENLAMP, 0, -60, 0);
 
@@ -114,7 +114,7 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
     };
     choice_r_wav = new wxChoice(notebook_1_gen, ID_GENSHP_R, wxDefaultPosition, wxDefaultSize, 4, choice_r_wav_choices, 0);
     label_2_copy_1 = new wxStaticText(notebook_1_gen, -1, wxT("Frequency [20..20000Hz]: "));
-    slide_r_fr = new wxSlider(notebook_1_gen, ID_GENRFREQ, 40, 0, 100);
+    slide_r_fr = new wxSlider(notebook_1_gen, ID_GENRFREQ, 80, 0, 200);
     label_3_copy_1 = new wxStaticText(notebook_1_gen, -1, wxT("Amplitude [0..-60dB]: "));
     slide_r_am = new wxSlider(notebook_1_gen, ID_GENRAMP, 0, -60, 0);
     button_gen_start = new wxToggleButton(notebook_1_gen, ID_GENSTART, wxT("Start"));
@@ -123,8 +123,8 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
     label_gen_sync = new wxStaticText(notebook_1_gen, -1, wxT("Phase between L and R [0..360 degrees]: "));
     text_gen_sync = new wxTextCtrl(notebook_1_gen, ID_GENPHASE, wxT("0"), wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
 
-    txt_freq_l = new wxTextCtrl(notebook_1_gen, ID_TXT_FREQ_L, wxT("315.0"));
-    txt_freq_r = new wxTextCtrl(notebook_1_gen, ID_TXT_FREQ_R, wxT("315.0"));
+    txt_freq_l = new wxTextCtrl(notebook_1_gen, ID_TXT_FREQ_L, wxT("315.0"), wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
+    txt_freq_r = new wxTextCtrl(notebook_1_gen, ID_TXT_FREQ_R, wxT("315.0"), wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
 
     /* oscilloscope panel */
     window_1 = new CtrlOScope(notebook_1_osc, _T(""), _T(""), 1);
@@ -254,15 +254,7 @@ void MainFrame::do_layout()
     wxBoxSizer* sizer_2 = new wxBoxSizer(wxVERTICAL);
     wxBoxSizer* sizer_3 = new wxBoxSizer(wxHORIZONTAL);
     wxStaticBoxSizer* sizer_4_copy = new wxStaticBoxSizer(sizer_4_copy_staticbox, wxVERTICAL);
-    wxBoxSizer* sizer_8_copy_1 = new wxBoxSizer(wxHORIZONTAL);
-    wxBoxSizer* sizer_7_copy_1 = new wxBoxSizer(wxHORIZONTAL);
-    wxBoxSizer* sizer_6_copy_1 = new wxBoxSizer(wxHORIZONTAL);
-    wxBoxSizer* sizer_5_copy_1 = new wxBoxSizer(wxHORIZONTAL);
     wxStaticBoxSizer* sizer_4 = new wxStaticBoxSizer(sizer_4_staticbox, wxVERTICAL);
-    wxBoxSizer* sizer_8 = new wxBoxSizer(wxHORIZONTAL);
-    wxBoxSizer* sizer_7 = new wxBoxSizer(wxHORIZONTAL);
-    wxBoxSizer* sizer_6 = new wxBoxSizer(wxHORIZONTAL);
-    wxBoxSizer* sizer_5 = new wxBoxSizer(wxHORIZONTAL);
     wxBoxSizer* sizer_gen_sync = new wxBoxSizer(wxHORIZONTAL);
     wxBoxSizer* sizer_gen_sync2 = new wxBoxSizer(wxHORIZONTAL);
 
@@ -273,43 +265,34 @@ void MainFrame::do_layout()
     wxBoxSizer* sizer_txtfreql = new wxBoxSizer(wxVERTICAL);
     wxBoxSizer* sizer_txtfreqr = new wxBoxSizer(wxVERTICAL);
 
+    wxFlexGridSizer * sizer_GenL = new wxFlexGridSizer( 3, 2, 5, 5);
+    wxFlexGridSizer * sizer_GenR = new wxFlexGridSizer( 3, 2, 5, 5);
+
     // generator
     sizer_4->Add(checkbox_l_en, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    sizer_5->Add(label_1, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    sizer_5->Add(10, 10, 1, 0, 0);
-    sizer_5->Add(choice_l_wav, 0, wxALL, 5);
-    sizer_4->Add(sizer_5, 0, wxEXPAND, 0);
-    sizer_6->Add(label_2, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    sizer_6->Add(10, 10, 1, 0, 0);
+    sizer_GenL->Add(label_1, 0, wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 5);
+    sizer_GenL->Add(choice_l_wav, 1, wxALL|wxEXPAND, 5);
+    sizer_GenL->Add(label_2, 0, wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 5);
     sizer_txtfreql->Add(slide_l_fr, 0, wxEXPAND, 5);
-    sizer_txtfreql->Add(txt_freq_l, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 5);
-    sizer_6->Add(sizer_txtfreql, 0, wxEXPAND, 0);
-
-    sizer_4->Add(sizer_6, 0, wxEXPAND, 0);
-    sizer_7->Add(label_3, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    sizer_7->Add(10, 10, 0, 0, 0);
-    sizer_7->Add(slide_l_am, 1, wxEXPAND, 5);
-    sizer_4->Add(sizer_7, 0, wxEXPAND, 0);
-    sizer_4->Add(sizer_8, 0, wxEXPAND, 0);
+    sizer_txtfreql->Add(txt_freq_l, wxALL|wxEXPAND, 5);
+    sizer_GenL->Add(sizer_txtfreql, 1, wxALL|wxEXPAND, 5);
+    sizer_GenL->Add(label_3, 0, wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 5);
+    sizer_GenL->Add(slide_l_am, 1, wxEXPAND, 5);
+    sizer_4->Add(sizer_GenL, 0, wxALL|wxEXPAND, 5);
     sizer_3->Add(sizer_4, 0, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    sizer_4_copy->Add(checkbox_r_en, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    sizer_5_copy_1->Add(label_1_copy_1, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    sizer_5_copy_1->Add(10, 10, 1, 0, 0);
-    sizer_5_copy_1->Add(choice_r_wav, 0, wxALL, 5);
-    sizer_4_copy->Add(sizer_5_copy_1, 0, wxEXPAND, 0);
-    sizer_6_copy_1->Add(label_2_copy_1, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    sizer_6_copy_1->Add(10, 10, 1, 0, 0);
-    sizer_txtfreqr->Add(slide_r_fr, 0, wxEXPAND, 5);
-    sizer_txtfreqr->Add(txt_freq_r, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 5);
-    sizer_6_copy_1->Add(sizer_txtfreqr, 0, wxEXPAND, 0);
 
-    sizer_4_copy->Add(sizer_6_copy_1, 0, wxEXPAND, 0);
-    sizer_7_copy_1->Add(label_3_copy_1, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    sizer_7_copy_1->Add(10, 10, 1, 0, 0);
-    sizer_7_copy_1->Add(slide_r_am, 1, wxALL|wxALIGN_RIGHT, 5);
-    sizer_4_copy->Add(sizer_7_copy_1, 0, wxEXPAND, 0);
-    sizer_4_copy->Add(sizer_8_copy_1, 0, wxEXPAND, 0);
+    sizer_4_copy->Add(checkbox_r_en, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    sizer_GenR->Add(label_1_copy_1, 0, wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 5);
+    sizer_GenR->Add(choice_r_wav, 1, wxALL|wxEXPAND, 5);
+    sizer_GenR->Add(label_2_copy_1, 0, wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 5);
+    sizer_txtfreqr->Add(slide_r_fr, 0, wxEXPAND, 5);
+    sizer_txtfreqr->Add(txt_freq_r, wxALL|wxEXPAND, 5);
+    sizer_GenR->Add(sizer_txtfreqr, 1, wxALL|wxEXPAND, 5);
+    sizer_GenR->Add(label_3_copy_1, 0, wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 5);
+    sizer_GenR->Add(slide_r_am, 1, wxEXPAND, 5);
+    sizer_4_copy->Add(sizer_GenR, 0, wxALL|wxEXPAND, 5);
     sizer_3->Add(sizer_4_copy, 0, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+
     sizer_2->Add(sizer_3, 0, wxALIGN_CENTER_HORIZONTAL, 0);
     sizer_gen_sync->Add(checkbox_gen_sync, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     sizer_gen_sync2->Add(label_gen_sync, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
@@ -582,6 +565,47 @@ void MainFrame::OnTimer( wxTimerEvent & ev)
 	break;
       }
 
+      // Add the frequency measurement feature - FFT
+      {
+	int nsampl;
+
+	m_OscBufferLength > 16384 ? nsampl = 16384 : nsampl = m_OscBufferLength;
+	nsampl = (int)( pow(2, (int)(log10(nsampl)/log10(2))));
+
+	if (nsampl > 0 ) {
+	  double * realin = (double*) malloc( nsampl*sizeof( double));
+	  double * realout = (double*) malloc( nsampl*sizeof( double));
+	  double * imagout = (double*) malloc( nsampl*sizeof( double));
+
+	  for( int i=0; i<nsampl;i++){
+	    realin[i] = g_OscBuffer_Left[i]/2048.0;
+	  }
+	  if (fft_double( nsampl, 0, realin, NULL, realout, imagout)) {
+	    int i;
+	    double dmax = realout[0]*realout[0]+imagout[0]*imagout[0];
+	    int imax = 0;
+	    for( i = 1; i < nsampl/2 ; i++){
+	      double dval = realout[i]*realout[i]+imagout[i]*imagout[i];
+	      if ( dval > dmax) {
+		dmax = dval;
+		imax = i;
+	      }
+	    }
+	    // recompute the frequency
+	    double freq = 1.0*imax*m_SamplingFreq/nsampl;
+	    wxString bla;
+	    bla.Printf("Frequency : %.1f ",freq);
+	    window_1->ShowUserText( bla, 100, 20);
+	  }
+	  free( realin);
+	  free( realout);
+	  free( imagout);
+	}
+
+
+      }
+
+
       // here it is necessary to recompute the length of data packet to show just micro/miliseconds and not samples
       unsigned long int finalBufferPoint = i + m_OscBufferLength;  // wrapped exactly for the OScopeCtrl X range
       if (finalBufferPoint > 1.5*m_OscBufferLength) { finalBufferPoint = (unsigned long)( 1.5*m_OscBufferLength); }
@@ -624,13 +648,12 @@ void MainFrame::OnTimer( wxTimerEvent & ev)
 
 	// left channel
 	for( int i=0; i<nsampl;i++){
-	  //realin[i] = sin(6.28*689.0625*i/fvz);
 	  realin[i] = g_SpeBuffer_Left[i]/2048.0;
 	}
 
 	if (fft_double( nsampl, 0, realin, NULL, realout, imagout)) {
 	  /* everything is correct */
-	  for( int i=0; i<m_SamplingFreq/2;i++){
+	  for( unsigned long int i=0; i<m_SamplingFreq/2;i++){
 	    /* zobrazeni jen poloviny, tzn. nsampl/2 odpovida fvz/2 */
 	    float ffcomp = 1.0*i*nsampl/m_SamplingFreq;
 	    int ifcomp = (int) (ffcomp);
@@ -654,7 +677,7 @@ void MainFrame::OnTimer( wxTimerEvent & ev)
 
 	if (fft_double( nsampl, 0, realin, NULL, realout, imagout)) {
 	  /* everything is correct */
-	  for( int i=0; i<m_SamplingFreq/2;i++){
+	  for( unsigned long int i=0; i<m_SamplingFreq/2;i++){
 	    /* zobrazeni jen poloviny, tzn. nsampl/2 odpovida fvz/2 */
 	    float ffcomp = 1.0*i*nsampl/m_SamplingFreq;
 	    int ifcomp = (int) (ffcomp);
@@ -693,8 +716,8 @@ void MainFrame::OnTimer( wxTimerEvent & ev)
 	double botgain = m_frm_gains[0];
 	unsigned long int arrpointer = 1;
 	ardbl.Clear();
-	for( int i=0; i<m_SamplingFreq/2;i++){
-	  if (i > (int) upfreq) {
+	for( unsigned long int i=0; i<m_SamplingFreq/2;i++){
+	  if (i > (unsigned long int) upfreq) {
 	    /* dalsi hodnota z poli */
 	    if ( (arrpointer+1) > m_frm_freqs.GetCount()) {
 	      /* ukoncit */
@@ -826,6 +849,14 @@ void MainFrame::OnFrmStart( wxCommandEvent& ev )
 
 void MainFrame::OnGeneratorChanged( wxCommandEvent& ev )
 {
+  if( checkbox_gen_sync->IsChecked()){
+    slide_r_fr->Enable( false);
+    label_2_copy_1->Enable( false);
+  } else {
+    slide_r_fr->Enable( true);
+    label_2_copy_1->Enable( true);
+  }
+
   if (button_gen_start->GetValue()) {
     SendGenSettings();
   }
@@ -839,7 +870,7 @@ void MainFrame::OnGenScrollLChanged( wxScrollEvent& ev )
 {
   wxString bla;
 
-  bla.Printf(wxT("%.1f"), floor(4.0*pow(10.0, 3.0*slide_l_fr->GetValue()/100.0))*5);
+  bla.Printf(wxT("%.1f"), floor(20.0*pow(10.0, 3.0*slide_l_fr->GetValue()/200.0)));
   txt_freq_l->SetValue( bla);
   if (button_gen_start->GetValue()) {
     SendGenSettings();
@@ -850,7 +881,7 @@ void MainFrame::OnGenScrollRChanged( wxScrollEvent& ev )
 {
   wxString bla;
 
-  bla.Printf(wxT("%.1f"), floor(4.0*pow(10.0, 3.0*slide_r_fr->GetValue()/100.0))*5);
+  bla.Printf(wxT("%.1f"), floor(20.0*pow(10.0, 3.0*slide_r_fr->GetValue()/200.0)));
   txt_freq_r->SetValue( bla);
   if (button_gen_start->GetValue()) {
     SendGenSettings();
@@ -896,11 +927,7 @@ void MainFrame::SendGenSettings( )
 
   if( checkbox_gen_sync->IsChecked()){
     freq_r = freq_l;
-    slide_r_fr->Enable( false);
-    label_2_copy_1->Enable( false);
   } else {
-    slide_r_fr->Enable( true);
-    label_2_copy_1->Enable( true);
     phas2 = 0.0;
   }
 
@@ -915,37 +942,42 @@ void MainFrame::SendGenSettings( )
 
 void MainFrame::OnSelectSndCard( wxCommandEvent& ev )
 {
-  SndDevArray devarr;
-  wxArrayString arrplstr, arrrecstr;
+  wxArrayString arrplstr, arrrecstr, freqsstr;
   wxString bla;
-  int num, i, recdev, pldev;
+  int recdev, pldev;
+  unsigned int i;
+  RWAudioDevList play;
+  RWAudioDevList record;
+  std::vector<long int> freqs;
 
-  devarr[0] = (char*) malloc( 40);
-  devarr[1] = (char*) malloc( 40);
-  devarr[2] = (char*) malloc( 40);
-  devarr[3] = (char*) malloc( 40);
-  devarr[4] = (char*) malloc( 40);
-  //z RWAUDIO ziskat seznam SND karet, otevrit SELECT dialog a pak nastaveni poslat do RW_AUDIO
-  arrplstr.Clear();
-  arrrecstr.Clear();
-  num = m_RWAudio->GetPlayDevices( &devarr);
+  m_RWAudio->GetRWAudioDevices( & play, & record, & freqs);
+
+
   bla = _T("Devices: ");
-  for (i = 0; i < num; i++) {
+  for (i = 0; i < play.card_name.size(); i++) {
     //bla += wxString::Format("%s ",devarr[i]);
-    arrplstr.Add(wxString::Format(wxT("%s "),devarr[i]));
+    arrplstr.Add(wxString::Format(wxT("%s "),play.card_name[i].c_str()));
   }
   //wxMessageBox(bla);
 
-  num = m_RWAudio->GetRecordDevices( &devarr);
-  for (i = 0; i < num; i++) {
-    arrrecstr.Add(wxString::Format(wxT("%s "),devarr[i]));
+  //num = m_RWAudio->GetRecordDevices( &devarr);
+  for (i = 0; i < record.card_name.size(); i++) {
+    arrrecstr.Add(wxString::Format(wxT("%s "),record.card_name[i].c_str()));
   }
+
+  for (i = 0; i < freqs.size(); i++) {
+    if ( 0 !=  freqs[i]) {
+      freqsstr.Add(wxString::Format(wxT("%ld "),freqs[i]));
+    }
+  }
+
   AudioInterfaceDialog dlg( this);
-  dlg.SetDevices( arrrecstr, arrplstr);
+
+  dlg.SetDevices( arrrecstr, arrplstr, freqsstr);
   if (wxID_OK == dlg.ShowModal()) {
     // poslat nastaveni do RW_AUDIO
     dlg.GetSelectedDevs( &recdev, &pldev);
-    m_RWAudio->SetSndDevices( recdev, pldev);
+    m_RWAudio->SetSndDevices( record.card_position[recdev], play.card_position[pldev]);
   }
 }
 

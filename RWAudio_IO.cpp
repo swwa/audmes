@@ -272,53 +272,89 @@ RWAudio::~RWAudio()
 }
 
 /********************************************************************/
-/*************         Recording part             *******************/
+/*************      Devices enumeration           *******************/
 /********************************************************************/
-int RWAudio::GetRecordDevices(SndDevArray * devlist)
+int RWAudio::GetRWAudioDevices( RWAudioDevList * play, RWAudioDevList * record, std::vector<long int> * freqs)
 {
-//   WAVEINCAPS     wic;
-//   unsigned long   iNumDevs;
-//   int i;
 
-//   iNumDevs = waveInGetNumDevs();
+  // Determine the number of devices available
+  unsigned int devices = m_AudioDriver.getDeviceCount();
 
-//   for (i = 0; i < iNumDevs; i++) {
-//     if (!waveInGetDevCaps(i, &wic, sizeof(WAVEINCAPS))) {
-//       //*devlist[i] = (char*) malloc(sizeof(wic.szPname));
-//       strcpy((*devlist)[i], wic.szPname);
-//     }
-//   }
+  // Scan through devices for various capabilities
+  RtAudio::DeviceInfo info;
 
-//   return iNumDevs;
-  return 0;
-}
+  play->card_position.clear();
+  play->card_name.clear();
+  record->card_position.clear();
+  record->card_name.clear();
+  freqs->clear();
 
+  for ( unsigned int i=0; i<=devices; i++ ) {
 
-/********************************************************************/
-/*************          Playing part              *******************/
-/********************************************************************/
-int RWAudio::GetPlayDevices(SndDevArray * devlist)
-{
-//   WAVEOUTCAPS     woc;
-//   unsigned long   iNumDevs;
-//   int i;
+    info = m_AudioDriver.getDeviceInfo( i );
 
-//   /* pocet zarizeni */
-//   iNumDevs = waveOutGetNumDevs();
-//   /* Go through all of those devices, displaying their names */
-//   /* just first 5 devices to choose from... */
-//   for (i = 0; i < iNumDevs; i++) {
-//     /* Get info about the next device */
-//     if (!waveOutGetDevCaps(i, &woc, sizeof(WAVEOUTCAPS))) {
-//       /* Display its Device ID and name */
-//       //*devlist[i] = (char*) malloc(sizeof(woc.szPname+1));
-//       strcpy((*devlist)[i], woc.szPname);
-//       //printf("Device ID #%u: %s\r\n", i, woc.szPname);
-//       //MessageBox(0,woc.szPname,woc.szPname,0);
-//     }
-//   }
+    if ( info.probed == true ) {
 
-//   return iNumDevs;
+      // add play card
+      if ((info.outputChannels > 1)||(info.duplexChannels > 1)) {
+
+	play->card_position.push_back(i);
+	play->card_name.push_back(info.name);
+
+	if (i == 0) {
+	  // copy all the frequencies into the table
+	  for (unsigned int j = 0; j < info.sampleRates.size(); j++) {
+	    freqs->push_back( info.sampleRates[j]);
+	  }
+	  
+	} else {
+	  // remove some frequencies not in the devicetable
+	  for (unsigned int j = 0; j < freqs->size(); j++) {
+	    char rem_frequency = 1;
+	    for (unsigned int k = 0; k < info.sampleRates.size(); k++) {
+	      if ((*freqs)[j] == info.sampleRates[k]) {
+		rem_frequency = 0;
+	      }
+	    }
+	    if ( 1 == rem_frequency) {
+	      (*freqs)[j] = 0;
+	    }
+	  }
+	}
+      }
+
+      // add record card
+      if ((info.inputChannels > 1)||(info.duplexChannels > 1)) {
+
+	record->card_position.push_back(i);
+	record->card_name.push_back(info.name);
+
+	if (i == 0) {
+	  // copy all the frequencies into the table
+	  for (unsigned int j = 0; j < info.sampleRates.size(); j++) {
+	    freqs->push_back( info.sampleRates[j]);
+	  }
+	  
+	} else {
+	  // remove some frequencies not in the devicetable
+	  for (unsigned int j = 0; j < freqs->size(); j++) {
+	    char rem_frequency = 1;
+	    for (unsigned int k = 0; k < info.sampleRates.size(); k++) {
+	      if ((*freqs)[j] == info.sampleRates[k]) {
+		rem_frequency = 0;
+	      }
+	    }
+	    if ( 1 == rem_frequency) {
+	      (*freqs)[j] = 0;
+	    }
+	  }
+	}
+ 	
+      }
+
+    }
+  }
+
 
   return 0;
 }

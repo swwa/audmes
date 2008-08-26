@@ -41,6 +41,8 @@ public:
 	void SetTrack2( wxArrayDouble ardbl);
 	void SetNumOfVerticals( int num) { m_NumberOfVerticals = num; };
 
+	void ShowUserText( wxString text, int xpos, int ypos) { m_UserText = text; m_UserTextPosX = xpos; m_UserTextPosY = ypos; };
+
 	virtual wxSize GetSize() const;
 	virtual wxSize DoGetBestSize() const;
 /* 	void GetSize( int *w, int *h) { *w = 300; *h = 150; } */
@@ -67,7 +69,13 @@ protected:
 	wxColour m_plColor;
 	wxColour m_trColor;
 	wxColour m_tr2Color;
+	wxColour m_whColor;
+
 	int m_NumberOfVerticals;
+
+	wxString m_UserText;
+	int m_UserTextPosX;
+	int m_UserTextPosY;
 
 };
 #endif // __CTRLOSCOPE_H__

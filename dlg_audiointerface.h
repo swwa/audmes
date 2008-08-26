@@ -36,7 +36,7 @@
 
 ////@begin control identifiers
 #define SYMBOL_AUDIOINTERFACEDIALOG_STYLE wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU|wxCLOSE_BOX
-#define SYMBOL_AUDIOINTERFACEDIALOG_TITLE _("Audio Interface Dialog")
+#define SYMBOL_AUDIOINTERFACEDIALOG_TITLE _("Audio Interface Configuration")
 #define SYMBOL_AUDIOINTERFACEDIALOG_IDNAME 32000
 #define SYMBOL_AUDIOINTERFACEDIALOG_SIZE wxSize(400, 300)
 #define SYMBOL_AUDIOINTERFACEDIALOG_POSITION wxDefaultPosition
@@ -91,7 +91,7 @@ public:
 
 ////@begin AudioInterfaceDialog member variables
 ////@end AudioInterfaceDialog member variables
-    void SetDevices( wxArrayString devreclist, wxArrayString devpllist);
+    void SetDevices( wxArrayString devreclist, wxArrayString devpllist, wxArrayString freqs);
     void GetSelectedDevs( int * recdev, int * playdev);
 };
 
