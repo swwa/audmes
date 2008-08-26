@@ -51,7 +51,5 @@ $(OBJECTPATH)/RtAudio.o:        audiolib/RtAudio.cpp
 
 
 clean:
-	-if exist $(OBJECT_PATH)\*.o -rm $(OBJECT_PATH)\*.o
-	-if exist $(OBJECT_PATH)\*.res -rm $(OBJECT_PATH)\*.res
-	-if exist $(OBJECT_PATH)\$(TARGETNAME) -rm $(OBJECT_PATH)\$(TARGETNAME)
+	if [ ! -e $(OBJECTPATH) ] ;then rm -rf $(OBJECTPATH) ; fi
 

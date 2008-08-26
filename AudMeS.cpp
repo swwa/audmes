@@ -594,7 +594,7 @@ void MainFrame::OnTimer( wxTimerEvent & ev)
 	    // recompute the frequency
 	    double freq = 1.0*imax*m_SamplingFreq/nsampl;
 	    wxString bla;
-	    bla.Printf("Frequency : %.1f ",freq);
+	    bla.Printf(wxT("Frequency : %.1f "),freq);
 	    window_1->ShowUserText( bla, 100, 20);
 	  }
 	  free( realin);
@@ -948,21 +948,20 @@ void MainFrame::OnSelectSndCard( wxCommandEvent& ev )
   unsigned int i;
   RWAudioDevList play;
   RWAudioDevList record;
-  std::vector<long int> freqs;
+  std::vector<unsigned long int> freqs;
 
   m_RWAudio->GetRWAudioDevices( & play, & record, & freqs);
 
 
   bla = _T("Devices: ");
   for (i = 0; i < play.card_name.size(); i++) {
-    //bla += wxString::Format("%s ",devarr[i]);
-    arrplstr.Add(wxString::Format(wxT("%s "),play.card_name[i].c_str()));
+      wxString newstr(play.card_name[i].c_str(), wxConvUTF8);
+      arrplstr.Add(newstr);
   }
-  //wxMessageBox(bla);
 
-  //num = m_RWAudio->GetRecordDevices( &devarr);
   for (i = 0; i < record.card_name.size(); i++) {
-    arrrecstr.Add(wxString::Format(wxT("%s "),record.card_name[i].c_str()));
+      wxString newstr(record.card_name[i].c_str(), wxConvUTF8);
+      arrrecstr.Add(newstr);
   }
 
   for (i = 0; i < freqs.size(); i++) {

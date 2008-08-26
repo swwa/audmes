@@ -24,7 +24,7 @@ public:
 
 	void ChangeBufLen( long int oscbuflen, long int spebuflen) { m_OscBufferLen = oscbuflen; m_SpeBufferLen = spebuflen; m_Buflen_Changed = 1; };
 
-	int GetRWAudioDevices( RWAudioDevList * play, RWAudioDevList * record, std::vector<long int> * freqs);
+	int GetRWAudioDevices( RWAudioDevList * play, RWAudioDevList * record, std::vector<unsigned long int> * freqs);
 
 	/* parameter settings */
 	int PlaySetGenerator( float, float, int, int, float, float);

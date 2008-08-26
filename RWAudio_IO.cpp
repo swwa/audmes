@@ -274,7 +274,7 @@ RWAudio::~RWAudio()
 /********************************************************************/
 /*************      Devices enumeration           *******************/
 /********************************************************************/
-int RWAudio::GetRWAudioDevices( RWAudioDevList * play, RWAudioDevList * record, std::vector<long int> * freqs)
+int RWAudio::GetRWAudioDevices( RWAudioDevList * play, RWAudioDevList * record, std::vector<unsigned long int> * freqs)
 {
 
   // Determine the number of devices available
@@ -289,11 +289,12 @@ int RWAudio::GetRWAudioDevices( RWAudioDevList * play, RWAudioDevList * record, 
   record->card_name.clear();
   freqs->clear();
 
-  for ( unsigned int i=0; i<=devices; i++ ) {
+  for ( unsigned int i=0; i<devices; i++ ) {
 
     info = m_AudioDriver.getDeviceInfo( i );
 
     if ( info.probed == true ) {
+//      std::cout << "device = " << i << "; name: " << info.name << "\n";
 
       // add play card
       if ((info.outputChannels > 1)||(info.duplexChannels > 1)) {
