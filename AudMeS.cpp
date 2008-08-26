@@ -281,14 +281,14 @@ void MainFrame::do_layout()
     sizer_4->Add(sizer_5, 0, wxEXPAND, 0);
     sizer_6->Add(label_2, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     sizer_6->Add(10, 10, 1, 0, 0);
-    sizer_txtfreql->Add(slide_l_fr, 0, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 5);
+    sizer_txtfreql->Add(slide_l_fr, 0, wxEXPAND, 5);
     sizer_txtfreql->Add(txt_freq_l, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 5);
     sizer_6->Add(sizer_txtfreql, 0, wxEXPAND, 0);
 
     sizer_4->Add(sizer_6, 0, wxEXPAND, 0);
     sizer_7->Add(label_3, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    sizer_7->Add(10, 10, 1, 0, 0);
-    sizer_7->Add(slide_l_am, 0, wxALL|wxALIGN_RIGHT, 5);
+    sizer_7->Add(10, 10, 0, 0, 0);
+    sizer_7->Add(slide_l_am, 1, wxEXPAND, 5);
     sizer_4->Add(sizer_7, 0, wxEXPAND, 0);
     sizer_4->Add(sizer_8, 0, wxEXPAND, 0);
     sizer_3->Add(sizer_4, 0, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
@@ -299,14 +299,14 @@ void MainFrame::do_layout()
     sizer_4_copy->Add(sizer_5_copy_1, 0, wxEXPAND, 0);
     sizer_6_copy_1->Add(label_2_copy_1, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     sizer_6_copy_1->Add(10, 10, 1, 0, 0);
-    sizer_txtfreqr->Add(slide_r_fr, 0, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 5);
+    sizer_txtfreqr->Add(slide_r_fr, 0, wxEXPAND, 5);
     sizer_txtfreqr->Add(txt_freq_r, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 5);
     sizer_6_copy_1->Add(sizer_txtfreqr, 0, wxEXPAND, 0);
 
     sizer_4_copy->Add(sizer_6_copy_1, 0, wxEXPAND, 0);
     sizer_7_copy_1->Add(label_3_copy_1, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     sizer_7_copy_1->Add(10, 10, 1, 0, 0);
-    sizer_7_copy_1->Add(slide_r_am, 0, wxALL|wxALIGN_RIGHT, 5);
+    sizer_7_copy_1->Add(slide_r_am, 1, wxALL|wxALIGN_RIGHT, 5);
     sizer_4_copy->Add(sizer_7_copy_1, 0, wxEXPAND, 0);
     sizer_4_copy->Add(sizer_8_copy_1, 0, wxEXPAND, 0);
     sizer_3->Add(sizer_4_copy, 0, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
