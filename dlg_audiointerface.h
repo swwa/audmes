@@ -20,6 +20,8 @@
  * Includes
  */
 
+#include "RWAudio_IO.h"
+
 ////@begin includes
 ////@end includes
 
@@ -59,6 +61,9 @@ class AudioInterfaceDialog: public wxDialog
     DECLARE_DYNAMIC_CLASS( AudioInterfaceDialog )
     DECLARE_EVENT_TABLE()
 
+	RWAudioDevList m_DevRecList;
+	RWAudioDevList m_DevPlayList;
+
 public:
     /// Constructors
     AudioInterfaceDialog( );
@@ -91,8 +96,10 @@ public:
 
 ////@begin AudioInterfaceDialog member variables
 ////@end AudioInterfaceDialog member variables
-    void SetDevices( wxArrayString devreclist, wxArrayString devpllist, wxArrayString freqs);
-    void GetSelectedDevs( int * recdev, int * playdev);
+    void SetDevices( RWAudioDevList devreclist, RWAudioDevList devpllist);
+    void GetSelectedDevs( unsigned int * recdev, unsigned int * playdev, unsigned long int * newfreq);
+    void OnChoiceChanged( wxCommandEvent& ev );
+
 };
 
 #endif

@@ -202,15 +202,58 @@ RWAudio::RWAudio( long int oscbufferlen, long int spebufferlen)
 #endif
   } else {
     // everything is ok
+    m_sampleRate = 44100;
+
+    m_genFR_l = m_genFR_r = 0.0;
+    m_genShape_l = m_genShape_r = 0;
+    m_genGain_l = m_genGain_r = 1.0;
+    m_genFI_l = m_genFI_r = 0.0;
+    m_genPhaseDif = 0.0;
+
+    m_OscBufferLen = oscbufferlen;
+    m_SpeBufferLen = spebufferlen;
+    m_Buflen_Changed = 0;
+
+    g_OscBufferPosition = 0;
+    g_SpeBufferPosition = 0;
+    g_OscBuffer_Left = (short *) malloc( m_OscBufferLen* sizeof(short));
+    g_OscBuffer_Right = (short *) malloc( m_OscBufferLen* sizeof(short));
+    g_SpeBuffer_Left = (short *) malloc( m_SpeBufferLen* sizeof(short));
+    g_SpeBuffer_Right = (short *) malloc( m_SpeBufferLen* sizeof(short));
+
+    // start audio streams
+    RestartAudio( m_AudioDriver.getDefaultInputDevice(), m_AudioDriver.getDefaultOutputDevice());
+
+  }
+}
+
+RWAudio::~RWAudio()
+{
+  m_AudioDriver.stopStream();
+  m_AudioDriver.closeStream();
+
+#ifdef _DEBUG
+	fclose(ddbg);
+#endif
+}
+
+
+void RWAudio::RestartAudio( int recDevId, int playDevId)
+{
+    // if stream is open (and running), stop it
+    if (m_AudioDriver.isStreamOpen()) {
+	m_AudioDriver.stopStream();
+	m_AudioDriver.closeStream();
+    }
+
+    //configure new stream
     RtAudio::StreamParameters iParams;
     RtAudio::StreamParameters oParams;
     RtAudio::StreamOptions rtAOptions;
     unsigned int bufferFrames = 512;
 
-    m_sampleRate = 44100;
-
-    iParams.deviceId = m_AudioDriver.getDefaultInputDevice();
-    oParams.deviceId = m_AudioDriver.getDefaultOutputDevice();
+    iParams.deviceId = recDevId;
+    oParams.deviceId = playDevId;
     iParams.nChannels = 2;
     oParams.nChannels = 2;
     iParams.firstChannel = 0;
@@ -234,23 +277,6 @@ RWAudio::RWAudio( long int oscbufferlen, long int spebufferlen)
     }
     m_bufferBytes = bufferFrames * iParams.nChannels * sizeof( short );
 
-    m_genFR_l = m_genFR_r = 0.0;
-    m_genShape_l = m_genShape_r = 0;
-    m_genGain_l = m_genGain_r = 1.0;
-    m_genFI_l = m_genFI_r = 0.0;
-    m_genPhaseDif = 0.0;
-
-    m_OscBufferLen = oscbufferlen;
-    m_SpeBufferLen = spebufferlen;
-    m_Buflen_Changed = 0;
-
-    g_OscBufferPosition = 0;
-    g_SpeBufferPosition = 0;
-    g_OscBuffer_Left = (short *) malloc( m_OscBufferLen* sizeof(short));
-    g_OscBuffer_Right = (short *) malloc( m_OscBufferLen* sizeof(short));
-    g_SpeBuffer_Left = (short *) malloc( m_SpeBufferLen* sizeof(short));
-    g_SpeBuffer_Right = (short *) malloc( m_SpeBufferLen* sizeof(short));
-
     m_AudioDriver.startStream();
 
     m_DrvRunning = 1;
@@ -258,23 +284,14 @@ RWAudio::RWAudio( long int oscbufferlen, long int spebufferlen)
 #ifdef _DEBUG
       fprintf(ddbg,"Driver is running\n");
 #endif
-  }
-}
 
-RWAudio::~RWAudio()
-{
-  m_AudioDriver.stopStream();
-  m_AudioDriver.closeStream();
 
-#ifdef _DEBUG
-	fclose(ddbg);
-#endif
 }
 
 /********************************************************************/
 /*************      Devices enumeration           *******************/
 /********************************************************************/
-int RWAudio::GetRWAudioDevices( RWAudioDevList * play, RWAudioDevList * record, std::vector<unsigned long int> * freqs)
+int RWAudio::GetRWAudioDevices( RWAudioDevList * play, RWAudioDevList * record)
 {
 
   // Determine the number of devices available
@@ -283,11 +300,10 @@ int RWAudio::GetRWAudioDevices( RWAudioDevList * play, RWAudioDevList * record, 
   // Scan through devices for various capabilities
   RtAudio::DeviceInfo info;
 
-  play->card_position.clear();
-  play->card_name.clear();
-  record->card_position.clear();
-  record->card_name.clear();
-  freqs->clear();
+  play->card_info.clear();
+  record->card_info.clear();
+  play->card_pos.clear();
+  record->card_pos.clear();
 
   for ( unsigned int i=0; i<devices; i++ ) {
 
@@ -299,58 +315,17 @@ int RWAudio::GetRWAudioDevices( RWAudioDevList * play, RWAudioDevList * record, 
       // add play card
       if ((info.outputChannels > 1)||(info.duplexChannels > 1)) {
 
-	play->card_position.push_back(i);
-	play->card_name.push_back(info.name);
+	play->card_info.push_back(info);
+	play->card_pos.push_back( i);
 
-	if (i == 0) {
-	  // copy all the frequencies into the table
-	  for (unsigned int j = 0; j < info.sampleRates.size(); j++) {
-	    freqs->push_back( info.sampleRates[j]);
-	  }
-	  
-	} else {
-	  // remove some frequencies not in the devicetable
-	  for (unsigned int j = 0; j < freqs->size(); j++) {
-	    char rem_frequency = 1;
-	    for (unsigned int k = 0; k < info.sampleRates.size(); k++) {
-	      if ((*freqs)[j] == info.sampleRates[k]) {
-		rem_frequency = 0;
-	      }
-	    }
-	    if ( 1 == rem_frequency) {
-	      (*freqs)[j] = 0;
-	    }
-	  }
-	}
       }
 
       // add record card
       if ((info.inputChannels > 1)||(info.duplexChannels > 1)) {
 
-	record->card_position.push_back(i);
-	record->card_name.push_back(info.name);
+	record->card_info.push_back(info);
+	record->card_pos.push_back( i);
 
-	if (i == 0) {
-	  // copy all the frequencies into the table
-	  for (unsigned int j = 0; j < info.sampleRates.size(); j++) {
-	    freqs->push_back( info.sampleRates[j]);
-	  }
-	  
-	} else {
-	  // remove some frequencies not in the devicetable
-	  for (unsigned int j = 0; j < freqs->size(); j++) {
-	    char rem_frequency = 1;
-	    for (unsigned int k = 0; k < info.sampleRates.size(); k++) {
-	      if ((*freqs)[j] == info.sampleRates[k]) {
-		rem_frequency = 0;
-	      }
-	    }
-	    if ( 1 == rem_frequency) {
-	      (*freqs)[j] = 0;
-	    }
-	  }
-	}
- 	
       }
 
     }
@@ -390,16 +365,22 @@ int RWAudio::PlaySetGenerator( float f1, float f2, int s1, int s2, float g1, flo
   return 1;
 }
 
-void RWAudio::SetSndDevices( int irec, int iplay)
+void RWAudio::SetSndDevices( unsigned int irec, unsigned int iplay, unsigned long int freq)
 {
-  if ( -1 == irec) {
-    m_RecSndCard = m_AudioDriver.getDefaultInputDevice();
+    unsigned int cardrec, cardplay;
+
+  if ( 1000 == irec) {
+    cardrec = m_AudioDriver.getDefaultInputDevice();
   } else {
-    m_RecSndCard = irec;
+    cardrec = irec;
   }
-  if (-1 == iplay) {
-    m_PlaySndCard = m_AudioDriver.getDefaultOutputDevice();
+  if ( 1000 == iplay) {
+    cardplay = m_AudioDriver.getDefaultOutputDevice();
   } else {
-    m_PlaySndCard = iplay;
+    cardplay = iplay;
   }
+  m_sampleRate = freq;
+
+  // redefine audio streams
+  RestartAudio( cardrec, cardplay);
 }

@@ -47,6 +47,8 @@ BEGIN_EVENT_TABLE( AudioInterfaceDialog, wxDialog )
 
 ////@begin AudioInterfaceDialog event table entries
 ////@end AudioInterfaceDialog event table entries
+  EVT_CHOICE(ID_OUTDEV_CHO, AudioInterfaceDialog::OnChoiceChanged)
+  EVT_CHOICE(ID_INDEV_CHO, AudioInterfaceDialog::OnChoiceChanged)
 
 END_EVENT_TABLE()
 
@@ -179,9 +181,12 @@ wxIcon AudioInterfaceDialog::GetIconResource( const wxString& name )
 ////@end AudioInterfaceDialog icon retrieval
 }
 
-void AudioInterfaceDialog::SetDevices( wxArrayString devreclist, wxArrayString devpllist, wxArrayString freqs)
+void AudioInterfaceDialog::SetDevices( RWAudioDevList devreclist, RWAudioDevList devpllist)
 {
-  unsigned int i;
+    unsigned int i;
+
+    m_DevRecList = devreclist;
+    m_DevPlayList = devpllist;
 
     wxChoice* p_cho = (wxChoice *) FindWindow( ID_OUTDEV_CHO);
     if(!p_cho) {
@@ -189,8 +194,9 @@ void AudioInterfaceDialog::SetDevices( wxArrayString devreclist, wxArrayString d
     }
     p_cho->Clear();
 
-    for(i = 0; i< devpllist.GetCount(); i++) {
-      p_cho->Append(devpllist[i]);
+    for(i = 0; i< devpllist.card_info.size(); i++) {
+	wxString newstr(devpllist.card_info[i].name.c_str(), wxConvUTF8);
+	p_cho->Append( newstr);
     }
     p_cho->SetSelection(0);
 
@@ -200,8 +206,9 @@ void AudioInterfaceDialog::SetDevices( wxArrayString devreclist, wxArrayString d
     }
     p_cho->Clear();
 
-    for(i = 0; i< devreclist.GetCount(); i++) {
-      p_cho->Append(devreclist[i]);
+    for(i = 0; i< devreclist.card_info.size(); i++) {
+	wxString newstr(devreclist.card_info[i].name.c_str(), wxConvUTF8);
+	p_cho->Append( newstr);
     }
     p_cho->SetSelection(0);
 
@@ -211,26 +218,80 @@ void AudioInterfaceDialog::SetDevices( wxArrayString devreclist, wxArrayString d
     }
     p_cho->Clear();
 
-    for(i = 0; i< freqs.GetCount(); i++) {
-      p_cho->Append(freqs[i]);
-    }
-    p_cho->SetSelection(freqs.GetCount()-1);
+//     for(i = 0; i< freqs.GetCount(); i++) {
+//       p_cho->Append(freqs[i]);
+//     }
+//     p_cho->SetSelection(freqs.GetCount()-1);
 
 
 }
 
-void AudioInterfaceDialog::GetSelectedDevs( int * recdev, int * playdev)
+void AudioInterfaceDialog::GetSelectedDevs( unsigned int * recdev, unsigned int * playdev, unsigned long int * newfreq)
 {
+    wxString strfreq;
+    int seldev;
+
     wxChoice* p_cho = (wxChoice *) FindWindow( ID_OUTDEV_CHO);
     if(!p_cho) {
         return;
     }
-    *playdev = p_cho->GetSelection();
+    seldev = p_cho->GetSelection();
+    *playdev = m_DevPlayList.card_pos[seldev];
 
     p_cho = (wxChoice *) FindWindow( ID_INDEV_CHO);
     if(!p_cho) {
         return;
     }
-    *recdev = p_cho->GetSelection();
+    seldev = p_cho->GetSelection();
+    *recdev = m_DevRecList.card_pos[seldev];
+
+    p_cho = (wxChoice *) FindWindow( ID_FREQ_CHO);
+    if(!p_cho) {
+        return;
+    }
+    strfreq = p_cho->GetString(p_cho->GetSelection());
+    strfreq.ToULong( newfreq);
+
+}
+
+// fill the frequency table
+void AudioInterfaceDialog::OnChoiceChanged( wxCommandEvent& ev )
+{
+    unsigned int pldev, recdev;
+
+    wxChoice* p_cho = (wxChoice *) FindWindow( ID_OUTDEV_CHO);
+    if(!p_cho) {
+        return;
+    }
+    pldev = p_cho->GetSelection();
+
+    p_cho = (wxChoice *) FindWindow( ID_INDEV_CHO);
+    if(!p_cho) {
+        return;
+    }
+    recdev = p_cho->GetSelection();
+
+    // clean the frequency list
+    p_cho = (wxChoice *) FindWindow( ID_FREQ_CHO);
+    if(!p_cho) {
+        return;
+    }
+    p_cho->Clear();
+
+    //std::cout << "\nPred loopou, pldev = " << pldev << " ; recdev = " << recdev ;
+    // compute the new list - find the same values in DevRecList and DevPlayList
+    for (unsigned int i = 0; i < m_DevPlayList.card_info[pldev].sampleRates.size(); i++) {
+	for (unsigned int j = 0; j < m_DevRecList.card_info[recdev].sampleRates.size(); j++) {
+	    unsigned long int srateplay = m_DevPlayList.card_info[pldev].sampleRates[i];
+	    unsigned long int sraterec = m_DevRecList.card_info[recdev].sampleRates[j];
+
+	    if ( srateplay == sraterec ) {
+		p_cho->Append( wxString::Format(wxT("%ld "), srateplay));
+	    }
+	}
+    }
+    if ( p_cho->GetCount() > 0) {
+	p_cho->SetSelection(p_cho->GetCount() -1);
+    }
 
 }

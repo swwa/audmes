@@ -944,39 +944,37 @@ void MainFrame::OnSelectSndCard( wxCommandEvent& ev )
 {
   wxArrayString arrplstr, arrrecstr, freqsstr;
   wxString bla;
-  int recdev, pldev;
-  unsigned int i;
-  RWAudioDevList play;
-  RWAudioDevList record;
-  std::vector<unsigned long int> freqs;
+  unsigned int recdev, pldev;
+  RWAudioDevList playDevList;
+  RWAudioDevList recordDevList;
+  unsigned long int newFrequency;
 
-  m_RWAudio->GetRWAudioDevices( & play, & record, & freqs);
+  m_RWAudio->GetRWAudioDevices( & playDevList, & recordDevList);
 
+//   bla = _T("Devices: ");
+//   for (i = 0; i < play.card_name.size(); i++) {
+//       wxString newstr(play.card_name[i].c_str(), wxConvUTF8);
+//       arrplstr.Add(newstr);
+//   }
 
-  bla = _T("Devices: ");
-  for (i = 0; i < play.card_name.size(); i++) {
-      wxString newstr(play.card_name[i].c_str(), wxConvUTF8);
-      arrplstr.Add(newstr);
-  }
+//   for (i = 0; i < record.card_name.size(); i++) {
+//       wxString newstr(record.card_name[i].c_str(), wxConvUTF8);
+//       arrrecstr.Add(newstr);
+//   }
 
-  for (i = 0; i < record.card_name.size(); i++) {
-      wxString newstr(record.card_name[i].c_str(), wxConvUTF8);
-      arrrecstr.Add(newstr);
-  }
-
-  for (i = 0; i < freqs.size(); i++) {
-    if ( 0 !=  freqs[i]) {
-      freqsstr.Add(wxString::Format(wxT("%ld "),freqs[i]));
-    }
-  }
+//   for (i = 0; i < freqs.size(); i++) {
+//     if ( 0 !=  freqs[i]) {
+//       freqsstr.Add(wxString::Format(wxT("%ld "),freqs[i]));
+//     }
+//   }
 
   AudioInterfaceDialog dlg( this);
 
-  dlg.SetDevices( arrrecstr, arrplstr, freqsstr);
+  dlg.SetDevices( recordDevList, playDevList);
   if (wxID_OK == dlg.ShowModal()) {
     // poslat nastaveni do RW_AUDIO
-    dlg.GetSelectedDevs( &recdev, &pldev);
-    m_RWAudio->SetSndDevices( record.card_position[recdev], play.card_position[pldev]);
+    dlg.GetSelectedDevs( &recdev, &pldev, &newFrequency);
+    m_RWAudio->SetSndDevices( recdev, pldev, newFrequency);
   }
 }
 

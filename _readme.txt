@@ -1,3 +1,8 @@
+2008-08-27
+----------
+- sound card switching works; but problems when using different sound cards
+for input and output
+
 2008-08-26
 ----------
 - changed colors for numbers in scopes

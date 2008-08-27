@@ -51,5 +51,5 @@ $(OBJECTPATH)/RtAudio.o:        audiolib/RtAudio.cpp
 
 
 clean:
-	if [ ! -e $(OBJECTPATH) ] ;then rm -rf $(OBJECTPATH) ; fi
+	if [ -e $(OBJECTPATH) ] ;then rm -rf $(OBJECTPATH) ; fi
 

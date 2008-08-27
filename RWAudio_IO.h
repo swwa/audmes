@@ -10,8 +10,8 @@
 
 struct RWAudioDevList
 {
-  std::vector<int> card_position;
-  std::vector<std::string> card_name;
+    std::vector<RtAudio::DeviceInfo> card_info;
+    std::vector<int> card_pos;
 };
 
 class RWAudio
@@ -20,11 +20,11 @@ public:
 	RWAudio( long int oscbuflen, long int spebuflen);
 	~RWAudio();
 
-	void SetSndDevices( int irec=-1, int iplay=-1);
+	void SetSndDevices( unsigned int irec=1000, unsigned int iplay=1000, unsigned long int freq = 44100);
 
 	void ChangeBufLen( long int oscbuflen, long int spebuflen) { m_OscBufferLen = oscbuflen; m_SpeBufferLen = spebuflen; m_Buflen_Changed = 1; };
 
-	int GetRWAudioDevices( RWAudioDevList * play, RWAudioDevList * record, std::vector<unsigned long int> * freqs);
+	int GetRWAudioDevices( RWAudioDevList * play, RWAudioDevList * record);
 
 	/* parameter settings */
 	int PlaySetGenerator( float, float, int, int, float, float);
@@ -51,12 +51,10 @@ public:
 protected:
 	RtAudio m_AudioDriver;
 
-	int m_RecSndCard;
-	int m_PlaySndCard;
-
-
 	int m_DrvRunning; // is driver properly initialized ?
 	char * m_ErrorMessage;
+
+	void RestartAudio( int recDevId, int playDevId);
 };
 
 
