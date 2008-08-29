@@ -6,6 +6,7 @@
 
 #ifdef __WXMSW__
 #include <windows.h>
+#include <wx/clipbrd.h>
 #endif
 
 #include "fourier.h"
@@ -591,6 +592,21 @@ void MainFrame::OnTimer( wxTimerEvent & ev)
 		imax = i;
 	      }
 	    }
+#ifdef __WXMSW__
+  if (wxTheClipboard->Open()) {
+    wxString listOfData = "Frequency out of range";
+
+    if (( imax > 9) &&( imax+9 < nsampl/2)) {
+      listOfData = "";
+      for (int j = imax-9; j < imax+9; j++) {
+	listOfData += wxString::Format("%.1f\t%f\n", 1.0*j*m_SamplingFreq/nsampl, sqrt(realout[j]*realout[j]+imagout[j]*imagout[j]));
+      }
+    }
+    wxTheClipboard->SetData( new wxTextDataObject(listOfData) );
+    wxTheClipboard->Close();
+  }
+
+#endif
 	    // recompute the frequency
 	    double freq = 1.0*imax*m_SamplingFreq/nsampl;
 	    wxString bla;
