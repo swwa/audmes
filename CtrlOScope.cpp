@@ -142,12 +142,16 @@ void CtrlOScope::PaintAll( wxDC & dc)
             wxMemoryDC* memDC= new wxMemoryDC();
             //clear the memdc with a certain background color
             memDC->SelectObject(*bmpBlit);
+#if defined(__WXMSW__)
             memDC->BeginDrawing();
+#endif
             memDC->Clear();
 
   PaintAllFunction( *memDC, 0, 0);
 
+#if defined(__WXMSW__)
             memDC->EndDrawing();
+#endif
 
             dc.Blit(rec.x,rec.y,rec.width,rec.height,memDC,0,0,wxCOPY);
 
