@@ -1,10 +1,10 @@
 /************************************************************************/
-/*! \class RtError
+/*! \class RtAudioError
     \brief Exception handling class for RtAudio & RtMidi.
 
-    The RtError class is quite simple but it does allow errors to be
-    "caught" by RtError::Type. See the RtAudio and RtMidi
-    documentation to know which methods can throw an RtError.
+    The RtAudioError class is quite simple but it does allow errors to be
+    "caught" by RtAudioError::Type. See the RtAudio and RtMidi
+    documentation to know which methods can throw an RtAudioError.
 
 */
 /************************************************************************/
@@ -16,10 +16,10 @@
 #include <iostream>
 #include <string>
 
-class RtError : public std::exception
+class RtAudioError : public std::exception
 {
  public:
-  //! Defined RtError types.
+  //! Defined RtAudioError types.
   enum Type {
     WARNING,           /*!< A non-critical error. */
     DEBUG_WARNING,     /*!< A non-critical error which might be useful for debugging. */
@@ -35,10 +35,10 @@ class RtError : public std::exception
   };
 
   //! The constructor.
-  RtError( const std::string& message, Type type = RtError::UNSPECIFIED ) throw() : message_(message), type_(type) {}
+  RtAudioError( const std::string& message, Type type = RtAudioError::UNSPECIFIED ) throw() : message_(message), type_(type) {}
  
   //! The destructor.
-  virtual ~RtError( void ) throw() {}
+  virtual ~RtAudioError( void ) throw() {}
 
   //! Prints thrown error message to stderr.
   virtual void printMessage( void ) throw() { std::cerr << '\n' << message_ << "\n\n"; }

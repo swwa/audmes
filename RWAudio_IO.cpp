@@ -267,7 +267,7 @@ void RWAudio::RestartAudio( int recDevId, int playDevId)
 #endif
       m_AudioDriver.openStream( &oParams, &iParams, RTAUDIO_SINT16, m_sampleRate, &bufferFrames, &inout, (void *)this);//, &rtAOptions );
     }
-    catch ( RtError& e ) {
+    catch ( RtAudioError& e ) {
       //std::cout << '\n' << e.getMessage() << '\n' << std::endl;
 #ifdef _DEBUG
       fprintf(ddbg,"Driver error: %s\n", e.getMessage().c_str());

@@ -332,7 +332,7 @@ class RtAudio
   /*!
 
     Any device integer between 0 and getDeviceCount() - 1 is valid.
-    If an invalid argument is provided, an RtError (type = INVALID_USE)
+    If an invalid argument is provided, an RtAudioError (type = INVALID_USE)
     will be thrown.  If a device is busy or otherwise unavailable, the
     structure member "probed" will have a value of "false" and all
     other members are undefined.  If the specified device is the
@@ -363,9 +363,9 @@ class RtAudio
 
   //! A public function for opening a stream with the specified parameters.
   /*!
-    An RtError (type = SYSTEM_ERROR) is thrown if a stream cannot be
+    An RtAudioError (type = SYSTEM_ERROR) is thrown if a stream cannot be
     opened with the specified parameters or an error occurs during
-    processing.  An RtError (type = INVALID_USE) is thrown if any
+    processing.  An RtAudioError (type = INVALID_USE) is thrown if any
     invalid device ID or channel number parameters are specified.
 
     \param outputParameters Specifies output stream parameters to use
@@ -414,8 +414,8 @@ class RtAudio
 
   //! A function that starts a stream.
   /*!
-    An RtError (type = SYSTEM_ERROR) is thrown if an error occurs
-    during processing.  An RtError (type = INVALID_USE) is thrown if a
+    An RtAudioError (type = SYSTEM_ERROR) is thrown if an error occurs
+    during processing.  An RtAudioError (type = INVALID_USE) is thrown if a
     stream is not open.  A warning is issued if the stream is already
     running.
   */
@@ -423,8 +423,8 @@ class RtAudio
 
   //! Stop a stream, allowing any samples remaining in the output queue to be played.
   /*!
-    An RtError (type = SYSTEM_ERROR) is thrown if an error occurs
-    during processing.  An RtError (type = INVALID_USE) is thrown if a
+    An RtAudioError (type = SYSTEM_ERROR) is thrown if an error occurs
+    during processing.  An RtAudioError (type = INVALID_USE) is thrown if a
     stream is not open.  A warning is issued if the stream is already
     stopped.
   */
@@ -432,8 +432,8 @@ class RtAudio
 
   //! Stop a stream, discarding any samples remaining in the input/output queue.
   /*!
-    An RtError (type = SYSTEM_ERROR) is thrown if an error occurs
-    during processing.  An RtError (type = INVALID_USE) is thrown if a
+    An RtAudioError (type = SYSTEM_ERROR) is thrown if an error occurs
+    during processing.  An RtAudioError (type = INVALID_USE) is thrown if a
     stream is not open.  A warning is issued if the stream is already
     stopped.
   */
@@ -447,7 +447,7 @@ class RtAudio
 
   //! Returns the number of elapsed seconds since the stream was started.
   /*!
-    If a stream is not open, an RtError (type = INVALID_USE) will be thrown.
+    If a stream is not open, an RtAudioError (type = INVALID_USE) will be thrown.
   */
   double getStreamTime( void );
 
@@ -457,7 +457,7 @@ class RtAudio
     caused by internal buffering by the audio system and/or hardware.
     For duplex streams, the returned value will represent the sum of
     the input and output latencies.  If a stream is not open, an
-    RtError (type = INVALID_USE) will be thrown.  If the API does not
+    RtAudioError (type = INVALID_USE) will be thrown.  If the API does not
     report latency, the return value will be zero.
   */
   long getStreamLatency( void );
@@ -649,13 +649,13 @@ protected:
   void clearStreamInfo();
 
   /*!
-    Protected common method that throws an RtError (type =
+    Protected common method that throws an RtAudioError (type =
     INVALID_USE) if a stream is not open.
   */
   void verifyStream( void );
 
   //! Protected common error method to allow global control over error handling.
-  void error( RtError::Type type );
+  void error( RtAudioError::Type type );
 
   /*!
     Protected method used to perform format, channel number, and/or interleaving
@@ -915,7 +915,7 @@ class RtApiDummy: public RtApi
 {
 public:
 
-  RtApiDummy() { errorText_ = "RtApiDummy: This class provides no functionality."; error( RtError::WARNING ); };
+  RtApiDummy() { errorText_ = "RtApiDummy: This class provides no functionality."; error( RtAudioError::WARNING ); };
   RtAudio::Api getCurrentApi( void ) { return RtAudio::RTAUDIO_DUMMY; };
   unsigned int getDeviceCount( void ) { return 0; };
   RtAudio::DeviceInfo getDeviceInfo( unsigned int device ) { RtAudio::DeviceInfo info; return info; };
