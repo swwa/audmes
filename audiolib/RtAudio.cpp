@@ -4820,6 +4820,7 @@ static char* getErrorString( int code )
 #if defined(__LINUX_ALSA__)
 
 #include <alsa/asoundlib.h>
+#include <limits.h>
 #include <unistd.h>
 
 // A structure to hold various information related to the ALSA API
