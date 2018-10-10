@@ -7,7 +7,7 @@ INCLUDE = ..
 OBJECTPATH = Release
 vpath %.o $(OBJECTPATH)
 
-OBJECTS=$(OBJECTPATH)/_AudMeS.o $(OBJECTPATH)/dlg_audiointerface.o $(OBJECTPATH)/RWAudio.o $(OBJECTPATH)/RtAudio.o $(OBJECTPATH)/CtrlOScope.o $(OBJECTPATH)/fourier.o  audiolib/libdsound.a
+OBJECTS=$(OBJECTPATH)/_AudMeS.o $(OBJECTPATH)/dlg_audiointerface.o $(OBJECTPATH)/RWAudio.o $(OBJECTPATH)/RtAudio.o $(OBJECTPATH)/CtrlOScope.o $(OBJECTPATH)/fourier.o
 
 CXX      = c++
 DEFS     =
