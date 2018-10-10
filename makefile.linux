@@ -7,15 +7,27 @@ INCLUDE = ..
 OBJECTPATH = Release
 vpath %.o $(OBJECTPATH)
 
-OBJECTS=$(OBJECTPATH)/_AudMeS.o $(OBJECTPATH)/dlg_audiointerface.o $(OBJECTPATH)/RWAudio.o $(OBJECTPATH)/RtAudio.o $(OBJECTPATH)/CtrlOScope.o $(OBJECTPATH)/fourier.o
+OBJECTS=\
+	$(OBJECTPATH)/_AudMeS.o \
+	$(OBJECTPATH)/dlg_audiointerface.o \
+	$(OBJECTPATH)/RWAudio.o \
+	$(OBJECTPATH)/CtrlOScope.o \
+	$(OBJECTPATH)/fourier.o
 
 CXX      = c++
 DEFS     =
-DEFS    += -D__LINUX_ALSA__ -D__LINUX__ -D__CPP__
-CFLAGS   = -g -O2 -DHAVE_GETTIMEOFDAY -O2
+CFLAGS   = -g -O2 
 CFLAGS  += -Wall -Wextra -I$(INCLUDE) -I../include
-LIBRARY  = -lpthread -lasound
 LIBRARY +=
+
+# Enable this and disable embedded block below to use system provided rtaudio 
+#LIBRARY  = -lrtaudio
+
+# Embedded block
+CFLAGS  += -DEMBED_RTAUDIO
+DEFS    += -D__LINUX_ALSA__ -D__LINUX__ -D__CPP__ -DHAVE_GETTIMEOFDAY 
+OBJECTS += $(OBJECTPATH)/RtAudio.o
+LIBRARY += -lasound -lpthread
 
 HEADERS = `wx-config --cxxflags`
 LIBS = `wx-config --libs`

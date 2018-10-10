@@ -21,6 +21,7 @@ RESCOMP=windres.exe
 OUTPUTPATH=ReleaseMSW
 OBJECTPATH=ReleaseMSW
 CPPFLAGS= -fno-rtti -fno-pcc-struct-return -fstrict-aliasing -Wall -D__WXMSW__ -D__GNUWIN32__ -D__WIN95__
+CPPFLAGS  += -DEMBED_RTAUDIO
 WARNINGFLAGS=-Wall
 OPTFLAGS=-O2
 DEBUGFLAGS=
