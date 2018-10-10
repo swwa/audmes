@@ -13,7 +13,7 @@ CC       = g++
 DEFS     =
 DEFS    += -D__LINUX_ALSA__ -D__LINUX__ -D__CPP__
 CFLAGS   = -g -O2 -DHAVE_GETTIMEOFDAY -O2
-CFLAGS  += -Wall -I$(INCLUDE) -I../include
+CFLAGS  += -Wall -Wextra -I$(INCLUDE) -I../include
 LIBRARY  = -lpthread -lasound
 LIBRARY +=
 
