@@ -118,7 +118,7 @@ double Index_to_frequency ( unsigned NumSamples, unsigned Index )
 
 #define CHECKPOINTERDOUBLE(p)  if (CheckPointerDouble(p,#p) == 0) return 0;
 
-static int CheckPointerDouble ( void *p, char *name )
+static int CheckPointerDouble ( void *p, const char *name )
 {
     if ( p == NULL )
     {
@@ -265,7 +265,7 @@ int fft_double (
 
 #define CHECKPOINTERFLOAT(p)  if (CheckPointerFloat(p,#p) == 0) return 0;
 
-static int CheckPointerFloat ( void *p, char *name )
+static int CheckPointerFloat ( void *p, const char *name )
 {
     if ( p == NULL )
     {
