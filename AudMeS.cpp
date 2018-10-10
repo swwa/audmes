@@ -721,7 +721,7 @@ void MainFrame::OnTimer( wxTimerEvent & ev)
 	free (imagout);
       }
       /* a tady frekvencni analyzer */
-      if (button_frm_start->GetValue()) {
+      if (button_frm_start->GetValue() && 0 < m_frm_freqs.GetCount() ) {
 	wxArrayDouble ardbl;
 
 	/* udelat linearni prolozeni bodu pro kazdy 1 Hz */
