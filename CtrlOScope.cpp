@@ -18,7 +18,6 @@
 
 #include <math.h>
 #include <wx/arrimpl.cpp> // this is a magic incantation which must be done!
-WX_DEFINE_OBJARRAY( wxArrayDouble);
 
 /////////////////////////////////////////////////////////////////////////////
 // CtrlOScope

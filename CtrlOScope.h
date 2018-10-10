@@ -7,7 +7,6 @@
 #include <wx/wx.h>
 #include <wx/dynarray.h>
 
-WX_DECLARE_OBJARRAY( double, wxArrayDouble);
 
 
 class CtrlOScope : public wxControl
