@@ -31,7 +31,6 @@ public:
 	void PlaySetPhaseDiff( float i_fi) { m_genPhaseDif = i_fi; m_genFI_r = m_genFI_l; };
 
 	int GetRunningStatus( void) { return m_DrvRunning; };
-	char * GetErrorMessage( void) { return m_ErrorMessage; };
 
 	// stuff for callback function
 	unsigned int m_bufferBytes;
@@ -52,7 +51,6 @@ protected:
 	RtAudio m_AudioDriver;
 
 	int m_DrvRunning; // is driver properly initialized ?
-	char * m_ErrorMessage;
 
 	void RestartAudio( int recDevId, int playDevId);
 };
