@@ -1,3 +1,8 @@
+2018-??-??
+- Updated code to compile with current compilers on Linux.
+- Updated code to compile with recent versions of rtaudio and
+  wxWidgets.
+
 2008-08-27
 ----------
 - sound card switching works; but problems when using different sound cards
