@@ -15,8 +15,6 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
-#define PI            3.14159265358979
-
 #ifdef _DEBUG
 FILE * ddbg;
 #endif
@@ -117,7 +115,7 @@ int inout( void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
     switch( aRWAudioClass->m_genShape_l)
       {
       case 1:
-	if ( aRWAudioClass->m_genFI_l < PI)
+	if ( aRWAudioClass->m_genFI_l < M_PI)
 	  {
 	    y = 1.0* aRWAudioClass->m_genGain_l;
 	  } else {
@@ -125,14 +123,14 @@ int inout( void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
 	  }
 	break;
       case 2:
-	y  = aRWAudioClass->m_genGain_l * (aRWAudioClass->m_genFI_l - PI)/PI;
+	y  = aRWAudioClass->m_genGain_l * (aRWAudioClass->m_genFI_l - M_PI)/M_PI;
 	break;
       case 3:
-	if ( aRWAudioClass->m_genFI_l < PI)
+	if ( aRWAudioClass->m_genFI_l < M_PI)
 	  {
-	    y = aRWAudioClass->m_genGain_l * 2 * (aRWAudioClass->m_genFI_l - PI/2)/PI;
+	    y = aRWAudioClass->m_genGain_l * 2 * (aRWAudioClass->m_genFI_l - M_PI/2)/M_PI;
 	  } else {
-	    y = aRWAudioClass->m_genGain_l * 2*(3*PI/2 - aRWAudioClass->m_genFI_l)/PI;
+	    y = aRWAudioClass->m_genGain_l * 2*(3*M_PI/2 - aRWAudioClass->m_genFI_l)/M_PI;
 	  }
 	break;
       default: /* sine wave */
@@ -143,7 +141,7 @@ int inout( void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
     switch( aRWAudioClass->m_genShape_r)
       {
       case 1:
-	if ( (aRWAudioClass->m_genFI_r - aRWAudioClass->m_genPhaseDif) < PI)
+	if ( (aRWAudioClass->m_genFI_r - aRWAudioClass->m_genPhaseDif) < M_PI)
 	  {
 	    y2 = aRWAudioClass->m_genGain_r;
 	  } else {
@@ -151,14 +149,14 @@ int inout( void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
 	  }
 	break;
       case 2:
-	y2 = aRWAudioClass->m_genGain_r * ((aRWAudioClass->m_genFI_r - aRWAudioClass->m_genPhaseDif)-PI)/PI;
+	y2 = aRWAudioClass->m_genGain_r * ((aRWAudioClass->m_genFI_r - aRWAudioClass->m_genPhaseDif)-M_PI)/M_PI;
 	break;
       case 3:
-	if ( aRWAudioClass->m_genFI_l < PI)
+	if ( aRWAudioClass->m_genFI_l < M_PI)
 	  {
-	    y2 = aRWAudioClass->m_genGain_r * 2 * (aRWAudioClass->m_genFI_r - aRWAudioClass->m_genPhaseDif - PI/2)/PI;
+	    y2 = aRWAudioClass->m_genGain_r * 2 * (aRWAudioClass->m_genFI_r - aRWAudioClass->m_genPhaseDif - M_PI/2)/M_PI;
 	  } else {
-	    y2 = aRWAudioClass->m_genGain_r * 2*(3*PI/2 - aRWAudioClass->m_genFI_r + aRWAudioClass->m_genPhaseDif)/PI;
+	    y2 = aRWAudioClass->m_genGain_r * 2*(3*M_PI/2 - aRWAudioClass->m_genFI_r + aRWAudioClass->m_genPhaseDif)/M_PI;
 	  }
 	break;
       default: /* sine wave */
@@ -167,11 +165,11 @@ int inout( void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
       }
     /* konec obalu */
 
-    aRWAudioClass->m_genFI_l += (float) 2.0 * PI * aRWAudioClass->m_genFR_l/aRWAudioClass->m_sampleRate;
-    aRWAudioClass->m_genFI_r += (float) 2.0 * PI * aRWAudioClass->m_genFR_r/aRWAudioClass->m_sampleRate;
+    aRWAudioClass->m_genFI_l += (float) 2.0 * M_PI * aRWAudioClass->m_genFR_l/aRWAudioClass->m_sampleRate;
+    aRWAudioClass->m_genFI_r += (float) 2.0 * M_PI * aRWAudioClass->m_genFR_r/aRWAudioClass->m_sampleRate;
 
-    if ( (2.0*PI) < aRWAudioClass->m_genFI_l) aRWAudioClass->m_genFI_l -= 2.0*PI;
-    if ( (2.0*PI) < aRWAudioClass->m_genFI_r) aRWAudioClass->m_genFI_r -= 2.0*PI;
+    if ( (2.0*M_PI) < aRWAudioClass->m_genFI_l) aRWAudioClass->m_genFI_l -= 2.0*M_PI;
+    if ( (2.0*M_PI) < aRWAudioClass->m_genFI_r) aRWAudioClass->m_genFI_r -= 2.0*M_PI;
 
       *outBuf++ = (short)(32768.f * y);
       *outBuf++ = (short)(32768.f * y2);
