@@ -445,7 +445,8 @@ void MainFrame::set_custom_props()
 void MainFrame::OnAboutClick( wxCommandEvent& event )
 {
   wxString s;
-  s << wxT("Tiny audio laboratory version ") wxT(AUDMES_VERSION_STRING) wxT("\nVaclav Peroutka - vaclavpe@seznam.cz\n\n");
+  s << wxT("Tiny audio laboratory version ") wxT(AUDMES_VERSION_STRING) wxT("\nVaclav Peroutka - vaclavpe@seznam.cz\n\n")
+    << wxT("Project page: https://sourceforge.net/projects/audmes/\n\n");
 
   wxMessageBox( s, _T("About application"),wxICON_INFORMATION | wxOK ); 
 }

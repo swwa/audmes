@@ -86,6 +86,8 @@ Audio Laboratory v0.1 alpha
 
 email: vaclavpe@seznam.cz
 
+Project page: https://sourceforge.net/projects/audmes/
+
 Today is: 2006-04-19
 
 What works:
