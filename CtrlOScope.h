@@ -20,7 +20,7 @@ public:
 	void OnSize(wxSizeEvent& evt);
 	void PaintAll( wxDC & dc);
 	void PaintAllFunction( wxDC & dc, int rectX, int rectY);
-	void OnEraseBackground( wxEraseEvent& event ) { };
+	void OnEraseBackground( wxEraseEvent& WXUNUSED(event) ) { };
 
 	void AppendPoints(double dNewPoint[], int iTrack = 0);
 	//	void SetRange(double dLower, double dUpper, int iTrack = 0, int logrange = false);

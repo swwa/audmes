@@ -60,7 +60,7 @@ int g_OscBufferChanged;
 int g_SpeBufferChanged;
 
 ///////////////////////////////////////////////////////////////////////
-MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPoint& pos, const wxSize& size, long style):
+MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPoint& pos, const wxSize& size, long WXUNUSED(style)):
     wxFrame(parent, id, title, pos, size, wxDEFAULT_FRAME_STYLE|wxFULL_REPAINT_ON_RESIZE)
 {
     // begin wxGlade: MainFrame::MainFrame
@@ -442,7 +442,7 @@ void MainFrame::set_custom_props()
 
 }
 
-void MainFrame::OnAboutClick( wxCommandEvent& event )
+void MainFrame::OnAboutClick( wxCommandEvent& WXUNUSED(event) )
 {
   wxString s;
   s << wxT("Tiny audio laboratory version ") wxT(AUDMES_VERSION_STRING) wxT("\nVaclav Peroutka - vaclavpe@seznam.cz\n\n")
@@ -451,27 +451,27 @@ void MainFrame::OnAboutClick( wxCommandEvent& event )
   wxMessageBox( s, _T("About application"),wxICON_INFORMATION | wxOK ); 
 }
 
-void MainFrame::OnExitClick( wxCommandEvent& event )
+void MainFrame::OnExitClick( wxCommandEvent& WXUNUSED(event) )
 {
   Close();
 }
 
-void MainFrame::OnOpenClick( wxCommandEvent& event )
+void MainFrame::OnOpenClick( wxCommandEvent& WXUNUSED(event) )
 {
 wxMessageBox( wxT("Not yet implemented"), _T("About application"),wxICON_INFORMATION | wxOK );
 }
 
-void MainFrame::OnSaveClick( wxCommandEvent& event )
+void MainFrame::OnSaveClick( wxCommandEvent& WXUNUSED(event) )
 {
 wxMessageBox( wxT("Not yet implemented"), _T("About application"),wxICON_INFORMATION | wxOK );
 }
 
-void MainFrame::OnSaveAsClick( wxCommandEvent& event )
+void MainFrame::OnSaveAsClick( wxCommandEvent& WXUNUSED(event) )
 {
 wxMessageBox( wxT("Not yet implemented"), _T("About application"),wxICON_INFORMATION | wxOK );
 }
 
-void MainFrame::OnAutoCalClick( wxCommandEvent& event )
+void MainFrame::OnAutoCalClick( wxCommandEvent& WXUNUSED(event) )
 {
  if ( button_osc_start->GetValue()) {
    short minValueL= 32767;
@@ -503,7 +503,7 @@ void MainFrame::OnAutoCalClick( wxCommandEvent& event )
    
 }
 
-void MainFrame::OnTimer( wxTimerEvent & ev)
+void MainFrame::OnTimer( wxTimerEvent & WXUNUSED(ev))
 {
   double tmpval;
 
@@ -757,7 +757,7 @@ void MainFrame::OnTimer( wxTimerEvent & ev)
     //wxMessageBox( _T("Idle event caught"), _T("About application"),wxICON_INFORMATION | wxOK ); 
 }
   
-void MainFrame::OnOscXScaleChanged( wxCommandEvent& ev )
+void MainFrame::OnOscXScaleChanged( wxCommandEvent& WXUNUSED(ev) )
 {
   double sweep_div;
   choice_osc_l_swp_copy->GetString(choice_osc_l_swp_copy->GetCurrentSelection()).ToDouble( &sweep_div);
@@ -775,7 +775,7 @@ void MainFrame::OnOscXScaleChanged( wxCommandEvent& ev )
 
 }
  
-void MainFrame::OnSpanStart( wxCommandEvent& ev )
+void MainFrame::OnSpanStart( wxCommandEvent& WXUNUSED(ev) )
 {
   //  int buf[4096];
 
@@ -787,7 +787,7 @@ void MainFrame::OnSpanStart( wxCommandEvent& ev )
 
 }
 
-void MainFrame::OnGenStart( wxCommandEvent& ev )
+void MainFrame::OnGenStart( wxCommandEvent& WXUNUSED(ev) )
 {
 
   if (button_gen_start->GetValue()) {
@@ -799,7 +799,7 @@ void MainFrame::OnGenStart( wxCommandEvent& ev )
 
 }
 
-void MainFrame::OnOscStart( wxCommandEvent& ev )
+void MainFrame::OnOscStart( wxCommandEvent& WXUNUSED(ev) )
 {
   if (button_osc_start->GetValue()) {
     button_osc_start->SetLabel(_T("Stop"));
@@ -808,7 +808,7 @@ void MainFrame::OnOscStart( wxCommandEvent& ev )
   }
 }
 
-void MainFrame::OnFrmStart( wxCommandEvent& ev )
+void MainFrame::OnFrmStart( wxCommandEvent& WXUNUSED(ev) )
 {
   long ipoints;
 
@@ -864,7 +864,7 @@ void MainFrame::OnFrmStart( wxCommandEvent& ev )
 }
 
 
-void MainFrame::OnGeneratorChanged( wxCommandEvent& ev )
+void MainFrame::OnGeneratorChanged( wxCommandEvent& WXUNUSED(ev) )
 {
   if( checkbox_gen_sync->IsChecked()){
     slide_r_fr->Enable( false);
@@ -879,11 +879,11 @@ void MainFrame::OnGeneratorChanged( wxCommandEvent& ev )
   }
 }
 
-void MainFrame::OnOscChoiceChanged( wxCommandEvent& ev )
+void MainFrame::OnOscChoiceChanged( wxCommandEvent& WXUNUSED(ev) )
 {
 }
 
-void MainFrame::OnGenScrollLChanged( wxScrollEvent& ev )
+void MainFrame::OnGenScrollLChanged( wxScrollEvent& WXUNUSED(ev) )
 {
   wxString bla;
 
@@ -894,7 +894,7 @@ void MainFrame::OnGenScrollLChanged( wxScrollEvent& ev )
   }
 }
 
-void MainFrame::OnGenScrollRChanged( wxScrollEvent& ev )
+void MainFrame::OnGenScrollRChanged( wxScrollEvent& WXUNUSED(ev) )
 {
   wxString bla;
 
@@ -905,7 +905,7 @@ void MainFrame::OnGenScrollRChanged( wxScrollEvent& ev )
   }
 }
 
-void MainFrame::OnGenScrollChanged( wxScrollEvent& ev )
+void MainFrame::OnGenScrollChanged( wxScrollEvent& WXUNUSED(ev) )
 {
   wxString bla;
 
@@ -957,7 +957,7 @@ void MainFrame::SendGenSettings( )
 }
 
 
-void MainFrame::OnSelectSndCard( wxCommandEvent& ev )
+void MainFrame::OnSelectSndCard( wxCommandEvent& WXUNUSED(ev) )
 {
   wxArrayString arrplstr, arrrecstr, freqsstr;
   wxString bla;
@@ -995,14 +995,14 @@ void MainFrame::OnSelectSndCard( wxCommandEvent& ev )
   }
 }
 
-void MainFrame::OnTxtFreqLChanged( wxCommandEvent& ev )
+void MainFrame::OnTxtFreqLChanged( wxCommandEvent& WXUNUSED(ev) )
 {
   if (button_gen_start->GetValue()) {
     SendGenSettings();
   }
 }
 
-void MainFrame::OnTxtFreqRChanged( wxCommandEvent& ev )
+void MainFrame::OnTxtFreqRChanged( wxCommandEvent& WXUNUSED(ev) )
 {
   if (button_gen_start->GetValue()) {
     SendGenSettings();
