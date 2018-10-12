@@ -120,6 +120,10 @@ SA:
 - add filtering windows - is it necessary ??
 - changeable FFT length
 
-Freq Response:
+Frequency Response:
 - finish input peak value measurement
 - add trace selector
+- support load/save measurements, for example as XML/CVS/JSON/IEC
+  60076-18 1.0/MLSSA/FRD File Format.
+- save pictures of measurement graph
+- measure frequencies 10k-20k
