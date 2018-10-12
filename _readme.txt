@@ -112,7 +112,7 @@ Oscilloscope:
 - changeable length of buffer - problem with "slower" Xscale
 - peak-to-peak measurement
 
-SA:
+Spectrum Analyzer:
 - better Y-scaling of spectrum analyzer
 - averaging in spectrum analyzer
 - add switch between CH1 and CH2 ( left/right)
