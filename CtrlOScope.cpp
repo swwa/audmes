@@ -76,39 +76,39 @@ void CtrlOScope::SetXRange(double dLower, double dUpper, int logrange)
   m_LogX = logrange;
 }  // SetRange
 
-void CtrlOScope::SetYRange(double dLower, double dUpper, int logrange, int itrack)
+void CtrlOScope::SetYRange(double dLower, double dUpper, int logrange, int WXUNUSED(itrack))
 {
   m_MinYValue = dLower;
   m_MaxYValue = dUpper;
   m_LogY = logrange;
 }  // SetRange
 
-void CtrlOScope::SetXUnits(wxString string, wxString XMin, wxString XMax )
+void CtrlOScope::SetXUnits(wxString WXUNUSED(string), wxString WXUNUSED(XMin), wxString WXUNUSED(XMax) )
 {
 }  // SetXUnits
 
-void CtrlOScope::SetYUnits(wxString string, wxString YMin, wxString YMax )
+void CtrlOScope::SetYUnits(wxString WXUNUSED(string), wxString WXUNUSED(YMin), wxString WXUNUSED(YMax) )
 {
 }  // SetYUnits
 
 /////////////////////////////////////////////////////////////////////////////
-void CtrlOScope::SetGridColor(wxColour color)
+void CtrlOScope::SetGridColor(wxColour WXUNUSED(color))
 {
 }  // SetGridColor
 
 
 /////////////////////////////////////////////////////////////////////////////
-void CtrlOScope::SetPlotColor(wxColour color, int iTrack)
+void CtrlOScope::SetPlotColor(wxColour WXUNUSED(color), int WXUNUSED(iTrack))
 {
 }  // SetPlotColor
 
 /////////////////////////////////////////////////////////////////////////////
-void CtrlOScope::SetBackgroundColor(wxColour color)
+void CtrlOScope::SetBackgroundColor(wxColour WXUNUSED(color))
 {
 }  // SetBackgroundColor
 
 /////////////////////////////////////////////////////////////////////////////
-void CtrlOScope::AppendPoints(double dNewPoint[], int iTrack )
+void CtrlOScope::AppendPoints(double WXUNUSED(dNewPoint)[], int WXUNUSED(iTrack) )
 {
 } // AppendPoints
  
@@ -126,7 +126,7 @@ wxSize CtrlOScope::DoGetBestSize( void) const
 
 
 ////////////////////////////////////////////////////////////////////////////
-void CtrlOScope::OnPaint(wxPaintEvent& evt) 
+void CtrlOScope::OnPaint(wxPaintEvent& WXUNUSED(evt)) 
 {
 	wxPaintDC dc(this) ;  // device context for painting
 	PaintAll( dc);

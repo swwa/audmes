@@ -6,6 +6,7 @@
 #include "RWAudio_IO.h"
 #include <stdio.h>
 #include <math.h>
+#include <wx/defs.h> // for WXUNUSED
 
 //#define _DEBUG
 
@@ -35,7 +36,8 @@ extern int g_SpeBufferChanged;
 // Callback functions
 //////////////////////////////////////////////////////////////////////
 int inout( void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
-		   double streamTime, RtAudioStreamStatus status, void *data )
+	   double WXUNUSED(streamTime), RtAudioStreamStatus WXUNUSED(status),
+	   void *data )
 {
 #ifdef _DEBUG
       fprintf(ddbg,"Jsme tady ");

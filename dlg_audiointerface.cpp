@@ -255,7 +255,7 @@ void AudioInterfaceDialog::GetSelectedDevs( unsigned int * recdev, unsigned int 
 }
 
 // fill the frequency table
-void AudioInterfaceDialog::OnChoiceChanged( wxCommandEvent& ev )
+void AudioInterfaceDialog::OnChoiceChanged( wxCommandEvent& WXUNUSED(ev) )
 {
     unsigned int pldev, recdev;
 
