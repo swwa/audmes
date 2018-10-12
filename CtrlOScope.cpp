@@ -292,7 +292,6 @@ void CtrlOScope::PaintAllFunction( wxDC & dc, int rectX, int rectY)
 	// find the position in the m_points[] array
 	unsigned long int xposit = (unsigned long int)((xfreq/m_MaxXValue)*m_points.GetCount());
 
-	if ( xposit < 0) { xposit = 0; }
 	if ( xposit < m_points.GetCount() ) { 
 
 	  float ydatapoint = m_points[xposit];
@@ -319,7 +318,6 @@ void CtrlOScope::PaintAllFunction( wxDC & dc, int rectX, int rectY)
 	// find the position in the m_points[] array
 	unsigned long int xposit = (unsigned long int)((xfreq/m_MaxXValue)*m_points2.GetCount());
 
-	if ( xposit < 0) { xposit = 0; }
 	if ( xposit < m_points2.GetCount() ) { 
 
 	  float ydatapoint = m_points2[xposit];
