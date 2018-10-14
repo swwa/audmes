@@ -32,9 +32,9 @@ public:
 	CtrlOScope( wxWindow* parent, wxString xname = _T("X"), wxString yname = _T("Y"), int tracks = 1);
 
 	virtual ~CtrlOScope();
-	//void OnTimer(wxTimerEvent& evt);
-	void OnPaint(wxPaintEvent& evt);
-	void OnSize(wxSizeEvent& evt);
+	//void OnTimer(wxTimerEvent& event);
+	void OnPaint(wxPaintEvent& event);
+	void OnSize(wxSizeEvent& event);
 	void PaintAll( wxDC & dc);
 	void PaintAllFunction( wxDC & dc, int rectX, int rectY);
 	void OnEraseBackground( wxEraseEvent& WXUNUSED(event) ) { };

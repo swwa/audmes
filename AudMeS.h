@@ -50,28 +50,30 @@ private:
     void do_layout();
     // end wxGlade
 
-  void OnSpanStart( wxCommandEvent & ev);
-  void OnGenStart( wxCommandEvent & ev);
-  void OnOscStart( wxCommandEvent & ev);
-  void OnFrmStart( wxCommandEvent& ev );
-  void OnAboutClick( wxCommandEvent& event );
-  void OnExitClick( wxCommandEvent& event );
-  void OnSoundInput( wxEvent & ev);
-  void OnTimer( wxTimerEvent & ev);
-  void OnGeneratorChanged( wxCommandEvent& ev );
-  void OnGenScrollChanged( wxScrollEvent& ev );
-  void OnGenScrollLChanged( wxScrollEvent& ev );
-  void OnGenScrollRChanged( wxScrollEvent& ev );
-  void OnOscChoiceChanged( wxCommandEvent& ev );
+  void OnSpanStart(wxCommandEvent & event);
+  void OnGenStart(wxCommandEvent & event);
+  void OnOscStart(wxCommandEvent & event);
+  void OnFrmStart(wxCommandEvent& event);
+  void OnAboutClick(wxCommandEvent& event);
+  void OnExitClick(wxCommandEvent& event);
+  void OnSoundInput(wxEvent & event);
+  void OnTimer(wxTimerEvent & event);
+  void OnGeneratorChanged(wxCommandEvent& event);
+  void OnGenScrollChanged(wxScrollEvent& event);
+  void OnGenScrollLChanged(wxScrollEvent& event);
+  void OnGenScrollRChanged(wxScrollEvent& event);
+  void OnOscChoiceChanged(wxCommandEvent& event);
   void SendGenSettings( void );
-  void OnSelectSndCard( wxCommandEvent& event);
+  void OnSelectSndCard(wxCommandEvent& event);
   void OnTxtFreqLChanged(wxCommandEvent& event);
   void OnTxtFreqRChanged(wxCommandEvent& event);
-  void OnOpenClick( wxCommandEvent& event );
-  void OnSaveClick( wxCommandEvent& event );
-  void OnSaveAsClick( wxCommandEvent& event );
-  void OnAutoCalClick( wxCommandEvent& event );
-  void OnOscXScaleChanged( wxCommandEvent& ev );
+  void OnOpenClick(wxCommandEvent& event);
+  void OnSaveClick(wxCommandEvent& event);
+  void OnSaveAsClick(wxCommandEvent& event);
+  void OnLoadFRD(wxCommandEvent& event);
+  void OnSaveFRD(wxCommandEvent& event);
+  void OnAutoCalClick(wxCommandEvent& event);
+  void OnOscXScaleChanged(wxCommandEvent& event);
 
 protected:
     // begin wxGlade: MainFrame::attributes

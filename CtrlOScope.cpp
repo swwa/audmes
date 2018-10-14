@@ -144,7 +144,7 @@ wxSize CtrlOScope::DoGetBestSize( void) const
 
 
 ////////////////////////////////////////////////////////////////////////////
-void CtrlOScope::OnPaint(wxPaintEvent& WXUNUSED(evt)) 
+void CtrlOScope::OnPaint(wxPaintEvent& WXUNUSED(event)) 
 {
 	wxPaintDC dc(this) ;  // device context for painting
 	PaintAll( dc);
@@ -429,8 +429,8 @@ void CtrlOScope::PaintAllFunction( wxDC & dc, int rectX, int rectY)
 } // OnPaint
 
 /////////////////////////////////////////////////////////////////////////////
-void CtrlOScope::OnSize(wxSizeEvent& evt) //UINT nType, int cx, int cy)
+void CtrlOScope::OnSize(wxSizeEvent& event) //UINT nType, int cx, int cy)
 {
-  evt.Skip();
+  event.Skip();
 } // OnSize
 

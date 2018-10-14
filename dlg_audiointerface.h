@@ -116,7 +116,7 @@ public:
 ////@end AudioInterfaceDialog member variables
     void SetDevices( RWAudioDevList devreclist, RWAudioDevList devpllist);
     void GetSelectedDevs( unsigned int * recdev, unsigned int * playdev, unsigned long int * newfreq);
-    void OnChoiceChanged( wxCommandEvent& ev );
+    void OnChoiceChanged( wxCommandEvent& event );
 
 };
 
