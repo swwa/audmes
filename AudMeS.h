@@ -70,10 +70,11 @@ private:
   void OnOpenClick(wxCommandEvent& event);
   void OnSaveClick(wxCommandEvent& event);
   void OnSaveAsClick(wxCommandEvent& event);
-  void OnLoadFRD(wxCommandEvent& event);
-  void OnSaveFRD(wxCommandEvent& event);
+  void OnLoadFRM(wxCommandEvent& event);
+  void OnSaveFRM(wxCommandEvent& event);
   void OnAutoCalClick(wxCommandEvent& event);
   void OnOscXScaleChanged(wxCommandEvent& event);
+  void DrawFreqResponse(void);
 
 protected:
     // begin wxGlade: MainFrame::attributes

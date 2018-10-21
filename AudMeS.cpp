@@ -26,6 +26,9 @@
 #include <windows.h>
 #include <wx/clipbrd.h>
 #endif
+#include <iostream>
+#include <fstream>
+#include <libfccp/csv.h>
 
 #include "fourier.h"
 #include "dlg_audiointerface.h"
@@ -61,6 +64,8 @@ BEGIN_EVENT_TABLE( MainFrame, wxFrame )
   EVT_MENU( wxID_OPEN, MainFrame::OnOpenClick )
   EVT_MENU( wxID_SAVE, MainFrame::OnSaveClick )
   EVT_MENU( wxID_SAVEAS, MainFrame::OnSaveAsClick )
+  EVT_MENU( ID_LOAD_FRM, MainFrame::OnLoadFRM )
+  EVT_MENU( ID_SAVE_FRM, MainFrame::OnSaveFRM )
   EVT_BUTTON( ID_AUTOCAL, MainFrame::OnAutoCalClick )
   EVT_CHOICE( ID_OSCXSCALE, MainFrame::OnOscXScaleChanged)
   EVT_CHOICE( ID_FFTLENGTH, MainFrame::OnOscXScaleChanged)
@@ -97,6 +102,8 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
     wxglade_tmp_menu_1->Append(wxID_OPEN, wxT("&Open config...\tAlt+O"), wxT(""), wxITEM_NORMAL);
     wxglade_tmp_menu_1->Append(wxID_SAVE, wxT("&Save config...\tAlt+S"), wxT(""), wxITEM_NORMAL);
     wxglade_tmp_menu_1->Append(wxID_SAVEAS, wxT("Save &As"), wxT(""), wxITEM_NORMAL);
+    wxglade_tmp_menu_1->Append(ID_LOAD_FRM, wxT("Load freq.resp."), wxT(""), wxITEM_NORMAL);
+    wxglade_tmp_menu_1->Append(ID_SAVE_FRM, wxT("Save freq.resp."), wxT(""), wxITEM_NORMAL);
     wxglade_tmp_menu_1->AppendSeparator();
     wxglade_tmp_menu_1->Append(wxID_EXIT, wxT("&Close\tAlt+F4"), wxT(""), wxITEM_NORMAL);
     frame_1_menubar->Append(wxglade_tmp_menu_1, wxT("&File"));
@@ -489,6 +496,56 @@ void MainFrame::OnSaveAsClick(wxCommandEvent& WXUNUSED(event))
 wxMessageBox( wxT("Not yet implemented"), _T("About application"),wxICON_INFORMATION | wxOK );
 }
 
+void MainFrame::OnSaveFRM( wxCommandEvent& WXUNUSED(event) )
+{
+  wxFileDialog 
+    saveFileDialog(this, _("Save frequency reponse file"), "", "",
+		   "CSV files (*.csv)|*.csv", wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
+  if (saveFileDialog.ShowModal() == wxID_CANCEL)
+    return;
+    
+  std::ofstream frm;
+  frm.open (saveFileDialog.GetPath(), std::ios::trunc);
+  if (! frm.is_open()) {
+    wxLogError("Cannot save current contents in file '%s'.",
+	       saveFileDialog.GetPath());
+    return;
+  }
+  frm << "Hz" << "," << "Gain" << std::endl;
+  for (unsigned int i = 0; i < m_frm_freqs.GetCount(); i++) {
+    frm << m_frm_freqs[i] << "," << m_frm_gains[i] << std::endl;
+  }
+  frm.close();
+}
+
+void MainFrame::OnLoadFRM( wxCommandEvent& WXUNUSED(event) )
+{
+  if (0 /* ...current content has not been saved... */) {
+    if (wxMessageBox(_("Current content has not been saved! Proceed?"),
+		     _("Please confirm"),
+		     wxICON_QUESTION | wxYES_NO, this) == wxNO )
+      return;
+  }
+    
+  wxFileDialog 
+    openFileDialog(this, _("Open frequency response file"), "", "",
+		   "CSV files (*.csv)|*.csv", wxFD_OPEN|wxFD_FILE_MUST_EXIST);
+  if (openFileDialog.ShowModal() == wxID_CANCEL)
+    return;
+
+  io::CSVReader<2> in(openFileDialog.GetPath());
+  in.read_header(io::ignore_extra_column, "Hz", "Gain");
+
+  m_frm_freqs.Clear();
+  m_frm_gains.Clear();
+  double hz; double gain;
+  while(in.read_row(hz, gain)){
+    m_frm_freqs.Add(hz);
+    m_frm_gains.Add(gain);
+  }
+  DrawFreqResponse();
+}
+
 void MainFrame::OnAutoCalClick(wxCommandEvent& WXUNUSED(event))
 {
  if ( button_osc_start->GetValue()) {
@@ -521,10 +578,40 @@ void MainFrame::OnAutoCalClick(wxCommandEvent& WXUNUSED(event))
    
 }
 
+void MainFrame::DrawFreqResponse(void)
+{
+  wxArrayDouble ardbl;
+
+  ardbl.Clear();
+  /* udelat linearni prolozeni bodu pro kazdy 1 Hz */
+  /* prvnim krokem vezmeme pocatecni hodnoty */
+  double upfreq = m_frm_freqs[0];
+  double upgain = m_frm_gains[0];
+  double botfreq = 0;
+  double botgain = m_frm_gains[0];
+  unsigned long int arrpointer = 1;
+  for( unsigned long int i=0; i<m_SamplingFreq/2;i++){
+    if (i > (unsigned long int) upfreq) {
+      /* dalsi hodnota z poli */
+      if ( (arrpointer+1) > m_frm_freqs.GetCount()) {
+	/* ukoncit */
+	break;
+      } else {
+	botfreq = upfreq; botgain = upgain;
+	upfreq = m_frm_freqs[arrpointer];
+	upgain = m_frm_gains[arrpointer];
+	arrpointer++;
+      }
+    }
+    double tmpval = botgain + (upgain-botgain)/(upfreq-botfreq)*(1.0*i-botfreq);
+    ardbl.Add( 20.0*log10(tmpval));
+  }
+  window_1_frm->SetTrack( ardbl );
+}
+
+
 void MainFrame::OnTimer( wxTimerEvent & WXUNUSED(event))
 {
-  double tmpval;
-
   // oscilloscope
     if ((button_osc_start->GetValue())&&(0 != g_OscBufferChanged)) {
       
@@ -741,34 +828,7 @@ void MainFrame::OnTimer( wxTimerEvent & WXUNUSED(event))
       }
       /* a tady frekvencni analyzer */
       if (button_frm_start->GetValue() && 0 < m_frm_freqs.GetCount() ) {
-	wxArrayDouble ardbl;
-
-	/* udelat linearni prolozeni bodu pro kazdy 1 Hz */
-	/* prvnim krokem vezmeme pocatecni hodnoty */
-	double upfreq = m_frm_freqs[0];
-	double upgain = m_frm_gains[0];
-	double botfreq = 0;
-	double botgain = m_frm_gains[0];
-	unsigned long int arrpointer = 1;
-	ardbl.Clear();
-	for( unsigned long int i=0; i<m_SamplingFreq/2;i++){
-	  if (i > (unsigned long int) upfreq) {
-	    /* dalsi hodnota z poli */
-	    if ( (arrpointer+1) > m_frm_freqs.GetCount()) {
-	      /* ukoncit */
-	      break;
-	    } else {
-	      botfreq = upfreq; botgain = upgain;
-	      upfreq = m_frm_freqs[arrpointer];
-	      upgain = m_frm_gains[arrpointer];
-	      arrpointer++;
-	    }
-	  }
-	  tmpval = botgain + (upgain-botgain)/(upfreq-botfreq)*(1.0*i-botfreq);
-	  ardbl.Add( 20.0*log10(tmpval));
-	}
-	window_1_frm->SetTrack( ardbl);
-
+	DrawFreqResponse();
       }
       g_SpeBufferChanged = 0;
     }
