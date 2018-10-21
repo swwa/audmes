@@ -3,6 +3,7 @@
 - Updated code to compile with recent versions of rtaudio and
   wxWidgets.
 - Documented the choice of GNU GPL v2+ as source license.
+- Added code to save and load frequency response data as CSV.
 
 2008-08-27
 ----------
