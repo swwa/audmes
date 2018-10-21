@@ -2,6 +2,7 @@
 - Updated code to compile with current compilers on Linux.
 - Updated code to compile with recent versions of rtaudio and
   wxWidgets.
+- Documented the choice of GNU GPL v2+ as source license.
 
 2008-08-27
 ----------
