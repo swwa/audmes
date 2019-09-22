@@ -1,3 +1,7 @@
+2019-09-22
+----------
+- update RtAudio to version 5.1.0
+
 2018-??-??
 - Updated code to compile with current compilers on Linux.
 - Updated code to compile with recent versions of rtaudio and
