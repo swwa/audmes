@@ -29,8 +29,8 @@ DEFS    += -D__LINUX_ALSA__ -D__LINUX__ -D__CPP__ -DHAVE_GETTIMEOFDAY
 OBJECTS += $(OBJECTPATH)/RtAudio.o
 LIBRARY += -lasound -lpthread
 
-HEADERS = `wx-config --cxxflags`
-LIBS = `wx-config --libs`
+HEADERS = $(shell wx-config --cxxflags)
+LIBS = $(shell wx-config --libs)
 
 TARGETNAME=AudMeS
 
