@@ -126,7 +126,7 @@ void AudioInterfaceDialog::CreateControls()
     wxBoxSizer* itemBoxSizer2 = new wxBoxSizer(wxVERTICAL);
     itemDialog1->SetSizer(itemBoxSizer2);
 
-    wxStaticBox * itemFreqStaticBox = new wxStaticBox( itemDialog1, wxID_ANY, _("Available Frequencies [kHz]"));
+    wxStaticBox * itemFreqStaticBox = new wxStaticBox( itemDialog1, wxID_ANY, _("Available Frequencies [Hz]"));
     wxStaticBoxSizer* itemFreqStaticBoxSizer = new wxStaticBoxSizer(itemFreqStaticBox, wxHORIZONTAL);
     itemBoxSizer2->Add(itemFreqStaticBoxSizer, 1, wxEXPAND|wxALL, 5);
     wxString* itemFreqChoiceStrings = NULL;
@@ -199,48 +199,62 @@ wxIcon AudioInterfaceDialog::GetIconResource( const wxString& name )
 ////@end AudioInterfaceDialog icon retrieval
 }
 
-void AudioInterfaceDialog::SetDevices( RWAudioDevList devreclist, RWAudioDevList devpllist)
+void AudioInterfaceDialog::SetDevices(RWAudioDevList devreclist,
+	RWAudioDevList devpllist, unsigned long int freq)
 {
     unsigned int i;
-
+    unsigned int pldev = 0, recdev = 0;
+    unsigned int cfreq = 0;
     m_DevRecList = devreclist;
     m_DevPlayList = devpllist;
+    m_freq = freq;
 
     wxChoice* p_cho = (wxChoice *) FindWindow( ID_OUTDEV_CHO);
-    if(!p_cho) {
-        return;
+    if (!p_cho) {
+	return;
     }
     p_cho->Clear();
 
-    for(i = 0; i< devpllist.card_info.size(); i++) {
+    for (i = 0; i < devpllist.card_info.size(); i++) {
 	wxString newstr(devpllist.card_info[i].name.c_str(), wxConvUTF8);
-	p_cho->Append( newstr);
+	p_cho->Append(newstr);
     }
     p_cho->SetSelection(0);
 
     p_cho = (wxChoice *) FindWindow( ID_INDEV_CHO);
-    if(!p_cho) {
-        return;
+    if (!p_cho) {
+	return;
     }
     p_cho->Clear();
 
-    for(i = 0; i< devreclist.card_info.size(); i++) {
+    for (i = 0; i < devreclist.card_info.size(); i++) {
 	wxString newstr(devreclist.card_info[i].name.c_str(), wxConvUTF8);
-	p_cho->Append( newstr);
+	p_cho->Append(newstr);
     }
     p_cho->SetSelection(0);
 
     p_cho = (wxChoice *) FindWindow( ID_FREQ_CHO);
-    if(!p_cho) {
-        return;
+    if (!p_cho) {
+	return;
     }
     p_cho->Clear();
 
-//     for(i = 0; i< freqs.GetCount(); i++) {
-//       p_cho->Append(freqs[i]);
-//     }
-//     p_cho->SetSelection(freqs.GetCount()-1);
+    // compute the new list - find the same values in DevRecList and DevPlayList
+    for (unsigned int i = 0; i < m_DevPlayList.card_info[pldev].sampleRates.size(); i++) {
+	for (unsigned int j = 0; j < m_DevRecList.card_info[recdev].sampleRates.size(); j++) {
+	    unsigned long int srateplay = m_DevPlayList.card_info[pldev].sampleRates[i];
+	    unsigned long int sraterec = m_DevRecList.card_info[recdev].sampleRates[j];
 
+	    if (srateplay == sraterec) {
+		p_cho->Append(wxString::Format(wxT("%ld "), srateplay));
+		if (srateplay == m_freq)
+		    cfreq = i;
+	    }
+	}
+    }
+    if (p_cho->GetCount() > 0) {
+	p_cho->SetSelection(cfreq);
+    }
 
 }
 
@@ -276,6 +290,7 @@ void AudioInterfaceDialog::GetSelectedDevs( unsigned int * recdev, unsigned int 
 void AudioInterfaceDialog::OnChoiceChanged(wxCommandEvent& WXUNUSED(event))
 {
     unsigned int pldev, recdev;
+    unsigned int cfreq = 0;
 
     wxChoice* p_cho = (wxChoice *) FindWindow( ID_OUTDEV_CHO);
     if(!p_cho) {
@@ -303,13 +318,15 @@ void AudioInterfaceDialog::OnChoiceChanged(wxCommandEvent& WXUNUSED(event))
 	    unsigned long int srateplay = m_DevPlayList.card_info[pldev].sampleRates[i];
 	    unsigned long int sraterec = m_DevRecList.card_info[recdev].sampleRates[j];
 
-	    if ( srateplay == sraterec ) {
-		p_cho->Append( wxString::Format(wxT("%ld "), srateplay));
+	    if (srateplay == sraterec) {
+		p_cho->Append(wxString::Format(wxT("%ld "), srateplay));
+		if (srateplay == m_freq)
+		    cfreq = i;
 	    }
 	}
     }
-    if ( p_cho->GetCount() > 0) {
-	p_cho->SetSelection(p_cho->GetCount() -1);
+    if (p_cho->GetCount() > 0) {
+	p_cho->SetSelection(cfreq);
     }
 
 }

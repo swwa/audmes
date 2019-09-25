@@ -81,6 +81,7 @@ class AudioInterfaceDialog: public wxDialog
 
 	RWAudioDevList m_DevRecList;
 	RWAudioDevList m_DevPlayList;
+	unsigned long int m_freq;
 
 public:
     /// Constructors
@@ -114,7 +115,7 @@ public:
 
 ////@begin AudioInterfaceDialog member variables
 ////@end AudioInterfaceDialog member variables
-    void SetDevices( RWAudioDevList devreclist, RWAudioDevList devpllist);
+    void SetDevices( RWAudioDevList devreclist, RWAudioDevList devpllist, unsigned long int freq);
     void GetSelectedDevs( unsigned int * recdev, unsigned int * playdev, unsigned long int * newfreq);
     void OnChoiceChanged( wxCommandEvent& event );
 

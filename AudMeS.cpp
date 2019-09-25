@@ -790,7 +790,7 @@ void MainFrame::OnTimer( wxTimerEvent & WXUNUSED(event))
 	  for( int i=0; i<nsampl;i++){
 	    // calculate window
 	    windowf[i] = 1.0 / (double)nsampl;
-	   
+	    }
 	  break;
 	}
 
@@ -803,8 +803,8 @@ void MainFrame::OnTimer( wxTimerEvent & WXUNUSED(event))
 
 	// left channel
 	for( int i=0; i<nsampl;i++){
-	  / copy and apply window
-	  ealin[i] = g_SpeBuffer_Left[i] * windowf[i];
+	  // copy and apply window
+	  realin[i] = g_SpeBuffer_Left[i] * windowf[i];
 	}
 
 	if (fft_double( nsampl, 0, realin, NULL, realout, imagout)) {
@@ -1078,7 +1078,7 @@ void MainFrame::OnSelectSndCard(wxCommandEvent& WXUNUSED(event))
   unsigned int recdev, pldev;
   RWAudioDevList playDevList;
   RWAudioDevList recordDevList;
-  unsigned long int newFrequency;
+  unsigned long int newFrequency = m_SamplingFreq;
 
   m_RWAudio->GetRWAudioDevices( & playDevList, & recordDevList);
 
@@ -1101,7 +1101,7 @@ void MainFrame::OnSelectSndCard(wxCommandEvent& WXUNUSED(event))
 
   AudioInterfaceDialog dlg( this);
 
-  dlg.SetDevices( recordDevList, playDevList);
+  dlg.SetDevices( recordDevList, playDevList, m_SamplingFreq);
   if (wxID_OK == dlg.ShowModal()) {
     // poslat nastaveni do RW_AUDIO
     dlg.GetSelectedDevs( &recdev, &pldev, &newFrequency);
