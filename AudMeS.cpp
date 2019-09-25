@@ -156,9 +156,9 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
     window_1 = new CtrlOScope(notebook_1_osc, _T(""), _T(""), 1);
     label_5_copy = new wxStaticText(notebook_1_osc, -1, wxT("X Scale [samples/div]: "));
     const wxString choice_osc_l_swp_copy_choices[] = {
-      wxT("20"),wxT("50"),wxT("100"),wxT("200"),wxT("500"),wxT("1000"),wxT("2000"),wxT("5000"),wxT("10000"),wxT("20000"),wxT("50000"),
+      wxT("10"),wxT("20"),wxT("50"),wxT("100"),wxT("200"),wxT("500"),wxT("1000"),wxT("2000"),wxT("5000"),wxT("10000"),wxT("20000"),wxT("50000"),
     };
-    choice_osc_l_swp_copy = new wxChoice(notebook_1_osc, ID_OSCXSCALE, wxDefaultPosition, wxDefaultSize, 11, choice_osc_l_swp_copy_choices, 0);
+    choice_osc_l_swp_copy = new wxChoice(notebook_1_osc, ID_OSCXSCALE, wxDefaultPosition, wxDefaultSize, 12, choice_osc_l_swp_copy_choices, 0);
     label_6 = new wxStaticText(notebook_1_osc, -1, wxT("Res [V/div]: "));
     const wxString choice_osc_l_res_choices[] = {
       wxT("1"),wxT("2"),wxT("4"),wxT("8"),wxT("16"),wxT("32"),wxT("64"),wxT("128"),wxT("256"),wxT("512"),wxT("1024"),wxT("2048"),wxT("4096"),wxT("8192"),wxT("16384"),wxT("32768")
@@ -201,14 +201,16 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
 
     // Spectrum analyzer
     label_5 = new wxStaticText(notebook_1_spe, -1, wxT("FFT Window Type:"));
-    const wxString combo_box_fft_choices[] = {
-        
+    const wxString choice_fft_choices[] = {
+        wxT("Rect"),
+        wxT("Hanning"),
+        wxT("Blackman")
     };
-    combo_box_fft = new wxComboBox(notebook_1_spe, -1, wxT(""), wxDefaultPosition, wxDefaultSize, 0, combo_box_fft_choices, wxCB_DROPDOWN);
-    label_9 = new wxStaticText(notebook_1_spe, -1, wxT("Number of samples:"));
+    choice_fft = new wxChoice(notebook_1_spe, ID_FFTWINDOW, wxDefaultPosition, wxDefaultSize, 3, choice_fft_choices, 0);
 
+    label_9 = new wxStaticText(notebook_1_spe, -1, wxT("Number of samples:"));
     const wxString choice_fftlength_choices[] = {
-      wxT("128"),wxT("256"),wxT("512"),wxT("1024"),wxT("2048"),wxT("4096"),wxT("8192"),wxT("16384"),wxT("32768"),wxT("64536")
+      wxT("128"),wxT("256"),wxT("512"),wxT("1024"),wxT("2048"),wxT("4096"),wxT("8192"),wxT("16384"),wxT("32768"),wxT("65536")
     };
     choice_fftlength = new wxChoice(notebook_1_spe, ID_FFTLENGTH, wxDefaultPosition, wxDefaultSize, 10, choice_fftlength_choices, 0);
 
@@ -252,7 +254,7 @@ void MainFrame::set_properties()
     choice_osc_l_res_copy->SetSelection(0);
     choice_osc_l_off_copy->SetSelection(0);
     choice_osc_trig_edge->SetSelection(0);
-    combo_box_fft->SetSelection(-1);
+    choice_fft->SetSelection(1);
     choice_fftlength->SetSelection(4);
     // end wxGlade
 }
@@ -378,7 +380,7 @@ void MainFrame::do_layout()
     sizer_9->SetSizeHints(notebook_1_osc);
     // analyzer
     sizer_17->Add(label_5, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    sizer_17->Add(combo_box_fft, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    sizer_17->Add(choice_fft, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     sizer_17->Add(20, 20, 0, 0, 0);
     sizer_17->Add(label_9, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     sizer_17->Add(choice_fftlength, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
@@ -442,8 +444,9 @@ void MainFrame::set_custom_props()
   window_1->SetNumOfVerticals( 10);
 
   /* analyzer */
-  window_1_spe->SetXRange( 10, m_SamplingFreq/2, 1);
+  window_1_spe->SetXRange( 10, 100000, 1);
   window_1_spe->SetYRange( -100, 0, 0, 1);
+  window_1_spe->SetFsample(m_SamplingFreq);
 
   /* freq response */
   window_1_frm->SetXRange( 10, 10000, 1);
@@ -760,17 +763,48 @@ void MainFrame::OnTimer( wxTimerEvent & WXUNUSED(event))
     if (0 != g_SpeBufferChanged) {
       if (button_osc_start_copy->GetValue()) {
       
-	double *realin, *realout, *imagout;
+	double *realin, *realout, *imagout, *windowf;
 	int nsampl = m_SpeBufferLength;
 	realin = (double*) malloc( nsampl*sizeof( double));
 	realout = (double*) malloc( nsampl*sizeof( double));
 	imagout = (double*) malloc( nsampl*sizeof( double));
+	windowf = (double*) malloc( nsampl*sizeof( double));
 	wxArrayDouble ardbl;
 	wxArrayDouble ardbl2;
 
+	const double multiplier = 2 * M_PI / nsampl;
+	switch (choice_fft->GetCurrentSelection()) {
+	case 1 :
+	  for( int i=0; i<nsampl;i++){
+	    // calculate window
+	    windowf[i] = (1.0 + -1.0 * cos(i * multiplier)) / (double)nsampl;
+	  }
+	  break;
+	case 2 :
+	  for( int i=0; i<nsampl;i++){
+	    // calculate window
+	    windowf[i] = 2.4 * (0.42 - 0.5 * cos(multiplier * i ) + 0.08 * cos(multiplier * i ))/ (double)nsampl;
+	  }
+	  break;
+	default :
+	  for( int i=0; i<nsampl;i++){
+	    // calculate window
+	    windowf[i] = 1.0 / (double)nsampl;
+	   
+	  break;
+	}
+
+	/*
+	 * Scale max. amplitude to 1 which is 0 db.
+	 * 16 bit samples and fft correction factor 4
+	 * 20 * log(1/65536 * 4) is -84.2 db
+	 */
+	const double dbscaler = -84.2;
+
 	// left channel
 	for( int i=0; i<nsampl;i++){
-	  realin[i] = g_SpeBuffer_Left[i]/2048.0;
+	  / copy and apply window
+	  ealin[i] = g_SpeBuffer_Left[i] * windowf[i];
 	}
 
 	if (fft_double( nsampl, 0, realin, NULL, realout, imagout)) {
@@ -784,7 +818,7 @@ void MainFrame::OnTimer( wxTimerEvent & WXUNUSED(event))
 	    float wt_hig = 1.0+ 1.0*ifcomp - ffcomp;
 	    float outval_low = sqrt(realout[ifcomp]*realout[ifcomp]+imagout[ifcomp]*imagout[ifcomp]);
 	    float outval_hig = sqrt(realout[ifcomp+1]*realout[ifcomp+1]+imagout[ifcomp+1]*imagout[ifcomp+1]);
-	    ardbl.Add( 20.0*log10( wt_hig*outval_low + wt_low*outval_hig )-90);
+	    ardbl.Add( 20.0*log10( wt_hig*outval_low + wt_low*outval_hig )+dbscaler);
 	  }
 	} else {
 	  /* wrong computation */
@@ -794,7 +828,8 @@ void MainFrame::OnTimer( wxTimerEvent & WXUNUSED(event))
 	}
 	// right channel
 	for( int i=0; i<nsampl;i++){
-	  realin[i] = g_SpeBuffer_Right[i]/2048.0;
+	  // copy and apply window
+	  realin[i] = g_SpeBuffer_Right[i] * windowf[i];
 	}
 
 	if (fft_double( nsampl, 0, realin, NULL, realout, imagout)) {
@@ -808,7 +843,7 @@ void MainFrame::OnTimer( wxTimerEvent & WXUNUSED(event))
 	    float wt_hig = 1.0+ 1.0*ifcomp - ffcomp;
 	    float outval_low = sqrt(realout[ifcomp]*realout[ifcomp]+imagout[ifcomp]*imagout[ifcomp]);
 	    float outval_hig = sqrt(realout[ifcomp+1]*realout[ifcomp+1]+imagout[ifcomp+1]*imagout[ifcomp+1]);
-	    ardbl2.Add( 20.0*log10( wt_hig*outval_low + wt_low*outval_hig )-90);
+	    ardbl2.Add( 20.0*log10( wt_hig*outval_low + wt_low*outval_hig )+dbscaler);
 	  }
 	} else {
 	  /* wrong computation */
@@ -825,6 +860,7 @@ void MainFrame::OnTimer( wxTimerEvent & WXUNUSED(event))
 	free (realin);
 	free (realout);
 	free (imagout);
+	free (windowf);
       }
       /* a tady frekvencni analyzer */
       if (button_frm_start->GetValue() && 0 < m_frm_freqs.GetCount() ) {
@@ -1070,6 +1106,9 @@ void MainFrame::OnSelectSndCard(wxCommandEvent& WXUNUSED(event))
     // poslat nastaveni do RW_AUDIO
     dlg.GetSelectedDevs( &recdev, &pldev, &newFrequency);
     m_RWAudio->SetSndDevices( recdev, pldev, newFrequency);
+    // std::cerr << "Frequency changed from " << m_SamplingFreq << "Hz to " << newFrequency  << "\n";
+    m_SamplingFreq = newFrequency;
+    window_1_spe->SetFsample(m_SamplingFreq);
   }
 }
 

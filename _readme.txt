@@ -1,3 +1,8 @@
+2019-09-25
+- add FFT window functions Hanning and Blackman.
+- add spectrum scaling according to sample rate.
+- modify spectrum view 10 Hz - 100kHz, 0 - -100 dB
+
 2019-09-22
 ----------
 - update RtAudio to version 5.1.0

@@ -44,6 +44,7 @@ public:
 	void SetTrack(double dTrack [], int iTrack = 0);
 	void SetXRange(double dLower, double dUpper, int logrange);
 	void SetYRange(double dLower, double dUpper, int logrange, int itrack);
+	void SetFsample(int fsampling);
 
 
 
@@ -69,6 +70,7 @@ public:
 protected:
 	int m_tracks;
 	int m_width, m_height;
+	int m_fsampling;
 
 	wxArrayDouble m_points;
 	wxArrayDouble m_points2;

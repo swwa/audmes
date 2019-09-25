@@ -119,7 +119,7 @@ protected:
     wxToggleButton* button_osc_start;
     wxPanel* notebook_1_osc;
     wxStaticText* label_5;
-    wxComboBox* combo_box_fft;
+    wxChoice* choice_fft;
     wxStaticText* label_9;
     wxChoice* choice_fftlength;
     CtrlOScope* window_1_spe;
