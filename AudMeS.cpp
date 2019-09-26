@@ -974,6 +974,7 @@ void MainFrame::OnFrmStart(wxCommandEvent& WXUNUSED(event))
   } else {
     button_frm_start->SetLabel(_T("Start"));
     frm_running = 0;
+    SendGenSettings();
   }
 }
 
