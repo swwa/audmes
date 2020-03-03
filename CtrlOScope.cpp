@@ -330,8 +330,15 @@ void CtrlOScope::PaintAllFunction( wxDC & dc, int rectX, int rectY)
 
 	if ( xposit < m_points.GetCount() ) { 
 
-	  float ydatapoint = m_points[xposit];
-
+	  /* iterate though all fft bins between x and the next x position in the graph */ 
+	  float nxfreq = m_MinXValue*pow(10,(i+1)/xstep);
+	  unsigned long int nxposit = (unsigned long int)((nxfreq/m_fsampling)*2*m_points.GetCount());
+	  if (nxposit >= m_points.GetCount()) { nxposit = m_points.GetCount()-1; }
+	  float ydatapoint = -150.0;
+	  for (unsigned long int j = xposit; j <= nxposit; j++) {
+	    if ((float) m_points[j] > ydatapoint) {ydatapoint = m_points[j];}
+	  }
+	  
 	  if (ydatapoint > m_MaxYValue) {ydatapoint = m_MaxYValue; }
 	  if (ydatapoint < m_MinYValue) { ydatapoint = m_MinYValue; }
 
@@ -356,7 +363,14 @@ void CtrlOScope::PaintAllFunction( wxDC & dc, int rectX, int rectY)
 
 	if ( xposit < m_points2.GetCount() ) { 
 
-	  float ydatapoint = m_points2[xposit];
+	  /* iterate though all fft bins between x and the next x position in the graph */ 
+	  float nxfreq = m_MinXValue*pow(10,(i+1)/xstep);
+	  unsigned long int nxposit = (unsigned long int)((nxfreq/m_fsampling)*2*m_points2.GetCount());
+	  if (nxposit >= m_points2.GetCount()) { nxposit = m_points2.GetCount()-1; }
+	  float ydatapoint = -150.0;
+	  for (unsigned long int j = xposit; j <= nxposit; j++) {
+	    if ((float) m_points[j] > ydatapoint) {ydatapoint = m_points2[j];}
+	  }
 
 	  if (ydatapoint > m_MaxYValue) {ydatapoint = m_MaxYValue; }
 	  if (ydatapoint < m_MinYValue) { ydatapoint = m_MinYValue; }
