@@ -1,4 +1,9 @@
+2020-??-??
+----------
+ - Migrate README to markdown and move change list to NEWS.
+
 2019-09-25
+----------
 - add FFT window functions Hanning and Blackman.
 - add spectrum scaling according to sample rate.
 - modify spectrum view 10 Hz - 100kHz, 0 - -100 dB.
@@ -9,6 +14,7 @@
 - update RtAudio to version 5.1.0
 
 2018-??-??
+----------
 - Updated code to compile with current compilers on Linux.
 - Updated code to compile with recent versions of rtaudio and
   wxWidgets.
@@ -29,7 +35,8 @@ for input and output
 
 2008-08-25
 ----------
-- first Linux port!!! - compilable with wxGTK-2.6.4 wth GTK2 and UNICODE; a plenty of problems:
+- first Linux port!!! - compilable with wxGTK-2.6.4 wth GTK2 and
+  UNICODE; a plenty of problems:
    - GEN gauges do not work as expected
    - glitches in generator
    - wxTextCtrls do not react to ENTERs
@@ -39,8 +46,10 @@ for input and output
 
 2008-08-22
 ----------
-- renamed OScopeCtrl->CtrlOScope; double buffering and some other features added
-- #define for switch XScale to microseconds/div - but a lot of problems with strange modulation
+- renamed OScopeCtrl->CtrlOScope; double buffering and some other features
+  added
+- #define for switch XScale to microseconds/div - but a lot of problems with
+  strange modulation
 
 2008-08-21
 ----------
@@ -60,7 +69,8 @@ for input and output
 
 2008-06-06
 ----------
-- triggering completely changed; currently missing control of trigger level and trigger hysteresis
+- triggering completely changed; currently missing control of trigger
+  level and trigger hysteresis
 - changed description of X scale and X resolution
 - in Makefile.gcc changed directory delimiters in "clean" target
 
@@ -92,50 +102,3 @@ Project renamed to AUDio MEasurement System - AudMeS
 - dlg_audiointerface.cpp: NOVY - dialog vyberu IN/OUT zarizeni
 - RWAudio_win.cpp: pridano GetPlayDev() a GetRecDev()
 - RWAudio_win.cpp: slouceni Rekorderu a Playeru - NEDOKONCENO, NEKONZISTENTNI!!!
-
-Audio Laboratory v0.1 alpha
-===========================
-
-email: vaclavpe@seznam.cz
-
-Project page: https://sourceforge.net/projects/audmes/
-
-Today is: 2006-04-19
-
-What works:
-===========
-- generator
-- spectrum analyzer
-- oscilloscope
-- frequency response - just frequency stepping
-
-ToDo
-====
-General:
-- clean up RWAudio file - rewrite to RTAudio lib ??
-- porting to Linux - ALSA architecture - rewrite to RTAudio lib ??
-- extend OscopeCtrl to add more traces
-- extend OscopeCtrl to add zooming of waves
-- load/save of config
-
-Generator:
-
-Oscilloscope:
-- changeable length of buffer - problem with "slower" Xscale
-- peak-to-peak measurement
-
-Spectrum Analyzer:
-- better Y-scaling of spectrum analyzer
-- averaging in spectrum analyzer
-- add switch between CH1 and CH2 ( left/right)
-- extend the range of SA to 20kHz - OscopeCtrl problem
-- add filtering windows - is it necessary ??
-- changeable FFT length
-
-Frequency Response:
-- finish input peak value measurement
-- add trace selector
-- support load/save measurements, for example as XML/CVS/JSON/IEC
-  60076-18 1.0/MLSSA/FRD File Format.
-- save pictures of measurement graph
-- measure frequencies 10k-20k
