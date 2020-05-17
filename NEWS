@@ -1,6 +1,7 @@
 2020-??-??
 ----------
  - Migrate README to markdown and move change list to NEWS.
+ - Migrated project from subversion to git.ZZgit diff
 
 2019-09-25
 ----------
