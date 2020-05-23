@@ -76,6 +76,7 @@ private:
   void OnOscXScaleChanged(wxCommandEvent& event);
   void DrawFreqResponse(void);
 
+  void sleep(int ms);
 protected:
     // begin wxGlade: MainFrame::attributes
     wxStaticBox* sizer_12_copy_staticbox;

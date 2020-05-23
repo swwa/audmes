@@ -944,15 +944,9 @@ void MainFrame::OnFrmStart(wxCommandEvent& WXUNUSED(event))
       // from 20Hz to 20kHz
       float freq = 20.0*pow(10.0, 3.0*i/ipoints)+50.0;
       m_RWAudio->PlaySetGenerator( freq, freq, 0, 0, pow(10,slide_l_am->GetValue()/20.0), pow(10,slide_r_am->GetValue()/20.0));
-#ifdef __WXMSW__
-      Sleep( 400);
+      sleep( 400);
       wxYield();
-      Sleep( 400);
-#else
-      usleep(400000);
-      wxYield();
-      usleep(400000);
-#endif
+      sleep( 400);
       wxYield();
       // find maximum value in the grabbed wave and store it as a result
       m_frm_freqs.Add( freq);
@@ -1125,6 +1119,15 @@ void MainFrame::OnTxtFreqRChanged(wxCommandEvent& WXUNUSED(event))
   if (button_gen_start->GetValue()) {
     SendGenSettings();
   }
+}
+
+void MainFrame::sleep(int ms)
+{
+#ifdef __WXMSW__
+  Sleep(ms);
+#else
+  usleep(ms * 1000);
+#endif
 }
 
 
