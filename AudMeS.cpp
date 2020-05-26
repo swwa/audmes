@@ -586,8 +586,8 @@ void MainFrame::DrawFreqResponse(void)
   wxArrayDouble ardbl;
 
   ardbl.Clear();
-  /* udelat linearni prolozeni bodu pro kazdy 1 Hz */
-  /* prvnim krokem vezmeme pocatecni hodnoty */
+  /* make the linear interpolation of points for each 1Hz */
+  /* initial values are the first step */
   double upfreq = m_frm_freqs[0];
   double upgain = m_frm_gains[0];
   double botfreq = 0;
@@ -595,9 +595,9 @@ void MainFrame::DrawFreqResponse(void)
   unsigned long int arrpointer = 1;
   for( unsigned long int i=0; i<m_SamplingFreq/2;i++){
     if (i > (unsigned long int) upfreq) {
-      /* dalsi hodnota z poli */
+      /* next value from arrays */
       if ( (arrpointer+1) > m_frm_freqs.GetCount()) {
-	/* ukoncit */
+	/* break */
 	break;
       } else {
 	botfreq = upfreq; botgain = upgain;
@@ -810,7 +810,7 @@ void MainFrame::OnTimer( wxTimerEvent & WXUNUSED(event))
 	if (fft_double( nsampl, 0, realin, NULL, realout, imagout)) {
 	  /* everything is correct */
 	  for( unsigned long int i=0; i<m_SamplingFreq/2;i++){
-	    /* zobrazeni jen poloviny, tzn. nsampl/2 odpovida fvz/2 */
+	    /* show only one half, this means nsampl/2 corresponds to fvz/2 */
 	    float ffcomp = 1.0*i*nsampl/m_SamplingFreq;
 	    int ifcomp = (int) (ffcomp);
 	    // make an averaging
@@ -835,7 +835,7 @@ void MainFrame::OnTimer( wxTimerEvent & WXUNUSED(event))
 	if (fft_double( nsampl, 0, realin, NULL, realout, imagout)) {
 	  /* everything is correct */
 	  for( unsigned long int i=0; i<m_SamplingFreq/2;i++){
-	    /* zobrazeni jen poloviny, tzn. nsampl/2 odpovida fvz/2 */
+	    /* show only one half, this means nsampl/2 corresponds to fvz/2 */
 	    float ffcomp = 1.0*i*nsampl/m_SamplingFreq;
 	    int ifcomp = (int) (ffcomp);
 	    // make an averaging
@@ -953,7 +953,7 @@ void MainFrame::OnFrmStart(wxCommandEvent& WXUNUSED(event))
       double i_min = g_SpeBuffer_Left[0];
       double i_max = g_SpeBuffer_Left[0];
       for( unsigned long int ii = 1; ii < m_SpeBufferLength; ii++){
-	/* zatim pouze prvni kanal */
+	/* only single channel so far */	
 	if (g_SpeBuffer_Left[ii] > i_max ) i_max = g_SpeBuffer_Left[ii];
 	if (g_SpeBuffer_Left[ii] < i_min ) i_min = g_SpeBuffer_Left[ii];
       }
