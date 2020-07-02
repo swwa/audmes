@@ -173,16 +173,9 @@ void CtrlOScope::PaintAll( wxDC & dc)
             wxMemoryDC* memDC= new wxMemoryDC();
             //clear the memdc with a certain background color
             memDC->SelectObject(*bmpBlit);
-#if defined(__WXMSW__)
-            memDC->BeginDrawing();
-#endif
             memDC->Clear();
 
   PaintAllFunction( *memDC, 0, 0);
-
-#if defined(__WXMSW__)
-            memDC->EndDrawing();
-#endif
 
             dc.Blit(rec.x,rec.y,rec.width,rec.height,memDC,0,0,wxCOPY);
 
@@ -417,7 +410,7 @@ void CtrlOScope::PaintAllFunction( wxDC & dc, int rectX, int rectY)
       }
     }
     /* kresli body v SetTracks */
-    dc.SetPen( wxPen( m_trColor,1,1));
+    dc.SetPen( wxPen( m_trColor,1,wxSOLID));
     int lastx = 0, lasty = 0;
     float xpoint;
     for (unsigned int i = 0; i < m_points.GetCount(); i++) {
@@ -435,7 +428,7 @@ void CtrlOScope::PaintAllFunction( wxDC & dc, int rectX, int rectY)
       }
       lastx = (int)(xpoint); lasty = (int)(ypoint);
     }
-    dc.SetPen( wxPen( m_tr2Color,1,1));
+    dc.SetPen( wxPen( m_tr2Color,1,wxSOLID));
     for (unsigned int i = 0; i < m_points2.GetCount(); i++) {
       /* prepocitat vstupni bod na X osu */
       //float xpoint = i+ldist; // linearni zavislost
