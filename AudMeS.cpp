@@ -307,7 +307,7 @@ void MainFrame::do_layout()
     sizer_GenL->Add(label_3, 0, wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 5);
     sizer_GenL->Add(slide_l_am, 1, wxEXPAND, 5);
     sizer_4->Add(sizer_GenL, 0, wxALL|wxEXPAND, 5);
-    sizer_3->Add(sizer_4, 0, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    sizer_3->Add(sizer_4, 0, wxALL|wxEXPAND, 5);
 
     sizer_4_copy->Add(checkbox_r_en, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     sizer_GenR->Add(label_1_copy_1, 0, wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 5);
@@ -319,7 +319,7 @@ void MainFrame::do_layout()
     sizer_GenR->Add(label_3_copy_1, 0, wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 5);
     sizer_GenR->Add(slide_r_am, 1, wxEXPAND, 5);
     sizer_4_copy->Add(sizer_GenR, 0, wxALL|wxEXPAND, 5);
-    sizer_3->Add(sizer_4_copy, 0, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    sizer_3->Add(sizer_4_copy, 0, wxALL|wxEXPAND, 5);
 
     sizer_2->Add(sizer_3, 0, wxALIGN_CENTER_HORIZONTAL, 0);
     sizer_gen_sync->Add(checkbox_gen_sync, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
@@ -336,7 +336,7 @@ void MainFrame::do_layout()
     //oscilloscope
     sizer_10->Add(window_1, 1, wxEXPAND, 0);
     sizer_13->Add(label_5_copy, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
-    sizer_13->Add(choice_osc_l_swp_copy, 0, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 5);
+    sizer_13->Add(choice_osc_l_swp_copy, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
     sizer_11->Add(sizer_13, 0, wxALIGN_CENTER_HORIZONTAL, 0);
 
     sizer_14->Add(label_6, 0, wxLEFT|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
