@@ -809,6 +809,7 @@ void MainFrame::OnTimer( wxTimerEvent & WXUNUSED(event))
 
 	if (fft_double( nsampl, 0, realin, NULL, realout, imagout)) {
 	  /* everything is correct */
+          realout[0] = 0; imagout[0] = 0; // remove DC
 	  for( unsigned long int i=0; i<m_SamplingFreq/2;i++){
 	    /* show only one half, this means nsampl/2 corresponds to fvz/2 */
 	    float ffcomp = 1.0*i*nsampl/m_SamplingFreq;
@@ -834,6 +835,7 @@ void MainFrame::OnTimer( wxTimerEvent & WXUNUSED(event))
 
 	if (fft_double( nsampl, 0, realin, NULL, realout, imagout)) {
 	  /* everything is correct */
+          realout[0] = 0; imagout[0] = 0; // remove DC
 	  for( unsigned long int i=0; i<m_SamplingFreq/2;i++){
 	    /* show only one half, this means nsampl/2 corresponds to fvz/2 */
 	    float ffcomp = 1.0*i*nsampl/m_SamplingFreq;
