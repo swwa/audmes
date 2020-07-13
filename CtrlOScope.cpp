@@ -444,13 +444,11 @@ void CtrlOScope::PaintAllFunction( wxDC & dc, int rectX, int rectY)
       }
       lastx = (int)(xpoint); lasty = (int)(ypoint);
     }
-
-    if (wxT("") != m_UserText) {
-      dc.SetTextForeground( m_whColor);
-      dc.DrawText( m_UserText, rectX+m_UserTextPosX, rectY+m_UserTextPosY);
-    }
   }
-
+  if (wxT("") != m_UserText) {
+    dc.SetTextForeground( m_whColor);
+    dc.DrawText( m_UserText, rectX+m_UserTextPosX, rectY+m_UserTextPosY);
+  }
 } // OnPaint
 
 /////////////////////////////////////////////////////////////////////////////

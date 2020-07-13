@@ -449,7 +449,7 @@ void MainFrame::set_custom_props()
   window_1_spe->SetFsample(m_SamplingFreq);
 
   /* freq response */
-  window_1_frm->SetXRange( 10, 10000, 1);
+  window_1_frm->SetXRange( 20, 20000, 1);
   window_1_frm->SetYRange( -100, 0, 0, 1);
 
   g_OscBufferChanged = 0;
@@ -944,8 +944,11 @@ void MainFrame::OnFrmStart(wxCommandEvent& WXUNUSED(event))
       m_frm_gains.Clear();
     for(int i=0; i<= (int)ipoints; i++) {
       // from 20Hz to 20kHz
-      float freq = 20.0*pow(10.0, 3.0*i/ipoints)+50.0;
+      float freq = 20.0*pow(10.0, 3.0*i/ipoints);
       m_RWAudio->PlaySetGenerator( freq, freq, 0, 0, pow(10,slide_l_am->GetValue()/20.0), pow(10,slide_r_am->GetValue()/20.0));
+      wxString bla;
+      bla.Printf(wxT("Frequency : %.1f "), freq);
+      window_1_frm->ShowUserText( bla, 100, 20);
       sleep( 400);
       wxYield();
       sleep( 400);
@@ -963,15 +966,12 @@ void MainFrame::OnFrmStart(wxCommandEvent& WXUNUSED(event))
 
       if ( 0 == frm_running) break;
     }
-
-    button_frm_start->SetLabel(_T("Start"));
     button_frm_start->SetValue( false);
-
-  } else {
-    button_frm_start->SetLabel(_T("Start"));
-    frm_running = 0;
-    SendGenSettings();
   }
+  button_frm_start->SetLabel(_T("Start"));
+  frm_running = 0;
+  SendGenSettings();
+  window_1_frm->ShowUserText( wxString(""), 0, 0);
 }
 
 
