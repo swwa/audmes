@@ -8,6 +8,7 @@ Sweep frequency characteristic.
 email: vaclavpe@seznam.cz
 
 Project page: https://sourceforge.net/projects/audmes/
+Source code: https://sourceforge.net/p/audmes/git/ci/master/tree/
 
 What works:
 ===========
@@ -16,20 +17,29 @@ What works:
  - oscilloscope
  - frequency response - just frequency stepping
 
+ Operating systems: Linux, Windows, MacOS
+
+
+Dependencies
+============
+ - wxWidgets 3.0.x (https://www.wxwidgets.org/)
+ - RtAudio 5.1 (https://github.com/thestk/rtaudio)
+ - libfccp (https://github.com/ben-strasser/fast-cpp-csv-parser)
+ - CMake 3.x (https://cmake.org)
+
+
 ToDo
 ====
 
 General
 -------
-
- - clean up RWAudio file - rewrite to RTAudio lib ??
- - porting to Linux - ALSA architecture - rewrite to RTAudio lib ??
  - extend OscopeCtrl to add more traces
  - extend OscopeCtrl to add zooming of waves
  - load/save of config
 
 Generator
 ---------
+ - white noise
 
 Oscilloscope
 ------------
@@ -41,9 +51,6 @@ Spectrum Analyzer
  - better Y-scaling of spectrum analyzer
  - averaging in spectrum analyzer
  - add switch between CH1 and CH2 ( left/right)
- - extend the range of SA to 20kHz - OscopeCtrl problem
- - add filtering windows - is it necessary ??
- - changeable FFT length
 
 Frequency Response
 ------------------
@@ -52,4 +59,3 @@ Frequency Response
  - support load/save measurements, for example as XML/CVS/JSON/IEC
    60076-18 1.0/MLSSA/FRD File Format.
  - save pictures of measurement graph
- - measure frequencies 10k-20k
