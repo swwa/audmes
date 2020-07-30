@@ -148,7 +148,8 @@ protected:
   int frm_running;
 
   wxArrayDouble m_frm_freqs;
-  wxArrayDouble m_frm_gains;
+  wxArrayDouble m_frm_lgains;
+  wxArrayDouble m_frm_rgains;
 
   wxButton * button_autocalibrate;
   wxString m_configfilename;

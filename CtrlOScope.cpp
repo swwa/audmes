@@ -362,7 +362,7 @@ void CtrlOScope::PaintAllFunction( wxDC & dc, int rectX, int rectY)
 	  if (nxposit >= m_points2.GetCount()) { nxposit = m_points2.GetCount()-1; }
 	  float ydatapoint = -150.0;
 	  for (unsigned long int j = xposit; j <= nxposit; j++) {
-	    if ((float) m_points[j] > ydatapoint) {ydatapoint = m_points2[j];}
+	    if ((float) m_points2[j] > ydatapoint) {ydatapoint = m_points2[j];}
 	  }
 
 	  if (ydatapoint > m_MaxYValue) {ydatapoint = m_MaxYValue; }

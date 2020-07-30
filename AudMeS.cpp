@@ -218,10 +218,10 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
     button_osc_start_copy = new wxToggleButton(notebook_1_spe, ID_SPANSTART, wxT("Start"));
 
     //Frequency response
-    label_1_frm = new wxStaticText(notebook_1_frm, -1, wxT("Number of points:"));
-    text_ctrl1_frm = new wxTextCtrl(notebook_1_frm, -1, wxT("100"));
-    label_2_frm = new wxStaticText(notebook_1_frm, -1, wxT("TBD:"));
-    text_ctrl2_frm = new wxTextCtrl(notebook_1_frm, -1, wxT(""));
+    label_1_frm = new wxStaticText(notebook_1_frm, -1, wxT("Number of points (max 120):"));
+    text_ctrl1_frm = new wxTextCtrl(notebook_1_frm, -1, wxT("24"));
+    label_2_frm = new wxStaticText(notebook_1_frm, -1, wxT("-"));
+    text_ctrl2_frm = new wxTextCtrl(notebook_1_frm, -1, wxT("-"));
     button_frm_start = new wxToggleButton(notebook_1_frm, ID_FRMSTART, wxT("Start"));
     window_1_frm = new CtrlOScope(notebook_1_frm, _T("Hz"), _T("dB"), 1);
 
@@ -514,9 +514,9 @@ void MainFrame::OnSaveFRM( wxCommandEvent& WXUNUSED(event) )
 	       saveFileDialog.GetPath());
     return;
   }
-  frm << "Hz" << "," << "Gain" << std::endl;
+  frm << "Hz" << "," << "GainL" << "," << "GainR" << std::endl;
   for (unsigned int i = 0; i < m_frm_freqs.GetCount(); i++) {
-    frm << m_frm_freqs[i] << "," << m_frm_gains[i] << std::endl;
+    frm << m_frm_freqs[i] << "," << m_frm_lgains[i] << "," << m_frm_rgains[i] << std::endl;
   }
   frm.close();
 }
@@ -536,15 +536,17 @@ void MainFrame::OnLoadFRM( wxCommandEvent& WXUNUSED(event) )
   if (openFileDialog.ShowModal() == wxID_CANCEL)
     return;
 
-  io::CSVReader<2> in(openFileDialog.GetPath());
-  in.read_header(io::ignore_extra_column, "Hz", "Gain");
+  io::CSVReader<3> in(openFileDialog.GetPath());
+  in.read_header(io::ignore_extra_column, "Hz", "GainL", "GainR");
 
   m_frm_freqs.Clear();
-  m_frm_gains.Clear();
-  double hz; double gain;
-  while(in.read_row(hz, gain)){
+  m_frm_lgains.Clear();
+  m_frm_rgains.Clear();
+  double hz; double gainl, gainr;
+  while(in.read_row(hz, gainl, gainr)){
     m_frm_freqs.Add(hz);
-    m_frm_gains.Add(gain);
+    m_frm_lgains.Add(gainl);
+    m_frm_rgains.Add(gainr);
   }
   DrawFreqResponse();
 }
@@ -583,15 +585,18 @@ void MainFrame::OnAutoCalClick(wxCommandEvent& WXUNUSED(event))
 
 void MainFrame::DrawFreqResponse(void)
 {
-  wxArrayDouble ardbl;
+  wxArrayDouble left, right;
 
-  ardbl.Clear();
+  left.Clear();
+  right.Clear();
   /* make the linear interpolation of points for each 1Hz */
   /* initial values are the first step */
   double upfreq = m_frm_freqs[0];
-  double upgain = m_frm_gains[0];
+  double lupgain = m_frm_lgains[0];
+  double rupgain = m_frm_rgains[0];
   double botfreq = 0;
-  double botgain = m_frm_gains[0];
+  double lbotgain = m_frm_lgains[0];
+  double rbotgain = m_frm_rgains[0];
   unsigned long int arrpointer = 1;
   for( unsigned long int i=0; i<m_SamplingFreq/2;i++){
     if (i > (unsigned long int) upfreq) {
@@ -600,16 +605,22 @@ void MainFrame::DrawFreqResponse(void)
 	/* break */
 	break;
       } else {
-	botfreq = upfreq; botgain = upgain;
+	botfreq = upfreq;
+	lbotgain = lupgain;
+	rbotgain = rupgain;
 	upfreq = m_frm_freqs[arrpointer];
-	upgain = m_frm_gains[arrpointer];
+	lupgain = m_frm_lgains[arrpointer];
+	rupgain = m_frm_rgains[arrpointer];
 	arrpointer++;
       }
     }
-    double tmpval = botgain + (upgain-botgain)/(upfreq-botfreq)*(1.0*i-botfreq);
-    ardbl.Add( 20.0*log10(tmpval));
+    double tmpval = lbotgain + (lupgain-lbotgain)/(upfreq-botfreq)*(1.0*i-botfreq);
+    left.Add( 20.0*log10(tmpval));
+    tmpval = rbotgain + (rupgain-rbotgain)/(upfreq-botfreq)*(1.0*i-botfreq);
+    right.Add( 20.0*log10(tmpval));
   }
-  window_1_frm->SetTrack( ardbl );
+  window_1_frm->SetTrack(left);
+  window_1_frm->SetTrack2(right);
 }
 
 
@@ -935,13 +946,14 @@ void MainFrame::OnFrmStart(wxCommandEvent& WXUNUSED(event))
     wxString tpoints = text_ctrl1_frm->GetValue();
 
     tpoints.ToLong( &ipoints, 10);
-    if (ipoints > 100) ipoints = 100;
+    if (ipoints > 120) ipoints = 120;
     if (ipoints < 1) ipoints = 1;
 
     frm_running = 1;
 
-      m_frm_freqs.Clear();
-      m_frm_gains.Clear();
+    m_frm_freqs.Clear();
+    m_frm_lgains.Clear();
+    m_frm_rgains.Clear();
     for(int i=0; i<= (int)ipoints; i++) {
       // from 20Hz to 20kHz
       float freq = 20.0*pow(10.0, 3.0*i/ipoints);
@@ -955,14 +967,18 @@ void MainFrame::OnFrmStart(wxCommandEvent& WXUNUSED(event))
       wxYield();
       // find maximum value in the grabbed wave and store it as a result
       m_frm_freqs.Add( freq);
-      double i_min = g_SpeBuffer_Left[0];
-      double i_max = g_SpeBuffer_Left[0];
+      double l_min = g_SpeBuffer_Left[0];
+      double l_max = g_SpeBuffer_Left[0];
+      double r_min = g_SpeBuffer_Right[0];
+      double r_max = g_SpeBuffer_Right[0];
       for( unsigned long int ii = 1; ii < m_SpeBufferLength; ii++){
-	/* only single channel so far */	
-	if (g_SpeBuffer_Left[ii] > i_max ) i_max = g_SpeBuffer_Left[ii];
-	if (g_SpeBuffer_Left[ii] < i_min ) i_min = g_SpeBuffer_Left[ii];
+	if (g_SpeBuffer_Left[ii] > l_max ) l_max = g_SpeBuffer_Left[ii];
+	if (g_SpeBuffer_Left[ii] < l_min ) l_min = g_SpeBuffer_Left[ii];
+	if (g_SpeBuffer_Right[ii] > r_max ) r_max = g_SpeBuffer_Right[ii];
+	if (g_SpeBuffer_Right[ii] < r_min ) r_min = g_SpeBuffer_Right[ii];
       }
-      m_frm_gains.Add( (i_max-i_min)/65536.0);
+      m_frm_lgains.Add( (l_max-l_min)/65536.0);
+      m_frm_rgains.Add( (r_max-r_min)/65536.0);
 
       if ( 0 == frm_running) break;
     }
