@@ -24,11 +24,7 @@
 #ifndef RWAUDIO_IO_H
 #define RWAUDIO_IO_H
 
-#if defined(EMBED_RTAUDIO)
-#  include "audiolib/RtAudio.h"
-#else
-#  include <rtaudio/RtAudio.h>
-#endif
+#include <rtaudio/RtAudio.h>
 
 struct RWAudioDevList
 {

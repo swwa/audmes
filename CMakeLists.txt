@@ -11,7 +11,7 @@ set(AM_SOURCES
 	dlg_audiointerface.cpp
 	fourier.c
 	RWAudio_IO.cpp
-	audiolib/RtAudio.cpp
+	rtaudio/RtAudio.cpp
 )
 
 include_directories(.) # for local libfccp
@@ -30,18 +30,18 @@ include("${wxWidgets_USE_FILE}")
 add_executable(AudMeS ${AM_SOURCES})
 
 if (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Linux")
-	add_definitions(-DEMBED_RTAUDIO -D__LINUX_ALSA__ -D__LINUX__ -DHAVE_GETTIMEOFDAY)
+	add_definitions(-D__LINUX_ALSA__ -D__LINUX__ -DHAVE_GETTIMEOFDAY)
 	target_link_libraries(${PROJECT_NAME} ${wxWidgets_LIBRARIES} asound)
 endif()
 
 if (${APPLE})
-	add_definitions(-DEMBED_RTAUDIO -D__MACOSX_CORE__ -DHAVE_GETTIMEOFDAY)
+	add_definitions(-D__MACOSX_CORE__ -DHAVE_GETTIMEOFDAY)
 	find_library(COREAUDIO_LIB CoreAudio)
 	find_library(COREFOUNDATION_LIB CoreFoundation)
 	target_link_libraries(${PROJECT_NAME} ${wxWidgets_LIBRARIES} ${COREAUDIO_LIB} ${COREFOUNDATION_LIB})
 endif()
 
 if (WIN32)
-        add_definitions(-DEMBED_RTAUDIO -D__WINDOWS_DS__ -D__WXMSW__)
+        add_definitions(-D__WINDOWS_DS__ -D__WXMSW__)
 	target_link_libraries(${PROJECT_NAME} -static ${wxWidgets_LIBRARIES} dsound)
 endif()
