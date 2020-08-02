@@ -623,12 +623,8 @@ void MainFrame::DrawFreqResponse(void)
   window_1_frm->SetTrack2(right);
 }
 
-
-void MainFrame::OnTimer( wxTimerEvent & WXUNUSED(event))
+void MainFrame::DrawOscilloscope(void)
 {
-  // oscilloscope
-    if ((button_osc_start->GetValue())&&(0 != g_OscBufferChanged)) {
-      
       wxArrayDouble ardbl, ardbl2;
       unsigned long int i;
       double trigger_edge;
@@ -770,11 +766,9 @@ void MainFrame::OnTimer( wxTimerEvent & WXUNUSED(event))
 
     }
 
-    // Spectrum analyzer
-    if (0 != g_SpeBufferChanged) {
-      if (button_osc_start_copy->GetValue()) {
-      
-	double *realin, *realout, *imagout, *windowf;
+void MainFrame::DrawSpectrum(void)
+{
+        double *realin, *realout, *imagout, *windowf;
 	int nsampl = m_SpeBufferLength;
 	realin = (double*) malloc( nsampl*sizeof( double));
 	realout = (double*) malloc( nsampl*sizeof( double));
@@ -865,8 +859,6 @@ void MainFrame::OnTimer( wxTimerEvent & WXUNUSED(event))
 	  }
 	}
 
-
-
 	window_1_spe->SetTrack( ardbl);
 	window_1_spe->SetTrack2( ardbl2);
 
@@ -874,16 +866,25 @@ void MainFrame::OnTimer( wxTimerEvent & WXUNUSED(event))
 	free (realout);
 	free (imagout);
 	free (windowf);
-      }
-      /* a tady frekvencni analyzer */
-      if (button_frm_start->GetValue() && 0 < m_frm_freqs.GetCount() ) {
-	DrawFreqResponse();
-      }
-      g_SpeBufferChanged = 0;
-    }
-    //wxMessageBox( _T("Idle event caught"), _T("About application"),wxICON_INFORMATION | wxOK ); 
 }
-  
+
+void MainFrame::OnTimer( wxTimerEvent & WXUNUSED(event))
+{
+    // oscilloscope
+    if (button_osc_start->GetValue() && 0 != g_OscBufferChanged) {
+        DrawOscilloscope ();
+    }
+    // spectrum analyzer
+    if (0 != g_SpeBufferChanged && button_osc_start_copy->GetValue()) {
+        DrawSpectrum();
+    }
+    // frequency response
+    if (button_frm_start->GetValue() && 0 < m_frm_freqs.GetCount()) {
+        DrawFreqResponse();
+    }
+    g_SpeBufferChanged = 0;
+}
+
 void MainFrame::OnOscXScaleChanged(wxCommandEvent& WXUNUSED(event))
 {
   double sweep_div;

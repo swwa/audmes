@@ -75,6 +75,8 @@ private:
   void OnAutoCalClick(wxCommandEvent& event);
   void OnOscXScaleChanged(wxCommandEvent& event);
   void DrawFreqResponse(void);
+  void DrawOscilloscope(void);
+  void DrawSpectrum(void);
 
   void sleep(int ms);
 protected:
