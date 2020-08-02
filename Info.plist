@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>BuildMachineOSBuild</key>
+	<string>15G22010</string>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleExecutable</key>
+	<string>AudMes</string>
+	<key>CFBundleGetInfoString</key>
+	<string>AudMes version 202005</string>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.education</string>
+	<key>CFBundleIconFile</key>
+	<string>AudMes.icns</string>
+	<key>CFBundleIdentifier</key>
+	<string>audmes</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleLongVersionString</key>
+	<string>Version 2020-05</string>
+	<key>CFBundleName</key>
+	<string>AudMeS</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>2020-05</string>
+	<key>CFBundleSignature</key>
+	<string>auDy</string>
+	<key>CFBundleSupportedPlatforms</key>
+	<array>
+		<string>MacOSX</string>
+	</array>
+	<key>CFBundleVersion</key>
+	<string>202005</string>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+	<key>NSHumanReadableCopyright</key>
+	<string>AudMeS Version 2020-05 - GPLv2</string>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
+	<key>CFBundleDisplayName</key>
+	<string>AudMes</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Needs audio input</string>
+</dict>
+</plist>
