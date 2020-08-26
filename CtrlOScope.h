@@ -33,7 +33,7 @@ class CtrlOScope : public wxControl {
   void OnPaint(wxPaintEvent& event);
   void OnSize(wxSizeEvent& event);
   void PaintAll(wxDC& dc);
-  void PaintAllFunction(wxDC& dc, int rectX, int rectY);
+  void PaintAllFunction(wxDC& dc);
   void OnEraseBackground(wxEraseEvent& WXUNUSED(event)){};
 
   void AppendPoints(double dNewPoint[], int iTrack = 0);

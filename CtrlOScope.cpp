@@ -151,7 +151,7 @@ void CtrlOScope::PaintAll(wxDC& dc) {
   memDC->SelectObject(*bmpBlit);
   memDC->Clear();
 
-  PaintAllFunction(*memDC, 0, 0);
+  PaintAllFunction(*memDC);
 
   dc.Blit(rec.x, rec.y, rec.width, rec.height, memDC, 0, 0, wxCOPY);
 
@@ -159,59 +159,49 @@ void CtrlOScope::PaintAll(wxDC& dc) {
   delete memDC;
 }
 
-void CtrlOScope::PaintAllFunction(wxDC& dc, int rectX, int rectY) {
+void CtrlOScope::PaintAllFunction(wxDC& dc) {
   wxRect rec = GetClientRect();
   wxString bla;
   int tw, th;
-  int twY, thY;
-  int twX, thX;
-  int bdist, ldist;
-
-  //	bla.Printf ("Rect is %d, %d, %d, %d", rectX, rectY, rec.width, rec.height);
-  //	wxMessageBox( bla, "Application Error", wxOK | wxICON_ERROR, this);
+  int ldist = 0;  // legend space on the left
+  int bdist = 0;  // legend space on bottom
+  int udist = 0;  // unit text space
 
   /* kresli pozadi - draw background */
   dc.SetPen(wxPen(m_bgColor, 1, wxSOLID));
   dc.SetBrush(wxBrush(m_bgColor, wxSOLID));
-  dc.DrawRectangle(rectX, rectY, rec.width, rec.height);
+  dc.DrawRectangle(0, 0, rec.width, rec.height);
 
   dc.SetPen(wxPen(m_plColor, 1, wxDOT));
   dc.SetBrush(wxBrush(m_plColor, wxSOLID));
   dc.SetTextForeground(m_whColor);
   dc.SetFont(wxFont(8, wxMODERN, wxNORMAL, wxNORMAL, 0, wxT("")));
 
-  /* spocitat vysku pisma pro spodni odstup a sirky pto odstup zleva - calculate space for legend */
-  dc.GetTextExtent(m_XUnit, &twX, &thX);
-  bdist = thX + 8;
-  dc.GetTextExtent(m_YUnit, &twY, &thY);
-  ldist = twY + 8;
+  /* spocitat vysku pisma pro spodni odstup a sirky pto odstup zleva */
+  /* calculate space for legend */
+  if (m_YUnit != wxT("")) {
+    dc.GetTextExtent(m_YUnit, &tw, &th);
+    udist = tw;
+  }
   bla.Printf(wxT("%.1f"), m_MinYValue);
   dc.GetTextExtent(bla, &tw, &th);
-  if (ldist < (tw + 5)) {
-    ldist = tw + 8;
-  }
+  ldist = udist + tw + 8;
   bla.Printf(wxT("%.1f"), m_MaxYValue);
   dc.GetTextExtent(bla, &tw, &th);
-  if (ldist < (tw + 5)) {
-    ldist = tw + 8;
+  if (ldist < (udist + tw + 8)) {
+    ldist = udist + tw + 8;
   }
+  if (m_XUnit != wxT("")) {
+    dc.GetTextExtent(_T("T"), &tw, &th);
+    udist = th;
+  }
+  dc.GetTextExtent(wxT("0"), &tw, &th);
+  bdist = udist + th + 8;
 
   /* tisk legendy - display legend */
-  if (m_YUnit != wxT("")) {
-    dc.SetBrush(wxBrush(m_plColor, wxSOLID));
-    dc.DrawText(m_YUnit, 5, rectY + rec.height / 2);
-  } else {
-    ldist = tw;
-  }
-  if (m_XUnit == wxT("")) {
-    dc.GetTextExtent(_T("T"), &twX, &thX);
-    bdist = thX + 5;
-  } else {
-    dc.GetTextExtent(m_XUnit, &twX, &thX);
-    bdist = thX + 5;
-    dc.SetBrush(wxBrush(m_plColor, wxSOLID));
-    dc.DrawText(m_XUnit, rectX + rec.width / 2 - 50, rectY + rec.height - bdist);
-  }
+  dc.SetBrush(wxBrush(m_plColor, wxSOLID));
+  dc.DrawText(m_YUnit, 4, rec.height / 2);
+  dc.DrawText(m_XUnit, rec.width / 2, rec.height - udist);
 
   /* spocitat jak casto se budou kreslit horizontalni cary */
   /* cara bude minimalne kazdych 30 pixelu; pocet 2,5,10,20,50 atd. */
@@ -229,25 +219,19 @@ void CtrlOScope::PaintAllFunction(wxDC& dc, int rectX, int rectY) {
     }
     nline *= 10;
   }
-  // bla.Printf("ydiv = %d", ydiv); dc.DrawText(bla, rectX+40,rectY+20);
   for (int i = 0; i <= ydiv; i++) {
     /* kresli vsechny cary - draw the lines*/
     float ystep = 1.0 * (rec.height - bdist - 5) / ydiv;
-    dc.DrawLine(rectX + ldist, (int)(rec.height + rectY - ystep * i - bdist), rectX + rec.width - 5,
-                (int)(rec.height + rectY - ystep * i - bdist));
+    dc.DrawLine(ldist, (int)(rec.height - ystep * i - bdist), rec.width - 5,
+                (int)(rec.height - ystep * i - bdist));
     bla.Printf(wxT("%.1f"), m_MinYValue + (m_MaxYValue - m_MinYValue) * i / ydiv);
     dc.GetTextExtent(bla, &tw, &th);
-    if (ydiv == i) {
-      dc.DrawText(bla, (int)(rectX + ldist - tw), (int)(rec.height + rectY - ystep * i - bdist));
-    } else {
-      dc.DrawText(bla, (int)(rectX + ldist - tw),
-                  (int)(rec.height + rectY - ystep * i - bdist - th));
-    }
+    dc.DrawText(bla, (int)(ldist - tw - 4), (int)(rec.height - ystep * i - bdist - th / 2));
   }
   if (((m_MinYValue + m_MaxYValue) < 0.01) && (1 == ydiv % 2)) {
     /* kresli nulovou caru - draw 0 line */
-    dc.DrawLine(rectX + ldist, rectY + 5 + (rec.height - bdist - 5) / 2, rectX + rec.width - 5,
-                rectY + 5 + (rec.height - bdist - 5) / 2);
+    dc.DrawLine(ldist, 5 + (rec.height - bdist - 5) / 2, rec.width - 5,
+                5 + (rec.height - bdist - 5) / 2);
   }
 
   /* spocitat jak casto se budou kreslit vertikalni cary */
@@ -272,29 +256,28 @@ void CtrlOScope::PaintAllFunction(wxDC& dc, int rectX, int rectY) {
     float xstep = 1.0 * (rec.width - ldist - 5) / ndecs;  // pocet bodu na dekadu
     for (int i = 0; i <= ndecs; i++) {
       /* kresli vsechny cary */
-      dc.DrawLine((int)(rectX + ldist + xstep * i), rectY + 5, (int)(rectX + ldist + xstep * i),
-                  rectY + rec.height - bdist);
+      dc.DrawLine((int)(ldist + xstep * i), +5, (int)(ldist + xstep * i), rec.height - bdist + 8);
       /* nakresli vnitrni cary */
       if (3 == xdiv) {
-        dc.DrawLine((int)(rectX + ldist + xstep * (i + log10(2))), rectY + 5,
-                    (int)(rectX + ldist + xstep * (i + log10(2))), rectY + rec.height - bdist);
-        dc.DrawLine((int)(rectX + ldist + xstep * (i + log10(5))), rectY + 5,
-                    (int)(rectX + ldist + xstep * (i + log10(5))), rectY + rec.height - bdist);
+        dc.DrawLine((int)(ldist + xstep * (i + log10(2))), 5, (int)(ldist + xstep * (i + log10(2))),
+                    rec.height - bdist);
+        dc.DrawLine((int)(ldist + xstep * (i + log10(5))), 5, (int)(ldist + xstep * (i + log10(5))),
+                    rec.height - bdist);
       }
       if (10 == xdiv) {
         for (int j = 2; j < 10; j++) {
-          dc.DrawLine((int)(rectX + ldist + xstep * (i + log10(j))), rectY + 5,
-                      (int)(rectX + ldist + xstep * (i + log10(j))), rectY + rec.height - bdist);
+          dc.DrawLine((int)(ldist + xstep * (i + log10(j))), 5,
+                      (int)(ldist + xstep * (i + log10(j))), rec.height - bdist);
         }
       }
-      bla.Printf(wxT("%.1f"), m_MinXValue * pow(10, i));
+      bla.Printf(wxT("%.0f"), m_MinXValue * pow(10, i));
       dc.GetTextExtent(bla, &tw, &th);
       if ((xstep * i + ldist) < (tw / 2)) {
-        dc.DrawText(bla, (int)(rectX + ldist + xstep * i), rectY + rec.height - bdist);
+        dc.DrawText(bla, (int)(ldist + xstep * i), rec.height - bdist + 8);
       } else if ((ldist + xstep * i + tw / 2) < rec.width) {
-        dc.DrawText(bla, (int)(rectX + ldist + xstep * i - tw / 2), rectY + rec.height - bdist);
+        dc.DrawText(bla, (int)(ldist + xstep * i - tw / 2), rec.height - bdist + 8);
       } else {
-        dc.DrawText(bla, (int)(rectX + ldist + xstep * i - tw), rectY + rec.height - bdist);
+        dc.DrawText(bla, (int)(ldist + xstep * i - tw), rec.height - bdist + 8);
       }
     }
 
@@ -339,11 +322,11 @@ void CtrlOScope::PaintAllFunction(wxDC& dc, int rectX, int rectY) {
               rec.height - bdist -
               (rec.height - bdist - 5) * (ydatapoint - m_MinYValue) / (m_MaxYValue - m_MinYValue);
           if (0 == i) {
-            dc.DrawPoint((int)(i + rectX + ldist), (int)(ypoint));
+            dc.DrawPoint((int)(i + ldist), (int)(ypoint));
           } else {
-            dc.DrawLine(lastx, lasty, (int)(i + rectX + ldist), (int)(ypoint));
+            dc.DrawLine(lastx, lasty, (int)(i + ldist), (int)(ypoint));
           }
-          lastx = (int)(i + rectX + ldist);
+          lastx = (int)(i + ldist);
           lasty = (int)(ypoint);
         }  // else skip the frequencies out ot FFT
       }
@@ -384,11 +367,11 @@ void CtrlOScope::PaintAllFunction(wxDC& dc, int rectX, int rectY) {
               rec.height - bdist -
               (rec.height - bdist - 5) * (ydatapoint - m_MinYValue) / (m_MaxYValue - m_MinYValue);
           if (0 == i) {
-            dc.DrawPoint((int)(i + rectX + ldist), (int)(ypoint));
+            dc.DrawPoint((int)(i + ldist), (int)(ypoint));
           } else {
-            dc.DrawLine(lastx, lasty, (int)(i + rectX + ldist), (int)(ypoint));
+            dc.DrawLine(lastx, lasty, (int)(i + ldist), (int)(ypoint));
           }
-          lastx = (int)(i + rectX + ldist);
+          lastx = (int)(i + ldist);
           lasty = (int)(ypoint);
         }  // else skip the frequencies out ot FFT
       }
@@ -416,16 +399,15 @@ void CtrlOScope::PaintAllFunction(wxDC& dc, int rectX, int rectY) {
       /* kresli vsechny cary */
       float xstep = 1.0 * (rec.width - ldist - 5) / xdiv;
 
-      dc.DrawLine((int)(rectX + xstep * i + ldist), rec.height + rectY - bdist,
-                  (int)(rectX + xstep * i + ldist), rectY + 5);
-      bla.Printf(wxT("%.1f"), m_MinXValue + (m_MaxXValue - m_MinXValue) * i / xdiv);
+      dc.DrawLine((int)(xstep * i + ldist), rec.height + bdist, (int)(xstep * i + ldist), 5);
+      bla.Printf(wxT("%.0f"), m_MinXValue + (m_MaxXValue - m_MinXValue) * i / xdiv);
       dc.GetTextExtent(bla, &tw, &th);
       if ((xstep * i + ldist) < (tw / 2)) {
-        dc.DrawText(bla, (int)(rectX + ldist + xstep * i), rectY + rec.height - bdist);
+        dc.DrawText(bla, (int)(ldist + xstep * i), rec.height - bdist + 8);
       } else if ((ldist + xstep * i + tw / 2) < rec.width) {
-        dc.DrawText(bla, (int)(rectX + ldist + xstep * i - tw / 2), rectY + rec.height - bdist);
+        dc.DrawText(bla, (int)(ldist + xstep * i - tw / 2), rec.height - bdist + 8);
       } else {
-        dc.DrawText(bla, (int)(rectX + ldist + xstep * i - tw), rectY + rec.height - bdist);
+        dc.DrawText(bla, (int)(ldist + xstep * i - tw), rec.height - bdist + 8);
       }
     }
     /* kresli body v SetTracks */
@@ -480,7 +462,7 @@ void CtrlOScope::PaintAllFunction(wxDC& dc, int rectX, int rectY) {
   }
   if (wxT("") != m_UserText) {
     dc.SetTextForeground(m_whColor);
-    dc.DrawText(m_UserText, rectX + m_UserTextPosX, rectY + m_UserTextPosY);
+    dc.DrawText(m_UserText, m_UserTextPosX, m_UserTextPosY);
   }
 }  // OnPaint
 
