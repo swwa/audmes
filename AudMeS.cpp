@@ -782,24 +782,22 @@ void MainFrame::DrawSpectrum(void) {
   wxArrayDouble ardbl;
   wxArrayDouble ardbl2;
 
+  // calculate window
   const double multiplier = 2 * M_PI / nsampl;
   switch (choice_fft->GetCurrentSelection()) {
-    case 1:
+    case 1:  // Hanning
       for (int i = 0; i < nsampl; i++) {
-        // calculate window
         windowf[i] = (1.0 + -1.0 * cos(i * multiplier)) / (double)nsampl;
       }
       break;
-    case 2:
+    case 2:  // Blackman
       for (int i = 0; i < nsampl; i++) {
-        // calculate window
         windowf[i] =
             2.4 * (0.42 - 0.5 * cos(multiplier * i) + 0.08 * cos(multiplier * i)) / (double)nsampl;
       }
       break;
-    default:
+    default:  // Rectangle
       for (int i = 0; i < nsampl; i++) {
-        // calculate window
         windowf[i] = 1.0 / (double)nsampl;
       }
       break;
@@ -819,21 +817,10 @@ void MainFrame::DrawSpectrum(void) {
   }
 
   if (fft_double(nsampl, 0, realin, NULL, realout, imagout)) {
-    /* everything is correct */
-    realout[0] = 0;
-    imagout[0] = 0;  // remove DC
-    for (unsigned long int i = 0; i < m_SamplingFreq / 2; i++) {
-      /* show only one half, this means nsampl/2 corresponds to fvz/2 */
-      float ffcomp = 1.0 * i * nsampl / m_SamplingFreq;
-      int ifcomp = (int)(ffcomp);
-      // make an averaging
-      float wt_low = ffcomp - 1.0 * ifcomp;
-      float wt_hig = 1.0 + 1.0 * ifcomp - ffcomp;
-      float outval_low =
-          sqrt(realout[ifcomp] * realout[ifcomp] + imagout[ifcomp] * imagout[ifcomp]);
-      float outval_hig = sqrt(realout[ifcomp + 1] * realout[ifcomp + 1] +
-                              imagout[ifcomp + 1] * imagout[ifcomp + 1]);
-      ardbl.Add(20.0 * log10(wt_hig * outval_low + wt_low * outval_hig) + dbscaler);
+    realout[0] = imagout[0] = 0;  // remove DC
+    /* show only one half, this means nsampl/2 corresponds to fvz/2 */
+    for (int i = 0; i < nsampl / 2; i++) {
+      ardbl.Add(20.0 * log10(sqrt(realout[i] * realout[i] + imagout[i] * imagout[i])) + dbscaler);
     }
   } else {
     /* wrong computation */
@@ -841,6 +828,7 @@ void MainFrame::DrawSpectrum(void) {
       ardbl.Add(25 * (sin(0.01 * i) + sin(0.012 * i)));
     }
   }
+
   // right channel
   for (int i = 0; i < nsampl; i++) {
     // copy and apply window
@@ -848,21 +836,10 @@ void MainFrame::DrawSpectrum(void) {
   }
 
   if (fft_double(nsampl, 0, realin, NULL, realout, imagout)) {
-    /* everything is correct */
-    realout[0] = 0;
-    imagout[0] = 0;  // remove DC
-    for (unsigned long int i = 0; i < m_SamplingFreq / 2; i++) {
-      /* show only one half, this means nsampl/2 corresponds to fvz/2 */
-      float ffcomp = 1.0 * i * nsampl / m_SamplingFreq;
-      int ifcomp = (int)(ffcomp);
-      // make an averaging
-      float wt_low = ffcomp - 1.0 * ifcomp;
-      float wt_hig = 1.0 + 1.0 * ifcomp - ffcomp;
-      float outval_low =
-          sqrt(realout[ifcomp] * realout[ifcomp] + imagout[ifcomp] * imagout[ifcomp]);
-      float outval_hig = sqrt(realout[ifcomp + 1] * realout[ifcomp + 1] +
-                              imagout[ifcomp + 1] * imagout[ifcomp + 1]);
-      ardbl2.Add(20.0 * log10(wt_hig * outval_low + wt_low * outval_hig) + dbscaler);
+    realout[0] = imagout[0] = 0;  // remove DC
+    /* show only one half, this means nsampl/2 corresponds to fvz/2 */
+    for (int i = 0; i < nsampl / 2; i++) {
+      ardbl2.Add(20.0 * log10(sqrt(realout[i] * realout[i] + imagout[i] * imagout[i])) + dbscaler);
     }
   } else {
     /* wrong computation */

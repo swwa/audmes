@@ -282,42 +282,35 @@ void CtrlOScope::PaintAllFunction(wxDC& dc) {
     }
 
     /* zobrazit body - draw data */
-    // bla.Printf("Pocet bodu: %d", m_points.GetCount()); wxMessageBox(bla,"D",wxOK);
+    float binsize = 0.5 * m_fsampling / m_points.GetCount();
 
     // left channel
     dc.SetPen(wxPen(m_trColor, 1, wxSOLID));
     int lastx = 0, lasty = 0;
+    float lastxfreq = 0.0;
     // new plot function - walking through X points and select values from the table
     if (m_points.GetCount() > 0) {
       for (long int i = 0; i < rec.width - ldist - 5; i++) {
         // find the frequency
         float xfreq = m_MinXValue * pow(10, i / xstep);
+        if ((binsize > xfreq - lastxfreq) && i > 0) continue;
         // find the position in the m_points[] array
-        unsigned long int xposit =
-            (unsigned long int)((xfreq / m_fsampling) * 2 * m_points.GetCount());
+        unsigned long int xposit = (unsigned long int)(xfreq / binsize);
 
         if (xposit < m_points.GetCount()) {
           /* iterate though all fft bins between x and the next x position in the graph */
           float nxfreq = m_MinXValue * pow(10, (i + 1) / xstep);
-          unsigned long int nxposit =
-              (unsigned long int)((nxfreq / m_fsampling) * 2 * m_points.GetCount());
+          unsigned long int nxposit = (unsigned long int)(nxfreq / binsize);
           if (nxposit >= m_points.GetCount()) {
             nxposit = m_points.GetCount() - 1;
           }
           float ydatapoint = -150.0;
           for (unsigned long int j = xposit; j <= nxposit; j++) {
-            if ((float)m_points[j] > ydatapoint) {
-              ydatapoint = m_points[j];
-            }
+            if ((float)m_points[j] > ydatapoint) ydatapoint = m_points[j];
           }
 
-          if (ydatapoint > m_MaxYValue) {
-            ydatapoint = m_MaxYValue;
-          }
-          if (ydatapoint < m_MinYValue) {
-            ydatapoint = m_MinYValue;
-          }
-
+          if (ydatapoint > m_MaxYValue) ydatapoint = m_MaxYValue;
+          if (ydatapoint < m_MinYValue) ydatapoint = m_MinYValue;
           float ypoint =
               rec.height - bdist -
               (rec.height - bdist - 5) * (ydatapoint - m_MinYValue) / (m_MaxYValue - m_MinYValue);
@@ -328,41 +321,37 @@ void CtrlOScope::PaintAllFunction(wxDC& dc) {
           }
           lastx = (int)(i + ldist);
           lasty = (int)(ypoint);
-        }  // else skip the frequencies out ot FFT
+          if (i > 0) lastxfreq = xposit * binsize;
+        }
       }
     }
+
     // right channel
     dc.SetPen(wxPen(m_tr2Color, 1, wxSOLID));
+    lastx = 0, lasty = 0;
+    lastxfreq = 0.0;
     if (m_points2.GetCount() > 0) {
       for (long int i = 0; i < rec.width - ldist - 5; i++) {
         // find the frequency
         float xfreq = m_MinXValue * pow(10, i / xstep);
-        // find the position in the m_points[] array
-        unsigned long int xposit =
-            (unsigned long int)((xfreq / m_fsampling) * 2 * m_points2.GetCount());
+        if ((binsize > xfreq - lastxfreq) && i > 0) continue;
+        // find the position in the m_points2[] array
+        unsigned long int xposit = (unsigned long int)(xfreq / binsize);
 
         if (xposit < m_points2.GetCount()) {
           /* iterate though all fft bins between x and the next x position in the graph */
           float nxfreq = m_MinXValue * pow(10, (i + 1) / xstep);
-          unsigned long int nxposit =
-              (unsigned long int)((nxfreq / m_fsampling) * 2 * m_points2.GetCount());
+          unsigned long int nxposit = (unsigned long int)(nxfreq / binsize);
           if (nxposit >= m_points2.GetCount()) {
             nxposit = m_points2.GetCount() - 1;
           }
           float ydatapoint = -150.0;
           for (unsigned long int j = xposit; j <= nxposit; j++) {
-            if ((float)m_points2[j] > ydatapoint) {
-              ydatapoint = m_points2[j];
-            }
+            if ((float)m_points2[j] > ydatapoint) ydatapoint = m_points2[j];
           }
 
-          if (ydatapoint > m_MaxYValue) {
-            ydatapoint = m_MaxYValue;
-          }
-          if (ydatapoint < m_MinYValue) {
-            ydatapoint = m_MinYValue;
-          }
-
+          if (ydatapoint > m_MaxYValue) ydatapoint = m_MaxYValue;
+          if (ydatapoint < m_MinYValue) ydatapoint = m_MinYValue;
           float ypoint =
               rec.height - bdist -
               (rec.height - bdist - 5) * (ydatapoint - m_MinYValue) / (m_MaxYValue - m_MinYValue);
@@ -373,7 +362,8 @@ void CtrlOScope::PaintAllFunction(wxDC& dc) {
           }
           lastx = (int)(i + ldist);
           lasty = (int)(ypoint);
-        }  // else skip the frequencies out ot FFT
+          if (i > 0) lastxfreq = xposit * binsize;
+        }
       }
     }
 
