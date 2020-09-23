@@ -216,6 +216,11 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
   choice_fftlength = new wxChoice(notebook_1_spe, ID_FFTLENGTH, wxDefaultPosition, wxDefaultSize,
                                   10, choice_fftlength_choices, 0);
 
+  label_rx = new wxStaticText(notebook_1_spe, -1, wxT("Freq:"));
+  const wxString choice_fftry_choices[] = {wxT("20-20k"), wxT("10-100k")};
+  choice_fftrx = new wxChoice(notebook_1_spe, ID_FFTWINDOW, wxDefaultPosition, wxDefaultSize, 2,
+                            choice_fftry_choices, 0);
+
   window_1_spe = new CtrlOScope(notebook_1_spe, _T("Hz"), _T("dB"), 1);
   button_osc_start_copy = new wxToggleButton(notebook_1_spe, ID_SPANSTART, wxT("Start"));
 
@@ -254,6 +259,7 @@ void MainFrame::set_properties() {
   choice_osc_trig_edge->SetSelection(0);
   choice_fft->SetSelection(1);
   choice_fftlength->SetSelection(4);
+  choice_fftrx->SetSelection(1);
   // end wxGlade
 }
 
@@ -383,6 +389,7 @@ void MainFrame::do_layout() {
   notebook_1_osc->SetSizer(sizer_9);
   sizer_9->Fit(notebook_1_osc);
   sizer_9->SetSizeHints(notebook_1_osc);
+
   // analyzer
   sizer_17->Add(label_5, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
   sizer_17->Add(choice_fft, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
@@ -390,6 +397,9 @@ void MainFrame::do_layout() {
   sizer_17->Add(label_9, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
   sizer_17->Add(choice_fftlength, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
                 5);
+  sizer_17->Add(20, 20, 0, 0, 0);
+  sizer_17->Add(label_rx, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
+  sizer_17->Add(choice_fftrx, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
   sizer_17->Add(20, 20, 0, 0, 0);
   sizer_10_copy->Add(sizer_17, 0, wxEXPAND, 0);
   sizer_10_copy->Add(window_1_spe, 1, wxEXPAND, 0);
@@ -400,6 +410,7 @@ void MainFrame::do_layout() {
   notebook_1_spe->SetSizer(sizer_9_copy);
   sizer_9_copy->Fit(notebook_1_spe);
   sizer_9_copy->SetSizeHints(notebook_1_spe);
+
   // frequency response
   sizer_17_frm->Add(label_1_frm, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
   sizer_17_frm->Add(text_ctrl1_frm, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
@@ -850,7 +861,14 @@ void MainFrame::DrawSpectrum(void) {
 
   window_1_spe->SetTrack(ardbl);
   window_1_spe->SetTrack2(ardbl2);
-
+  switch (choice_fftrx->GetCurrentSelection()) {
+    case 1:
+      window_1_spe->SetXRange(10, 100000, 1);
+      break;
+    default:
+      window_1_spe->SetXRange(10, 10000, 1);
+      break;
+  }
   free(realin);
   free(realout);
   free(imagout);
