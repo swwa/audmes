@@ -1,8 +1,13 @@
+2020-09-24
+----------
+- Improve FFT interpolation.
+- Add second channel to frequency response.
+
 2020-07-01
 ----------
- - Migrate to CMake.
- - Migrate README to markdown and move change list to NEWS.
- - Migrated project from subversion to git.
+- Migrate to CMake.
+- Migrate README to markdown and move change list to NEWS.
+- Migrated project from subversion to git.
 
 2019-09-25
 ----------
