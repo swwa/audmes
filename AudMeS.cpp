@@ -459,7 +459,7 @@ void MainFrame::set_custom_props() {
   window_1_spe->SetFsample(m_SamplingFreq);
 
   /* freq response */
-  window_1_frm->SetXRange(20, 20000, 1);
+  window_1_frm->SetXRange(10, 100000, 1);
   window_1_frm->SetYRange(-100, 0, 0, 1);
 
   g_OscBufferChanged = 0;
