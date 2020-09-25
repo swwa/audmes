@@ -590,17 +590,17 @@ void MainFrame::DrawFreqResponse(void) {
   right.Clear();
   /* make the linear interpolation of points for each 1Hz */
   /* initial values are the first step */
-  double upfreq = m_frm_freqs[0];
-  double lupgain = m_frm_lgains[0];
-  double rupgain = m_frm_rgains[0];
+  double upfreq = 0;
+  double lupgain = 0.00000001;
+  double rupgain = 0.00000001;
   double botfreq = 0;
   double lbotgain = 0.00000001;
   double rbotgain = 0.00000001;
-  unsigned long int arrpointer = 1;
+  unsigned long int arrpointer = 0;
   for (unsigned long int i = 0; i < m_SamplingFreq / 2; i++) {
     if (i > (unsigned long int)upfreq) {
       /* next value from arrays */
-      if ((arrpointer + 1) > m_frm_freqs.GetCount()) {
+      if ((arrpointer) >= m_frm_freqs.GetCount()) {
         lbotgain = lupgain;
         rbotgain = rupgain;
         lupgain = rupgain = 0.00000001;
@@ -942,6 +942,7 @@ void MainFrame::OnFrmStart(wxCommandEvent& WXUNUSED(event)) {
       wxString bla;
       bla.Printf(wxT("Frequency : %.1f "), freq);
       window_1_frm->ShowUserText(bla, 100, 20);
+      DrawFreqResponse();
       sleep(400);
       wxYield();
       sleep(400);
@@ -960,7 +961,6 @@ void MainFrame::OnFrmStart(wxCommandEvent& WXUNUSED(event)) {
       m_frm_freqs.Add(freq);
       m_frm_lgains.Add((l_max - l_min) / 65536.0);
       m_frm_rgains.Add((r_max - r_min) / 65536.0);
-      DrawFreqResponse();
 
       if (0 == frm_running) break;
     }
