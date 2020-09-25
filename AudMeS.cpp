@@ -594,15 +594,16 @@ void MainFrame::DrawFreqResponse(void) {
   double lupgain = m_frm_lgains[0];
   double rupgain = m_frm_rgains[0];
   double botfreq = 0;
-  double lbotgain = m_frm_lgains[0];
-  double rbotgain = m_frm_rgains[0];
+  double lbotgain = 0.00000001;
+  double rbotgain = 0.00000001;
   unsigned long int arrpointer = 1;
   for (unsigned long int i = 0; i < m_SamplingFreq / 2; i++) {
     if (i > (unsigned long int)upfreq) {
       /* next value from arrays */
       if ((arrpointer + 1) > m_frm_freqs.GetCount()) {
-        /* break */
-        break;
+        lbotgain = lupgain;
+        rbotgain = rupgain;
+        lupgain = rupgain = 0.00000001;
       } else {
         botfreq = upfreq;
         lbotgain = lupgain;
@@ -866,10 +867,6 @@ void MainFrame::OnTimer(wxTimerEvent& WXUNUSED(event)) {
   if (0 != g_SpeBufferChanged && button_osc_start_copy->GetValue()) {
     DrawSpectrum();
   }
-  // frequency response
-  if (button_frm_start->GetValue() && 0 < m_frm_freqs.GetCount()) {
-    DrawFreqResponse();
-  }
   g_SpeBufferChanged = 0;
 }
 
@@ -950,7 +947,6 @@ void MainFrame::OnFrmStart(wxCommandEvent& WXUNUSED(event)) {
       sleep(400);
       wxYield();
       // find maximum value in the grabbed wave and store it as a result
-      m_frm_freqs.Add(freq);
       double l_min = g_SpeBuffer_Left[0];
       double l_max = g_SpeBuffer_Left[0];
       double r_min = g_SpeBuffer_Right[0];
@@ -961,12 +957,15 @@ void MainFrame::OnFrmStart(wxCommandEvent& WXUNUSED(event)) {
         if (g_SpeBuffer_Right[ii] > r_max) r_max = g_SpeBuffer_Right[ii];
         if (g_SpeBuffer_Right[ii] < r_min) r_min = g_SpeBuffer_Right[ii];
       }
+      m_frm_freqs.Add(freq);
       m_frm_lgains.Add((l_max - l_min) / 65536.0);
       m_frm_rgains.Add((r_max - r_min) / 65536.0);
+      DrawFreqResponse();
 
       if (0 == frm_running) break;
     }
     button_frm_start->SetValue(false);
+    DrawFreqResponse();
   }
   button_frm_start->SetLabel(_T("Start"));
   frm_running = 0;
