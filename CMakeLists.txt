@@ -45,3 +45,8 @@ if (WIN32)
         add_definitions(-D__WINDOWS_DS__ -D__WXMSW__)
 	target_link_libraries(${PROJECT_NAME} -mwindows -static ${wxWidgets_LIBRARIES} dsound)
 endif()
+
+install(TARGETS "AudMeS" DESTINATION "bin")
+install(FILES "audmes.desktop" DESTINATION "share/applications")
+install(FILES "audmes.png" DESTINATION "share/pixmaps")
+install(FILES "audmes.png" DESTINATION "share/icons/hicolor/128x128/apps/")

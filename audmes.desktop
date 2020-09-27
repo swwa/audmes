@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.1
+Type=Application
+Name=AudMeS
+GenericName=AudMeS
+Comment=Audio Measurement System
+Icon=audmes
+Exec=AudMeS
+Actions=
+Categories=AudioVideo;
