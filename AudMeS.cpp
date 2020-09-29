@@ -83,6 +83,8 @@ long int g_SpeBufferPosition;
 int g_OscBufferChanged;
 int g_SpeBufferChanged;
 
+static const int frm_low = 20;
+
 ///////////////////////////////////////////////////////////////////////
 MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPoint& pos,
                      const wxSize& size, long WXUNUSED(style))
@@ -459,7 +461,7 @@ void MainFrame::set_custom_props() {
   window_1_spe->SetFsample(m_SamplingFreq);
 
   /* freq response */
-  window_1_frm->SetXRange(10, 100000, 1);
+  window_1_frm->SetXRange(10, 20000, 1);
   window_1_frm->SetYRange(-100, 0, 0, 1);
 
   g_OscBufferChanged = 0;
@@ -590,7 +592,7 @@ void MainFrame::DrawFreqResponse(void) {
   right.Clear();
   /* make the linear interpolation of points for each 1Hz */
   /* initial values are the first step */
-  double upfreq = 0;
+  double upfreq = frm_low - 1;
   double lupgain = 0.00000001;
   double rupgain = 0.00000001;
   double botfreq = 0;
@@ -936,7 +938,7 @@ void MainFrame::OnFrmStart(wxCommandEvent& WXUNUSED(event)) {
     m_frm_rgains.Clear();
     for (int i = 0; i <= (int)ipoints; i++) {
       // from 20Hz to 20kHz
-      float freq = 20.0 * pow(10.0, 3.0 * i / ipoints);
+      float freq = frm_low * pow(10.0, 3.0 * i / ipoints);
       m_RWAudio->PlaySetGenerator(freq, freq, 0, 0, pow(10, slide_l_am->GetValue() / 20.0),
                                   pow(10, slide_r_am->GetValue() / 20.0));
       wxString bla;
