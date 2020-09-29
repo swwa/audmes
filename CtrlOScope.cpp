@@ -163,9 +163,11 @@ void CtrlOScope::PaintAllFunction(wxDC& dc) {
   wxRect rec = GetClientRect();
   wxString bla;
   int tw, th;
-  int ldist = 0;  // legend space on the left
-  int bdist = 0;  // legend space on bottom
-  int udist = 0;  // unit text space
+  int ldist = 0;   // legend space on the left
+  int rdist = 20;  // space on the right
+  int tdist = 10;  // space on top
+  int bdist = 0;   // legend space on bottom
+  int udist = 0;   // unit text space
 
   /* kresli pozadi - draw background */
   dc.SetPen(wxPen(m_bgColor, 1, wxSOLID));
@@ -203,35 +205,15 @@ void CtrlOScope::PaintAllFunction(wxDC& dc) {
   dc.DrawText(m_YUnit, 4, rec.height / 2);
   dc.DrawText(m_XUnit, rec.width / 2, rec.height - udist);
 
-  /* spocitat jak casto se budou kreslit horizontalni cary */
-  /* cara bude minimalne kazdych 30 pixelu; pocet 2,5,10,20,50 atd. */
-  /* calculate number of horizontal lines in the graph */
-  int nline = 50;
-  int ydiv = 0;
-  int nstrt = nline;
-  while (ydiv == 0) {
-    if (rec.height < nline) {
-      ydiv = 1 * nline / nstrt;
-    } else if (rec.height < 2 * nline) {
-      ydiv = 2 * nline / nstrt;
-    } else if (rec.height < 5 * nline) {
-      ydiv = 5 * nline / nstrt;
-    }
-    nline *= 10;
-  }
+  int ydiv = 10; /* fixed number of horizontal lines */
   for (int i = 0; i <= ydiv; i++) {
     /* kresli vsechny cary - draw the lines*/
-    float ystep = 1.0 * (rec.height - bdist - 5) / ydiv;
-    dc.DrawLine(ldist, (int)(rec.height - ystep * i - bdist), rec.width - 5,
+    float ystep = 1.0 * (rec.height - bdist - tdist) / ydiv;
+    dc.DrawLine(ldist, (int)(rec.height - ystep * i - bdist), rec.width - rdist,
                 (int)(rec.height - ystep * i - bdist));
     bla.Printf(wxT("%.1f"), m_MinYValue + (m_MaxYValue - m_MinYValue) * i / ydiv);
     dc.GetTextExtent(bla, &tw, &th);
     dc.DrawText(bla, (int)(ldist - tw - 4), (int)(rec.height - ystep * i - bdist - th / 2));
-  }
-  if (((m_MinYValue + m_MaxYValue) < 0.01) && (1 == ydiv % 2)) {
-    /* kresli nulovou caru - draw 0 line */
-    dc.DrawLine(ldist, 5 + (rec.height - bdist - 5) / 2, rec.width - 5,
-                5 + (rec.height - bdist - 5) / 2);
   }
 
   /* spocitat jak casto se budou kreslit vertikalni cary */
@@ -241,36 +223,42 @@ void CtrlOScope::PaintAllFunction(wxDC& dc) {
   if (1 == m_LogX) {
     /* logaritmicke meritko - spocitat pocet dekad a potom neco dale */
     /* cara bude minimalne kazdych 100 pixelu na dekadu; pak bude 1, 3, 10 */
-    int ndecs = (int)(log10(m_MaxXValue / m_MinXValue) + .9);
+    float ndecs = log10(m_MaxXValue / m_MinXValue);
     float npix = rec.width / ndecs;
     int xdiv;
 
-    if (npix < 70) {
+    if (npix < 100) {
       xdiv = 1;
-    } else if (npix < 200) {
+    } else if (npix < 300) {
       xdiv = 3;
     } else {
       xdiv = 10;
     }
 
-    float xstep = 1.0 * (rec.width - ldist - 5) / ndecs;  // pocet bodu na dekadu
+    float xstep = 1.0 * (rec.width - ldist - rdist) / ndecs;  // pocet bodu na dekadu
     for (int i = 0; i <= ndecs; i++) {
       /* kresli vsechny cary */
-      dc.DrawLine((int)(ldist + xstep * i), +5, (int)(ldist + xstep * i), rec.height - bdist + 8);
+      dc.DrawLine((int)(ldist + xstep * i), tdist, (int)(ldist + xstep * i),
+                  rec.height - bdist + 8);
       /* nakresli vnitrni cary */
       if (3 == xdiv) {
-        dc.DrawLine((int)(ldist + xstep * (i + log10(2))), 5, (int)(ldist + xstep * (i + log10(2))),
-                    rec.height - bdist);
-        dc.DrawLine((int)(ldist + xstep * (i + log10(5))), 5, (int)(ldist + xstep * (i + log10(5))),
-                    rec.height - bdist);
+        dc.DrawLine((int)(ldist + xstep * (i + log10(2))), tdist,
+                    (int)(ldist + xstep * (i + log10(2))), rec.height - bdist);
+        dc.DrawLine((int)(ldist + xstep * (i + log10(5))), tdist,
+                    (int)(ldist + xstep * (i + log10(5))), rec.height - bdist);
       }
       if (10 == xdiv) {
         for (int j = 2; j < 10; j++) {
-          dc.DrawLine((int)(ldist + xstep * (i + log10(j))), 5,
+          dc.DrawLine((int)(ldist + xstep * (i + log10(j))), tdist,
                       (int)(ldist + xstep * (i + log10(j))), rec.height - bdist);
         }
       }
-      bla.Printf(wxT("%.0f"), m_MinXValue * pow(10, i));
+      int cf = (int)(m_MinXValue * pow(10, i));
+      int cfk = cf / 1000;
+      if (cfk >= 1)
+        bla.Printf(wxT("%dk"), cfk);
+      else
+        bla.Printf(wxT("%d"), cf);
       dc.GetTextExtent(bla, &tw, &th);
       if ((xstep * i + ldist) < (tw / 2)) {
         dc.DrawText(bla, (int)(ldist + xstep * i), rec.height - bdist + 8);
@@ -290,7 +278,7 @@ void CtrlOScope::PaintAllFunction(wxDC& dc) {
     float lastxfreq = 0.0;
     // new plot function - walking through X points and select values from the table
     if (m_points.GetCount() > 0) {
-      for (long int i = 0; i < rec.width - ldist - 5; i++) {
+      for (long int i = 0; i < rec.width - ldist - rdist; i++) {
         // find the frequency
         float xfreq = m_MinXValue * pow(10, i / xstep);
         if ((binsize > xfreq - lastxfreq) && i > 0) continue;
@@ -311,9 +299,9 @@ void CtrlOScope::PaintAllFunction(wxDC& dc) {
 
           if (ydatapoint > m_MaxYValue) ydatapoint = m_MaxYValue;
           if (ydatapoint < m_MinYValue) ydatapoint = m_MinYValue;
-          float ypoint =
-              rec.height - bdist -
-              (rec.height - bdist - 5) * (ydatapoint - m_MinYValue) / (m_MaxYValue - m_MinYValue);
+          float ypoint = rec.height - bdist -
+                         (rec.height - bdist - tdist) * (ydatapoint - m_MinYValue) /
+                             (m_MaxYValue - m_MinYValue);
           if (0 == i) {
             dc.DrawPoint((int)(i + ldist), (int)(ypoint));
           } else {
@@ -331,7 +319,7 @@ void CtrlOScope::PaintAllFunction(wxDC& dc) {
     lastx = 0, lasty = 0;
     lastxfreq = 0.0;
     if (m_points2.GetCount() > 0) {
-      for (long int i = 0; i < rec.width - ldist - 5; i++) {
+      for (long int i = 0; i < rec.width - ldist - rdist; i++) {
         // find the frequency
         float xfreq = m_MinXValue * pow(10, i / xstep);
         if ((binsize > xfreq - lastxfreq) && i > 0) continue;
@@ -352,9 +340,9 @@ void CtrlOScope::PaintAllFunction(wxDC& dc) {
 
           if (ydatapoint > m_MaxYValue) ydatapoint = m_MaxYValue;
           if (ydatapoint < m_MinYValue) ydatapoint = m_MinYValue;
-          float ypoint =
-              rec.height - bdist -
-              (rec.height - bdist - 5) * (ydatapoint - m_MinYValue) / (m_MaxYValue - m_MinYValue);
+          float ypoint = rec.height - bdist -
+                         (rec.height - bdist - tdist) * (ydatapoint - m_MinYValue) /
+                             (m_MaxYValue - m_MinYValue);
           if (0 == i) {
             dc.DrawPoint((int)(i + ldist), (int)(ypoint));
           } else {
@@ -385,11 +373,10 @@ void CtrlOScope::PaintAllFunction(wxDC& dc) {
       nline *= 10;
     }
 
+    float xstep = 1.0 * (rec.width - ldist - rdist) / xdiv;
     for (int i = 0; i <= xdiv; i++) {
       /* kresli vsechny cary */
-      float xstep = 1.0 * (rec.width - ldist - 5) / xdiv;
-
-      dc.DrawLine((int)(xstep * i + ldist), rec.height + bdist, (int)(xstep * i + ldist), 5);
+      dc.DrawLine((int)(ldist + xstep * i), tdist, (int)(ldist + xstep * i), rec.height - bdist);
       bla.Printf(wxT("%.0f"), m_MinXValue + (m_MaxXValue - m_MinXValue) * i / xdiv);
       dc.GetTextExtent(bla, &tw, &th);
       if ((xstep * i + ldist) < (tw / 2)) {
@@ -407,7 +394,7 @@ void CtrlOScope::PaintAllFunction(wxDC& dc) {
     for (unsigned int i = 0; i < m_points.GetCount(); i++) {
       /* prepocitat vstupni bod na X osu */
       // float xpoint = i+ldist; // linearni zavislost
-      xpoint = ldist + i * (rec.width - ldist - 5) / (m_MaxXValue - m_MinXValue);
+      xpoint = ldist + i * (rec.width - ldist - rdist) / (m_MaxXValue - m_MinXValue);
       /* prepocitat Y hodnotu na Y osu - orezat hodnoty */
       if (m_points[i] > m_MaxYValue) {
         m_points[i] = m_MaxYValue;
@@ -417,7 +404,7 @@ void CtrlOScope::PaintAllFunction(wxDC& dc) {
       }
       float ypoint =
           rec.height - bdist -
-          (rec.height - bdist - 5) * (m_points[i] - m_MinYValue) / (m_MaxYValue - m_MinYValue);
+          (rec.height - bdist - tdist) * (m_points[i] - m_MinYValue) / (m_MaxYValue - m_MinYValue);
       if (0 == i) {
         dc.DrawLine((int)(xpoint), (int)(ypoint), (int)(xpoint), (int)(ypoint));
       } else {
@@ -430,7 +417,7 @@ void CtrlOScope::PaintAllFunction(wxDC& dc) {
     for (unsigned int i = 0; i < m_points2.GetCount(); i++) {
       /* prepocitat vstupni bod na X osu */
       // float xpoint = i+ldist; // linearni zavislost
-      xpoint = ldist + i * (rec.width - ldist - 5) / (m_MaxXValue - m_MinXValue);
+      xpoint = ldist + i * (rec.width - ldist - rdist) / (m_MaxXValue - m_MinXValue);
       /* prepocitat Y hodnotu na Y osu - orezat hodnoty */
       if (m_points2[i] > m_MaxYValue) {
         m_points2[i] = m_MaxYValue;
@@ -440,7 +427,7 @@ void CtrlOScope::PaintAllFunction(wxDC& dc) {
       }
       float ypoint =
           rec.height - bdist -
-          (rec.height - bdist - 5) * (m_points2[i] - m_MinYValue) / (m_MaxYValue - m_MinYValue);
+          (rec.height - bdist - tdist) * (m_points2[i] - m_MinYValue) / (m_MaxYValue - m_MinYValue);
       if (0 == i) {
         dc.DrawLine((int)(xpoint), (int)(ypoint), (int)(xpoint), (int)(ypoint));
       } else {
