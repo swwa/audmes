@@ -221,13 +221,12 @@ void CtrlOScope::PaintAllFunction(wxDC& dc) {
   /* ******************************************************************* */
   /* vertical lines depending on linear or log scale  */
   if (1 == m_LogX) {
-    /* logaritmicke meritko - spocitat pocet dekad a potom neco dale */
-    /* cara bude minimalne kazdych 100 pixelu na dekadu; pak bude 1, 3, 10 */
+
+    /* draw vertical lines */
     float ndecs = log10(m_MaxXValue / m_MinXValue);
     float xstep = (rec.width - ldist - rdist) / ndecs;
-
     int decade = log10(m_MinXValue);
-    int freq = m_MinXValue;
+    double freq = m_MinXValue;
     while (freq <= m_MaxXValue) {
       dc.DrawLine((int)(ldist + xstep * log10(freq / m_MinXValue)), tdist,
                   (int)(ldist + xstep * log10(freq / m_MinXValue)), rec.height - bdist);
@@ -243,7 +242,7 @@ void CtrlOScope::PaintAllFunction(wxDC& dc) {
                     rec.height - bdist + 8);
       }
       freq += pow(10, decade);
-      if (log10(freq) - 1 == decade) {
+      if (log10(freq) - 1 >= decade) {
         decade++;
       }
     }
