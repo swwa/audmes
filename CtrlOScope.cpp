@@ -36,8 +36,6 @@
 
 #include <math.h>
 
-#include <wx/arrimpl.cpp>  // this is a magic incantation which must be done!
-
 /////////////////////////////////////////////////////////////////////////////
 // CtrlOScope
 CtrlOScope::CtrlOScope(wxWindow* parent, wxString xname, wxString yname, int tracks)
