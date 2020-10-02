@@ -451,6 +451,8 @@ void MainFrame::set_custom_props() {
   choice_osc_l_swp_copy->GetString(choice_osc_l_swp_copy->GetCurrentSelection())
       .ToDouble(&sweep_div);
   m_OscBufferLength = (long)(10 * sweep_div);
+
+  /* oscilloscope */
   window_1->SetXRange(0, sweep_div * 10, 0);
   window_1->SetYRange(-1, 1, 0, 1);
   window_1->SetNumOfVerticals(10);
@@ -461,8 +463,8 @@ void MainFrame::set_custom_props() {
   window_1_spe->SetFsample(m_SamplingFreq);
 
   /* freq response */
-  window_1_frm->SetXRange(10, 20000, 1);
-  window_1_frm->SetYRange(-100, 0, 0, 1);
+  window_1_frm->SetXRange(20, 20000, 1);
+  window_1_frm->SetYRange(-80, 0, 0, 1);
 
   g_OscBufferChanged = 0;
   g_SpeBufferChanged = 0;
@@ -949,20 +951,17 @@ void MainFrame::OnFrmStart(wxCommandEvent& WXUNUSED(event)) {
       wxYield();
       sleep(400);
       wxYield();
-      // find maximum value in the grabbed wave and store it as a result
-      double l_min = g_SpeBuffer_Left[0];
-      double l_max = g_SpeBuffer_Left[0];
-      double r_min = g_SpeBuffer_Right[0];
-      double r_max = g_SpeBuffer_Right[0];
-      for (unsigned long int ii = 1; ii < m_SpeBufferLength; ii++) {
-        if (g_SpeBuffer_Left[ii] > l_max) l_max = g_SpeBuffer_Left[ii];
-        if (g_SpeBuffer_Left[ii] < l_min) l_min = g_SpeBuffer_Left[ii];
-        if (g_SpeBuffer_Right[ii] > r_max) r_max = g_SpeBuffer_Right[ii];
-        if (g_SpeBuffer_Right[ii] < r_min) r_min = g_SpeBuffer_Right[ii];
+      // find RMS value in the grabbed wave and store it as a result
+      // TODO: depends on the spectrum buffer size - which may be small
+      double l_rms = 0;
+      double r_rms = 0;
+      for (unsigned long int ii = 0; ii < m_SpeBufferLength; ii++) {
+        l_rms += g_SpeBuffer_Left[ii] / 32768.0 * g_SpeBuffer_Left[ii] / 32768.0;
+        r_rms += g_SpeBuffer_Right[ii] / 32768.0 * g_SpeBuffer_Right[ii] / 32768.0;
       }
       m_frm_freqs.Add(freq);
-      m_frm_lgains.Add((l_max - l_min) / 65536.0);
-      m_frm_rgains.Add((r_max - r_min) / 65536.0);
+      m_frm_lgains.Add(sqrt(l_rms / m_SpeBufferLength));
+      m_frm_rgains.Add(sqrt(r_rms / m_SpeBufferLength));
 
       if (0 == frm_running) break;
     }
