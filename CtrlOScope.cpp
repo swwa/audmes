@@ -205,7 +205,9 @@ void CtrlOScope::PaintAllFunction(wxDC& dc) {
   dc.DrawText(m_YUnit, 4, rec.height / 2);
   dc.DrawText(m_XUnit, rec.width / 2, rec.height - udist);
 
-  int ydiv = 10; /* fixed number of horizontal lines */
+  int ydiv = 10; /* number of horizontal lines */
+  if (m_MaxYValue - m_MinYValue > 19) ydiv = (m_MaxYValue - m_MinYValue) / 10;
+
   for (int i = 0; i <= ydiv; i++) {
     /* kresli vsechny cary - draw the lines*/
     float ystep = 1.0 * (rec.height - bdist - tdist) / ydiv;
@@ -224,48 +226,27 @@ void CtrlOScope::PaintAllFunction(wxDC& dc) {
     /* logaritmicke meritko - spocitat pocet dekad a potom neco dale */
     /* cara bude minimalne kazdych 100 pixelu na dekadu; pak bude 1, 3, 10 */
     float ndecs = log10(m_MaxXValue / m_MinXValue);
-    float npix = rec.width / ndecs;
-    int xdiv;
+    float xstep = (rec.width - ldist - rdist) / ndecs;
 
-    if (npix < 100) {
-      xdiv = 1;
-    } else if (npix < 300) {
-      xdiv = 3;
-    } else {
-      xdiv = 10;
-    }
-
-    float xstep = 1.0 * (rec.width - ldist - rdist) / ndecs;  // pocet bodu na dekadu
-    for (int i = 0; i <= ndecs; i++) {
-      /* kresli vsechny cary */
-      dc.DrawLine((int)(ldist + xstep * i), tdist, (int)(ldist + xstep * i),
-                  rec.height - bdist + 8);
-      /* nakresli vnitrni cary */
-      if (3 == xdiv) {
-        dc.DrawLine((int)(ldist + xstep * (i + log10(2))), tdist,
-                    (int)(ldist + xstep * (i + log10(2))), rec.height - bdist);
-        dc.DrawLine((int)(ldist + xstep * (i + log10(5))), tdist,
-                    (int)(ldist + xstep * (i + log10(5))), rec.height - bdist);
+    int decade = log10(m_MinXValue);
+    int freq = m_MinXValue;
+    while (freq <= m_MaxXValue) {
+      dc.DrawLine((int)(ldist + xstep * log10(freq / m_MinXValue)), tdist,
+                  (int)(ldist + xstep * log10(freq / m_MinXValue)), rec.height - bdist);
+      if (log10(freq) == decade || log10(freq / 2) == decade || log10(freq / 5) == decade) {
+        int cf = (int)freq;
+        int cfk = cf / 1000;
+        if (cfk >= 1)
+          bla.Printf(wxT("%dk"), cfk);
+        else
+          bla.Printf(wxT("%d"), cf);
+        dc.GetTextExtent(bla, &tw, &th);
+        dc.DrawText(bla, (int)(ldist + xstep * log10(freq / m_MinXValue) - tw / 2),
+                    rec.height - bdist + 8);
       }
-      if (10 == xdiv) {
-        for (int j = 2; j < 10; j++) {
-          dc.DrawLine((int)(ldist + xstep * (i + log10(j))), tdist,
-                      (int)(ldist + xstep * (i + log10(j))), rec.height - bdist);
-        }
-      }
-      int cf = (int)(m_MinXValue * pow(10, i));
-      int cfk = cf / 1000;
-      if (cfk >= 1)
-        bla.Printf(wxT("%dk"), cfk);
-      else
-        bla.Printf(wxT("%d"), cf);
-      dc.GetTextExtent(bla, &tw, &th);
-      if ((xstep * i + ldist) < (tw / 2)) {
-        dc.DrawText(bla, (int)(ldist + xstep * i), rec.height - bdist + 8);
-      } else if ((ldist + xstep * i + tw / 2) < rec.width) {
-        dc.DrawText(bla, (int)(ldist + xstep * i - tw / 2), rec.height - bdist + 8);
-      } else {
-        dc.DrawText(bla, (int)(ldist + xstep * i - tw), rec.height - bdist + 8);
+      freq += pow(10, decade);
+      if (log10(freq) - 1 == decade) {
+        decade++;
       }
     }
 
