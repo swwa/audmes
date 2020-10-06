@@ -441,6 +441,12 @@ void MainFrame::set_custom_props() {
 #ifdef __WXMSW__
   SetIcon(wxICON(AudMeSIcon));
 #endif
+
+#ifdef __LINUX__
+#include "audmes.xpm"
+  SetIcon(wxICON(audmes));
+#endif
+
   m_SamplingFreq = 44100;
 
   choice_osc_l_res->SetSelection(15);

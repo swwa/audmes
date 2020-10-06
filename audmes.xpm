@@ -1,0 +1,26 @@
+/* XPM */
+static char *audmes_xpm[] = {
+/* columns rows colors chars-per-pixel */
+"16 16 4 1 ",
+"  c black",
+". c cyan",
+"X c white",
+"o c None",
+/* pixels */
+"oooooooooooooooo",
+"o              o",
+"o X . .X X X X o",
+"o           .  o",
+"o X . .  X. .  o",
+"o XX.X.X.X.X.X o",
+"o              o",
+"o XX.X.X.X.X.X o",
+"o  . ......... o",
+"o    X X X.X.X o",
+"o      X X  .X o",
+"o X            o",
+"o . . .    X   o",
+"o XX. .X. .X X o",
+"o              o",
+"oooooooooooooooo"
+};
