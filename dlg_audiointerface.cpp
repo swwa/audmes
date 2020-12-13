@@ -251,6 +251,9 @@ void AudioInterfaceDialog::SetDevices(RWAudioDevList devreclist, RWAudioDevList 
   if (p_cho->GetCount() > 0) {
     p_cho->SetSelection(cfreq);
   }
+  if (GetSizer()) {
+    GetSizer()->SetSizeHints(this);
+  }
 }
 
 void AudioInterfaceDialog::GetSelectedDevs(unsigned int* recdev, unsigned int* playdev,
