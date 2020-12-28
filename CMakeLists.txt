@@ -17,13 +17,12 @@ set(AM_SOURCES
 include_directories(.) # for local libfccp
 
 if (WIN32)
-        set(AM_SOURCES ${AM_SOURCES} audmes.rc)
+	set(AM_SOURCES ${AM_SOURCES} audmes.rc)
 	set(wxWidgets_ROOT_DIR "C:/Users/ws/projects/wx3.0.5")
 	set(wxWidgets_LIB_DIR "${wxWidgets_ROOT_DIR}/lib/gcc810_dll")
+	set(wxWidgets_CONFIGURATION mswu)
 endif()
 
-set(wxWidgets_CONFIGURATION mswu)
-set(wxWidgets_USE_STATIC ON)
 find_package(wxWidgets COMPONENTS core base REQUIRED)
 include("${wxWidgets_USE_FILE}")
 
@@ -42,7 +41,7 @@ if (${APPLE})
 endif()
 
 if (WIN32)
-        add_definitions(-D__WINDOWS_DS__ -D__WXMSW__)
+	add_definitions(-D__WINDOWS_DS__ -D__WXMSW__)
 	target_link_libraries(${PROJECT_NAME} -mwindows -static ${wxWidgets_LIBRARIES} dsound)
 endif()
 
@@ -50,3 +49,11 @@ install(TARGETS "AudMeS" DESTINATION "bin")
 install(FILES "audmes.desktop" DESTINATION "share/applications")
 install(FILES "audmes.png" DESTINATION "share/pixmaps")
 install(FILES "audmes.png" DESTINATION "share/icons/hicolor/128x128/apps/")
+
+SET(CPACK_GENERATOR "DEB")
+SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "swwa")
+SET(CPACK_DEBIAN_PACKAGE_SECTION "sound")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "pulseaudio, libwxgtk3.0-0v5")
+SET(CPACK__DEBIAN_PACKAGE_HOMEPAGE "https://sourceforge.net/projects/audmes/")
+set(CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/README.md")
+INCLUDE(CPack)
