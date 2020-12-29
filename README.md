@@ -8,6 +8,7 @@ Sweep frequency characteristic.
 email: vaclavpe@seznam.cz
 
 Project page: https://sourceforge.net/projects/audmes/
+
 Source code: https://sourceforge.net/p/audmes/git/ci/master/tree/
 
 What works:
@@ -27,6 +28,47 @@ Dependencies
  - libfccp (https://github.com/ben-strasser/fast-cpp-csv-parser)
  - CMake 3.x (https://cmake.org)
 
+
+Compiling
+==========
+
+Windows 10
+
+Get the following software:
+
+https://sourceforge.net/projects/mingw-w64/files/mingw-w64/
+- mingw-w64-install.exe
+
+Install the 32 bit version:
+
+    Version	8.1.0
+    Arch	i686
+    Threads	posix
+    Exceptions	jlj
+    Build	0
+
+https://git-scm.com/download/win
+- Git-2.26.2-64-bit.exe
+
+https://cmake.org/download/
+- cmake-3.17.2-win64-x64.msi
+
+https://github.com/wxWidgets/wxWidgets/releases/tag/v3.0.5
+- wxMSW-3.0.5_gcc810_x64_Dev.7z
+- wxWidgets-3.0.5-headers.7z
+
+https://github.com/thestk/rtaudio
+- RtAudio 5.1
+
+https://github.com/ben-strasser/fast-cpp-csv-parser
+- libfccp
+
+Compile with (git bash in source directory):
+
+    mkdir build && cd build
+    cmake .. -G "MinGW Makefiles" # run it twice
+    cmake .. -G "MinGW Makefiles" # 2nd time should work
+    mingw32-make
 
 ToDo
 ====
