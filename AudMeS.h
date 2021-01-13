@@ -128,6 +128,8 @@ class MainFrame : public wxFrame {
   wxChoice* choice_fft;
   wxStaticText* label_9;
   wxChoice* choice_fftlength;
+  wxStaticText* label_rx;
+  wxChoice* choice_fftrx;
   CtrlOScope* window_1_spe;
   wxToggleButton* button_osc_start_copy;
   wxPanel* notebook_1_spe;
