@@ -631,6 +631,8 @@ void MainFrame::DrawFreqResponse(void) {
   }
   window_1_frm->SetTrack(left);
   window_1_frm->SetTrack2(right);
+  wxPaintEvent event = 0;
+  window_1_frm->OnPaint(event);
 }
 
 void MainFrame::DrawOscilloscope(void) {
@@ -862,6 +864,8 @@ void MainFrame::DrawSpectrum(void) {
   window_1_spe->SetTrack(ardbl);
   window_1_spe->SetTrack2(ardbl2);
 
+  g_SpeBufferChanged = 0;
+
   free(realin);
   free(realout);
   free(imagout);
@@ -869,15 +873,17 @@ void MainFrame::DrawSpectrum(void) {
 }
 
 void MainFrame::OnTimer(wxTimerEvent& WXUNUSED(event)) {
+  wxPaintEvent event = 0;
   // oscilloscope
   if (button_osc_start->GetValue() && 0 != g_OscBufferChanged) {
     DrawOscilloscope();
+    window_1->OnPaint(event);
   }
   // spectrum analyzer
   if (0 != g_SpeBufferChanged && button_osc_start_copy->GetValue()) {
     DrawSpectrum();
+    window_1_spe->OnPaint(event);
   }
-  g_SpeBufferChanged = 0;
 }
 
 void MainFrame::OnOscXScaleChanged(wxCommandEvent& WXUNUSED(event)) {
