@@ -129,7 +129,7 @@ class MainFrame : public wxFrame {
   wxStaticText* label_9;
   wxChoice* choice_fftlength;
   CtrlOScope* window_1_spe;
-  wxToggleButton* button_osc_start_copy;
+  wxToggleButton* button_spe_start;
   wxPanel* notebook_1_spe;
   wxNotebook* notebook_1;
   wxTextCtrl* txt_freq_l;

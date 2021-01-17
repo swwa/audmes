@@ -219,7 +219,7 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
                                   10, choice_fftlength_choices, 0);
 
   window_1_spe = new CtrlOScope(notebook_1_spe, _T("Hz"), _T("dB"), 1);
-  button_osc_start_copy = new wxToggleButton(notebook_1_spe, ID_SPANSTART, wxT("Start"));
+  button_spe_start = new wxToggleButton(notebook_1_spe, ID_SPANSTART, wxT("Start"));
 
   // Frequency response
   label_1_frm = new wxStaticText(notebook_1_frm, -1, wxT("Number of points (max 120):"));
@@ -396,7 +396,7 @@ void MainFrame::do_layout() {
   sizer_10_copy->Add(sizer_17, 0, wxEXPAND, 0);
   sizer_10_copy->Add(window_1_spe, 1, wxEXPAND, 0);
   sizer_9_copy->Add(sizer_10_copy, 1, wxEXPAND, 0);
-  sizer_9_copy->Add(button_osc_start_copy, 0,
+  sizer_9_copy->Add(button_spe_start, 0,
                     wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
   notebook_1_spe->SetAutoLayout(true);
   notebook_1_spe->SetSizer(sizer_9_copy);
@@ -631,8 +631,6 @@ void MainFrame::DrawFreqResponse(void) {
   }
   window_1_frm->SetTrack(left);
   window_1_frm->SetTrack2(right);
-  wxPaintEvent event = 0;
-  window_1_frm->OnPaint(event);
 }
 
 void MainFrame::DrawOscilloscope(void) {
@@ -781,8 +779,6 @@ void MainFrame::DrawOscilloscope(void) {
 
   window_1->SetTrack(ardbl);
   window_1->SetTrack2(ardbl2);
-
-  g_OscBufferChanged = 0;
 }
 
 void MainFrame::DrawSpectrum(void) {
@@ -864,8 +860,6 @@ void MainFrame::DrawSpectrum(void) {
   window_1_spe->SetTrack(ardbl);
   window_1_spe->SetTrack2(ardbl2);
 
-  g_SpeBufferChanged = 0;
-
   free(realin);
   free(realout);
   free(imagout);
@@ -873,16 +867,26 @@ void MainFrame::DrawSpectrum(void) {
 }
 
 void MainFrame::OnTimer(wxTimerEvent& WXUNUSED(event)) {
-  wxPaintEvent event = 0;
-  // oscilloscope
-  if (button_osc_start->GetValue() && 0 != g_OscBufferChanged) {
+  bool refresh = false;
+  if (0 != g_OscBufferChanged && button_osc_start->GetValue()) {
     DrawOscilloscope();
-    window_1->OnPaint(event);
+    g_OscBufferChanged = 0;
+    refresh = true;
   }
-  // spectrum analyzer
-  if (0 != g_SpeBufferChanged && button_osc_start_copy->GetValue()) {
-    DrawSpectrum();
-    window_1_spe->OnPaint(event);
+  if (0 != g_SpeBufferChanged) {
+    if (button_spe_start->GetValue()) {
+      DrawSpectrum();
+      refresh = true;
+    }
+    if (button_frm_start->GetValue()) {
+      DrawFreqResponse();
+      refresh = true;
+    }
+    g_SpeBufferChanged = 0;
+  }
+  if (refresh) {
+    Refresh();
+    Update();
   }
 }
 
@@ -908,10 +912,10 @@ void MainFrame::OnOscXScaleChanged(wxCommandEvent& WXUNUSED(event)) {
 void MainFrame::OnSpanStart(wxCommandEvent& WXUNUSED(event)) {
   //  int buf[4096];
 
-  if (button_osc_start_copy->GetValue()) {
-    button_osc_start_copy->SetLabel(_T("Stop"));
+  if (button_spe_start->GetValue()) {
+    button_spe_start->SetLabel(_T("Stop"));
   } else {
-    button_osc_start_copy->SetLabel(_T("Start"));
+    button_spe_start->SetLabel(_T("Start"));
   }
 }
 
@@ -958,8 +962,7 @@ void MainFrame::OnFrmStart(wxCommandEvent& WXUNUSED(event)) {
       wxString bla;
       bla.Printf(wxT("Frequency : %.1f "), freq);
       window_1_frm->ShowUserText(bla, 100, 20);
-      DrawFreqResponse();
-      sleep(400);
+      sleep(200);
       wxYield();
       sleep(400);
       wxYield();
@@ -968,7 +971,7 @@ void MainFrame::OnFrmStart(wxCommandEvent& WXUNUSED(event)) {
       double l_rms = 0;
       double r_rms = 0;
       for (unsigned long int ii = 0; ii < m_SpeBufferLength; ii++) {
-        l_rms += g_SpeBuffer_Left[ii] / 32768.0 * g_SpeBuffer_Left[ii] / 32768.0;
+        l_rms += (double) g_SpeBuffer_Left[ii] / 32768.0 * (double) g_SpeBuffer_Left[ii] / 32768.0;
         r_rms += g_SpeBuffer_Right[ii] / 32768.0 * g_SpeBuffer_Right[ii] / 32768.0;
       }
       m_frm_freqs.Add(freq);
@@ -977,8 +980,9 @@ void MainFrame::OnFrmStart(wxCommandEvent& WXUNUSED(event)) {
 
       if (0 == frm_running) break;
     }
+    sleep(200);
+    wxYield();
     button_frm_start->SetValue(false);
-    DrawFreqResponse();
   }
   button_frm_start->SetLabel(_T("Start"));
   frm_running = 0;
