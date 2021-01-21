@@ -875,7 +875,7 @@ void MainFrame::DrawSpectrum(void) {
       window_1_spe->SetXRange(10, 100000, 1);
       break;
     default:
-      window_1_spe->SetXRange(10, 10000, 1);
+      window_1_spe->SetXRange(20, 20000, 1);
       break;
   }
   free(realin);
