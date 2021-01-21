@@ -79,14 +79,10 @@ CtrlOScope::~CtrlOScope() {}  // ~CtrlOScope
 
 void CtrlOScope::SetTrack(wxArrayDouble ardbl) {
   m_points = ardbl;
-  wxClientDC dc(this);
-  PaintAll(dc);
 }
 
 void CtrlOScope::SetTrack2(wxArrayDouble ardbl) {
   m_points2 = ardbl;
-  wxClientDC dc(this);
-  PaintAll(dc);
 }
 
 /////////////////////////////////////////////////////////////////////////////

@@ -35,7 +35,7 @@ The following istructions are for Debian, Ubuntu and similar.
 Install the basic development tools and dependencies
 
     apt install build-essential git
-    apt install cmake libfccp-dev libwxgtk3.0-dev
+    apt install cmake libfccp-dev libwxgtk3.0-dev libpulse-dev
 
 Fetch the source
 
@@ -51,6 +51,11 @@ Compile
 Test the result
 
     ./AudMeS
+
+If no window appears, check the exit status of AudMeS: `echo $?`.
+If is is not 0, then a sound card problem occurred.
+Make sure you have input and output available.
+You may need to plug in a cable.
 
 Package and install
 
@@ -101,6 +106,7 @@ Compile 32bit version with (git bash in source directory):
 
 ### General
 
+- Sound card error handling during startup
 - extend OscopeCtrl to add more traces
 - extend OscopeCtrl to add zooming of waves
 - load/save of config
