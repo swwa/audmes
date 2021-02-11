@@ -122,9 +122,9 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
   /* generator panel */
   checkbox_l_en = new wxCheckBox(notebook_1_gen, ID_GENLENB, wxT("Enable Output"));
   label_1 = new wxStaticText(notebook_1_gen, -1, wxT("Waveform: "));
-  const wxString choice_l_wav_choices[] = {wxT("Sine"), wxT("Rectangular"), wxT("Triangle"),
-                                           wxT("Saw")};
-  choice_l_wav = new wxChoice(notebook_1_gen, ID_GENSHP_L, wxDefaultPosition, wxDefaultSize, 4,
+  const wxString choice_l_wav_choices[] = {wxT("Sine"), wxT("Rectangular"), wxT("Saw"),
+                                           wxT("Triangle"), wxT("Wh-Noise")};
+  choice_l_wav = new wxChoice(notebook_1_gen, ID_GENSHP_L, wxDefaultPosition, wxDefaultSize, 5,
                               choice_l_wav_choices, 0);
   label_2 = new wxStaticText(notebook_1_gen, -1, wxT("Frequency [20..20000Hz]: "));
   slide_l_fr = new wxSlider(notebook_1_gen, ID_GENLFREQ, 80, 0, 200);
@@ -133,9 +133,9 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
 
   checkbox_r_en = new wxCheckBox(notebook_1_gen, ID_GENRENB, wxT("Enable Output"));
   label_1_copy_1 = new wxStaticText(notebook_1_gen, -1, wxT("Waveform: "));
-  const wxString choice_r_wav_choices[] = {wxT("Sine"), wxT("Rectangular"), wxT("Triangle"),
-                                           wxT("Saw")};
-  choice_r_wav = new wxChoice(notebook_1_gen, ID_GENSHP_R, wxDefaultPosition, wxDefaultSize, 4,
+  const wxString choice_r_wav_choices[] = {wxT("Sine"), wxT("Rectangular"), wxT("Saw"),
+                                           wxT("Triangle"), wxT("Wh-Noise")};
+  choice_r_wav = new wxChoice(notebook_1_gen, ID_GENSHP_R, wxDefaultPosition, wxDefaultSize, 5,
                               choice_r_wav_choices, 0);
   label_2_copy_1 = new wxStaticText(notebook_1_gen, -1, wxT("Frequency [20..20000Hz]: "));
   slide_r_fr = new wxSlider(notebook_1_gen, ID_GENRFREQ, 80, 0, 200);
@@ -221,7 +221,7 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
   label_rx = new wxStaticText(notebook_1_spe, -1, wxT("Freq:"));
   const wxString choice_fftry_choices[] = {wxT("20-20k"), wxT("10-100k")};
   choice_fftrx = new wxChoice(notebook_1_spe, ID_FFTWINDOW, wxDefaultPosition, wxDefaultSize, 2,
-                            choice_fftry_choices, 0);
+                              choice_fftry_choices, 0);
 
   window_1_spe = new CtrlOScope(notebook_1_spe, _T("Hz"), _T("dB"), 1);
   button_spe_start = new wxToggleButton(notebook_1_spe, ID_SPANSTART, wxT("Start"));
@@ -989,7 +989,7 @@ void MainFrame::OnFrmStart(wxCommandEvent& WXUNUSED(event)) {
       double l_rms = 0;
       double r_rms = 0;
       for (unsigned long int ii = 0; ii < m_SpeBufferLength; ii++) {
-        l_rms += (double) g_SpeBuffer_Left[ii] / 32768.0 * (double) g_SpeBuffer_Left[ii] / 32768.0;
+        l_rms += (double)g_SpeBuffer_Left[ii] / 32768.0 * (double)g_SpeBuffer_Left[ii] / 32768.0;
         r_rms += g_SpeBuffer_Right[ii] / 32768.0 * g_SpeBuffer_Right[ii] / 32768.0;
       }
       m_frm_freqs.Add(freq);

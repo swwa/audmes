@@ -51,9 +51,23 @@ extern long int g_SpeBufferPosition;
 extern int g_OscBufferChanged;
 extern int g_SpeBufferChanged;
 
-//////////////////////////////////////////////////////////////////////
-// Callback functions
-//////////////////////////////////////////////////////////////////////
+/*
+ * pseudo noise generator - linear feedback shift register
+ * derived from https://en.wikipedia.org/wiki/Linear-feedback_shift_register
+ */
+bool lfsr16() {
+  uint16_t bit;             /* Must be 16-bit to allow bit<<15 later in the code */
+  static uint16_t lfsr = 1; /* Must not be 0 */
+
+  /* taps: 16 14 13 11; feedback polynomial: x^16 + x^14 + x^13 + x^11 + 1 */
+  bit = ((lfsr >> 0) ^ (lfsr >> 2) ^ (lfsr >> 3) ^ (lfsr >> 5)) & 1u;
+  lfsr = (lfsr >> 1) | (bit << 15);
+  return bit;
+}
+
+/*
+ * callback function to fetch audio input and generate tones
+ */
 int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
           double WXUNUSED(streamTime), RtAudioStreamStatus WXUNUSED(status), void *data) {
 #ifdef _DEBUG
@@ -126,6 +140,8 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
     /* tady to obalit podle m_genShape_l/m_genShape_r - obdelnik, pila, trojuhelnik atd. */
     double y = 0;
     double y2 = 0;
+    bool noise = lfsr16();
+
     /* left channel */
     switch (aRWAudioClass->m_genShape_l) {
       case 1:
@@ -143,6 +159,13 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
           y = aRWAudioClass->m_genGain_l * 2 * (aRWAudioClass->m_genFI_l - M_PI / 2) / M_PI;
         } else {
           y = aRWAudioClass->m_genGain_l * 2 * (3 * M_PI / 2 - aRWAudioClass->m_genFI_l) / M_PI;
+        }
+        break;
+      case 4:
+        if (noise && aRWAudioClass->m_genFR_l != 0.0) {
+          y = 1.0 * aRWAudioClass->m_genGain_l;
+        } else {
+          y = 1.0 * -aRWAudioClass->m_genGain_l;
         }
         break;
       default: /* sine wave */
@@ -163,12 +186,19 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
              ((aRWAudioClass->m_genFI_r - aRWAudioClass->m_genPhaseDif) - M_PI) / M_PI;
         break;
       case 3:
-        if (aRWAudioClass->m_genFI_l < M_PI) {
+        if (aRWAudioClass->m_genFI_r < M_PI) {
           y2 = aRWAudioClass->m_genGain_r * 2 *
                (aRWAudioClass->m_genFI_r - aRWAudioClass->m_genPhaseDif - M_PI / 2) / M_PI;
         } else {
           y2 = aRWAudioClass->m_genGain_r * 2 *
                (3 * M_PI / 2 - aRWAudioClass->m_genFI_r + aRWAudioClass->m_genPhaseDif) / M_PI;
+        }
+        break;
+      case 4:
+        if (noise && aRWAudioClass->m_genFR_r != 0.0) {
+          y2 = 1.0 * aRWAudioClass->m_genGain_r;
+        } else {
+          y2 = 1.0 * -aRWAudioClass->m_genGain_r;
         }
         break;
       default: /* sine wave */
