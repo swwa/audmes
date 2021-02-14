@@ -225,58 +225,44 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
   return 0;
 }
 
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
-
-RWAudio::RWAudio(long int oscbufferlen, long int spebufferlen) {
+RWAudio::RWAudio() {
   m_DrvRunning = 0;
-
-#ifdef _DEBUG
-  ddbg = fopen("debug.log", "wb");
-  fprintf(ddbg, "Novy soubor\n");
-#endif
-  // init of RtAudio
-  if (m_AudioDriver.getDeviceCount() < 1) {
-#ifdef _DEBUG
-    fprintf(ddbg, "No devices??? Nbr = %d  \n", m_AudioDriver.getDeviceCount());
-#endif
-  } else {
-    // everything is ok
-    m_sampleRate = 44100;
-
-    m_genFR_l = m_genFR_r = 0.0;
-    m_genShape_l = m_genShape_r = 0;
-    m_genGain_l = m_genGain_r = 1.0;
-    m_genFI_l = m_genFI_r = 0.0;
-    m_genPhaseDif = 0.0;
-
-    m_OscBufferLen = oscbufferlen;
-    m_SpeBufferLen = spebufferlen;
-    m_Buflen_Changed = 0;
-
-    g_OscBufferPosition = 0;
-    g_SpeBufferPosition = 0;
-    g_OscBuffer_Left = (short *)malloc(m_OscBufferLen * sizeof(short));
-    g_OscBuffer_Right = (short *)malloc(m_OscBufferLen * sizeof(short));
-    g_SpeBuffer_Left = (short *)malloc(m_SpeBufferLen * sizeof(short));
-    g_SpeBuffer_Right = (short *)malloc(m_SpeBufferLen * sizeof(short));
-
-    // start audio streams
-    RestartAudio(m_AudioDriver.getDefaultInputDevice(), m_AudioDriver.getDefaultOutputDevice());
-  }
+  m_Buflen_Changed = false;
+  m_sampleRate = 44100;
 }
 
 RWAudio::~RWAudio() {
   m_AudioDriver.stopStream();
   m_AudioDriver.closeStream();
-
-#ifdef _DEBUG
-  fclose(ddbg);
-#endif
 }
 
-void RWAudio::RestartAudio(int recDevId, int playDevId) {
+// Initialize RtAudio and start audio stream
+int RWAudio::InitSnd(long int oscbuflen, long int spebuflen) {
+  m_OscBufferLen = oscbuflen;
+  m_SpeBufferLen = spebuflen;
+
+  m_genFR_l = m_genFR_r = 0.0;
+  m_genShape_l = m_genShape_r = 0;
+  m_genGain_l = m_genGain_r = 1.0;
+  m_genFI_l = m_genFI_r = 0.0;
+  m_genPhaseDif = 0.0;
+
+  g_OscBufferPosition = 0;
+  g_SpeBufferPosition = 0;
+  g_OscBuffer_Left = (short *)malloc(m_OscBufferLen * sizeof(short));
+  g_OscBuffer_Right = (short *)malloc(m_OscBufferLen * sizeof(short));
+  g_SpeBuffer_Left = (short *)malloc(m_SpeBufferLen * sizeof(short));
+  g_SpeBuffer_Right = (short *)malloc(m_SpeBufferLen * sizeof(short));
+  // init of RtAudio
+  if (m_AudioDriver.getDeviceCount() < 1) return 1;
+  // start audio streams
+  if (RestartAudio(m_AudioDriver.getDefaultInputDevice(), m_AudioDriver.getDefaultOutputDevice())) {
+    return 2;
+  }
+  return 0;
+}
+
+int RWAudio::RestartAudio(int recDevId, int playDevId) {
   // if stream is open (and running), stop it
   if (m_AudioDriver.isStreamOpen()) {
     m_AudioDriver.stopStream();
@@ -299,17 +285,11 @@ void RWAudio::RestartAudio(int recDevId, int playDevId) {
   rtAOptions.flags |= RTAUDIO_NONINTERLEAVED;
 
   try {
-#ifdef _DEBUG
-    fprintf(ddbg, "Initing Driver: \n");
-#endif
     m_AudioDriver.openStream(&oParams, &iParams, RTAUDIO_SINT16, m_sampleRate, &bufferFrames,
                              &inout, (void *)this);  //, &rtAOptions );
   } catch (RtAudioError &e) {
-    // std::cout << '\n' << e.getMessage() << '\n' << std::endl;
-#ifdef _DEBUG
-    fprintf(ddbg, "Driver error: %s\n", e.getMessage().c_str());
-#endif
-    exit(1);
+    // std::cerr << '\n' << e.getMessage() << '\n' << std::endl;
+    return 1;
   }
   m_bufferBytes = bufferFrames * iParams.nChannels * sizeof(short);
 
@@ -317,9 +297,7 @@ void RWAudio::RestartAudio(int recDevId, int playDevId) {
 
   m_DrvRunning = 1;
 
-#ifdef _DEBUG
-  fprintf(ddbg, "Driver is running\n");
-#endif
+  return 0;
 }
 
 /********************************************************************/

@@ -33,8 +33,10 @@ struct RWAudioDevList {
 
 class RWAudio {
  public:
-  RWAudio(long int oscbuflen, long int spebuflen);
+  RWAudio();
   ~RWAudio();
+
+  int InitSnd(long int oscbuflen, long int spebuflen);
 
   void SetSndDevices(unsigned int irec = 1000, unsigned int iplay = 1000,
                      unsigned long int freq = 44100);
@@ -42,7 +44,7 @@ class RWAudio {
   void ChangeBufLen(long int oscbuflen, long int spebuflen) {
     m_OscBufferLen = oscbuflen;
     m_SpeBufferLen = spebuflen;
-    m_Buflen_Changed = 1;
+    m_Buflen_Changed = true;
   };
 
   int GetRWAudioDevices(RWAudioDevList* play, RWAudioDevList* record);
@@ -56,9 +58,10 @@ class RWAudio {
 
   int GetRunningStatus(void) { return m_DrvRunning; };
 
-  // stuff for callback function
+  /* stuff for callback function */
   unsigned int m_bufferBytes;
-  /* generator - before we had global vars */
+
+  /* generator */
   float m_genFR_l, m_genFR_r;
   int m_genShape_l, m_genShape_r;
   float m_genGain_l, m_genGain_r;
@@ -69,14 +72,14 @@ class RWAudio {
 
   long int m_OscBufferLen;
   long int m_SpeBufferLen;
-  unsigned int m_Buflen_Changed;
+  bool m_Buflen_Changed;
 
  protected:
   RtAudio m_AudioDriver;
 
   int m_DrvRunning;  // is driver properly initialized ?
 
-  void RestartAudio(int recDevId, int playDevId);
+  int RestartAudio(int recDevId, int playDevId);
 };
 
 #endif  // RWAUDIO_IO_H

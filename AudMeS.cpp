@@ -486,19 +486,24 @@ void MainFrame::set_custom_props() {
   g_OscBufferChanged = 0;
   g_SpeBufferChanged = 0;
 
+  m_configfilename = wxT("");
+
   m_timer = new wxTimer(this, ID_TIMERID);
   m_timer->Start(200);
 
   choice_fftlength->GetString(choice_fftlength->GetCurrentSelection()).ToDouble(&sweep_div);
   m_SpeBufferLength = (long)(sweep_div);
 
+  m_RWAudio = new RWAudio();
+  int ret = 0;
 #ifdef XSCALEINTIME
-  m_RWAudio = new RWAudio((long int)(1.5 * m_OscBufferLength * m_SamplingFreq / 10000 + 10),
-                          m_SpeBufferLength);
+  ret = m_RWAudio->InitSnd((long int)(1.5 * m_OscBufferLength * m_SamplingFreq / 10000 + 10),
+                     m_SpeBufferLength);
 #else
-  m_RWAudio = new RWAudio((long int)(1.5 * m_OscBufferLength), m_SpeBufferLength);
+  ret = m_RWAudio->InitSnd((long int)(1.5 * m_OscBufferLength), m_SpeBufferLength);
 #endif
-  m_configfilename = wxT("");
+
+  if(ret) wxMessageBox(_T("Sound card issue: please check settings\n"), _T("Alert"), wxICON_INFORMATION | wxOK);
 }
 
 void MainFrame::OnAboutClick(wxCommandEvent& WXUNUSED(event)) {
