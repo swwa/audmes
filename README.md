@@ -75,7 +75,7 @@ Install the 32 bit version:
     Version     8.1.0
     Arch        i686
     Threads     posix
-    Exceptions  jlj
+    Exceptions  sjlj
     Build       0
 
 Git <https://git-scm.com/download/win>
