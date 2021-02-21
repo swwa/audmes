@@ -136,8 +136,8 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
   fprintf(ddbg, "\n Frames: %d\n ", nBufferFrames);
 #endif
 
+  /* calculate the wave form according to the selected shape */
   for (unsigned long i = 0; i < nBufferFrames; i++) {
-    /* tady to obalit podle m_genShape_l/m_genShape_r - obdelnik, pila, trojuhelnik atd. */
     double y = 0;
     double y2 = 0;
     bool noise = lfsr16();
@@ -162,7 +162,7 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
         }
         break;
       case 4:
-        if (noise && aRWAudioClass->m_genFR_l != 0.0) {
+        if (noise) {
           y = 1.0 * aRWAudioClass->m_genGain_l;
         } else {
           y = 1.0 * -aRWAudioClass->m_genGain_l;
@@ -195,7 +195,7 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
         }
         break;
       case 4:
-        if (noise && aRWAudioClass->m_genFR_r != 0.0) {
+        if (noise) {
           y2 = 1.0 * aRWAudioClass->m_genGain_r;
         } else {
           y2 = 1.0 * -aRWAudioClass->m_genGain_r;
@@ -206,7 +206,6 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
              sin(aRWAudioClass->m_genFI_r - aRWAudioClass->m_genPhaseDif);
         break;
     }
-    /* konec obalu */
 
     aRWAudioClass->m_genFI_l +=
         (float)2.0 * M_PI * aRWAudioClass->m_genFR_l / aRWAudioClass->m_sampleRate;
@@ -216,8 +215,18 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
     if ((2.0 * M_PI) < aRWAudioClass->m_genFI_l) aRWAudioClass->m_genFI_l -= 2.0 * M_PI;
     if ((2.0 * M_PI) < aRWAudioClass->m_genFI_r) aRWAudioClass->m_genFI_r -= 2.0 * M_PI;
 
-    *outBuf++ = (short)(32768.f * y);
-    *outBuf++ = (short)(32768.f * y2);
+    /* freq 0.0 - turn sound off */
+    if (aRWAudioClass->m_genFR_l == 0.0) {
+      *outBuf++ = 0;
+    } else {
+      *outBuf++ = (short)(32768.f * y);
+    }
+    if (aRWAudioClass->m_genFR_r == 0.0) {
+      *outBuf++ = 0;
+    } else {
+      *outBuf++ = (short)(32768.f * y2);
+    }
+
 #ifdef _DEBUG
     // fprintf(ddbg,"%04X %04X ",(short)(32768.f * y), (short)(32768.f * y2));
 #endif
