@@ -498,12 +498,14 @@ void MainFrame::set_custom_props() {
   int ret = 0;
 #ifdef XSCALEINTIME
   ret = m_RWAudio->InitSnd((long int)(1.5 * m_OscBufferLength * m_SamplingFreq / 10000 + 10),
-                     m_SpeBufferLength);
+                           m_SpeBufferLength);
 #else
   ret = m_RWAudio->InitSnd((long int)(1.5 * m_OscBufferLength), m_SpeBufferLength);
 #endif
 
-  if(ret) wxMessageBox(_T("Sound card issue: please check settings\n"), _T("Alert"), wxICON_INFORMATION | wxOK);
+  if (ret)
+    wxMessageBox(_T("Sound card issue: please check settings\n"), _T("Alert"),
+                 wxICON_INFORMATION | wxOK);
 }
 
 void MainFrame::OnAboutClick(wxCommandEvent& WXUNUSED(event)) {
@@ -1016,9 +1018,15 @@ void MainFrame::OnFrmStart(wxCommandEvent& WXUNUSED(event)) {
 void MainFrame::OnGeneratorChanged(wxCommandEvent& WXUNUSED(event)) {
   if (checkbox_gen_sync->IsChecked()) {
     slide_r_fr->Enable(false);
+    label_1_copy_1->Enable(false);
+    txt_freq_r->Enable(false);
+    choice_r_wav->Enable(false);
     label_2_copy_1->Enable(false);
   } else {
     slide_r_fr->Enable(true);
+    choice_r_wav->Enable(true);
+    txt_freq_r->Enable(true);
+    label_1_copy_1->Enable(true);
     label_2_copy_1->Enable(true);
   }
 
@@ -1067,36 +1075,39 @@ void MainFrame::SendGenSettings() {
   float freq_l, freq_r;
   double phas2;
   double doubleToFreq;
+  float gain_l, gain_r;
 
   if ((checkbox_l_en->IsChecked()) && (button_gen_start->GetValue())) {
-    txt_freq_l->GetValue().ToDouble(&doubleToFreq);
-    freq_l = (float)doubleToFreq;
+    gain_l = 1.0 * pow(10, slide_l_am->GetValue() / 20.0);
   } else {
-    freq_l = 0.0;
+    gain_l = 0.0;
   }
   if ((checkbox_r_en->IsChecked()) && (button_gen_start->GetValue())) {
-    txt_freq_r->GetValue().ToDouble(&doubleToFreq);
-    freq_r = (float)doubleToFreq;
+    gain_r = 1.0 * pow(10, slide_r_am->GetValue() / 20.0);
   } else {
-    freq_r = 0.0;
+    gain_r = 0.0;
   }
 
   text_gen_sync->GetValue().ToDouble(&phas2);
 
+  txt_freq_l->GetValue().ToDouble(&doubleToFreq);
+  freq_l = (float)doubleToFreq;
+
+  txt_freq_r->GetValue().ToDouble(&doubleToFreq);
+  freq_r = (float)doubleToFreq;
+
+  int shapeleft = choice_l_wav->GetCurrentSelection();
+  int shaperight = choice_r_wav->GetCurrentSelection();
+
   if (checkbox_gen_sync->IsChecked()) {
     freq_r = freq_l;
+    shaperight = shapeleft;
   } else {
     phas2 = 0.0;
   }
 
-  int shapeleft = choice_l_wav->GetCurrentSelection();
-  int shaperight = choice_r_wav->GetCurrentSelection();
-  m_RWAudio->PlaySetGenerator(freq_l, freq_r, shapeleft, shaperight,
-                              1.0 * pow(10, slide_l_am->GetValue() / 20.0),
-                              1.0 * pow(10, slide_r_am->GetValue() / 20.0));
-  if (checkbox_gen_sync->IsChecked()) {
-    m_RWAudio->PlaySetPhaseDiff(phas2 * 3.14159 / 180.0);  // should be in degrees now
-  }
+  m_RWAudio->PlaySetGenerator(freq_l, freq_r, shapeleft, shaperight, gain_l, gain_r);
+  m_RWAudio->PlaySetPhaseDiff(phas2 * 3.14159 / 180.0);  // should be in degrees now
 }
 
 void MainFrame::OnSelectSndCard(wxCommandEvent& WXUNUSED(event)) {
