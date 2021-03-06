@@ -45,7 +45,7 @@ Compile
 
     cd audmes-git
     mkdir build && cd build
-    cmake ..
+    cmake .. -DCMAKE_BUILD_TYPE=Release
     cmake --build .
 
 Test the result
@@ -86,34 +86,56 @@ Cmake <https://cmake.org/download/>
 
 - cmake-3.17.2-win64-x64.msi
 
+Create a directory to store the project.
+
+    $ENV{HOMEDRIVE}$ENV{HOMEPATH}/projects
+
 WxWidgets <https://github.com/wxWidgets/wxWidgets/releases/tag/v3.0.5>
 
 - wxMSW-3.0.5_gcc810_Dev.7z
 - wxWidgets-3.0.5-headers.7z
 
+Extract the archives to $ENV{HOMEDRIVE}$ENV{HOMEPATH}/projects/wx3.0.5.
+
+Clone audmes:
+    cd $ENV{HOMEDRIVE}$ENV{HOMEPATH}/projects
+    git clone https://git.code.sf.net/p/audmes/git audmes-git
+
 FCCP <https://github.com/ben-strasser/fast-cpp-csv-parser>
 
 - libfccp
 
+Clone into $ENV{HOMEDRIVE}$ENV{HOMEPATH}/projects/audmes-git/libfccp
+
+Make sure you have wingw-w64 and cmake in your bash path.
+
 Compile 32bit version with (git bash in source directory):
 
+    cd $ENV{HOMEDRIVE}$ENV{HOMEPATH}/projects/audmes-git
     mkdir build && cd build
     cmake .. -G "MinGW Makefiles" # run it twice
     cmake .. -G "MinGW Makefiles" # 2nd time should work
     mingw32-make
 
+Install libraries:
+
+    cp /c/Program\ Files\ \(x86\)/mingw-w64/i686-8.1.0-posix-sjlj-rt_v6-rev0/mingw32/bin/libwinpthread-1.dll.
+    cp /c/Program\ Files\ \(x86\)/mingw-w64/i686-8.1.0-posix-sjlj-rt_v6-rev0/mingw32/bin/libstdc++-6.dll .
+    cp /c/Program\ Files\ \(x86\)/mingw-w64/i686-8.1.0-posix-sjlj-rt_v6-rev0/mingw32/bin/libgcc_s_sjlj-1.dll .
+    cp ../../wx3.0.5/lib/gcc810_dll/wxbase30u_gcc810.dll .
+    cp ../../wx3.0.5/lib/gcc810_dll/wxmsw30u_core_gcc810.dll .
+
+Run the program:
+
+    AudMeS.exe
+
 ## ToDo
 
 ### General
 
-- Sound card error handling during startup
 - extend OscopeCtrl to add more traces
 - extend OscopeCtrl to add zooming of waves
 - load/save of config
-
-### Generator
-
-- white noise
 
 ### Oscilloscope
 
