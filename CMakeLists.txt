@@ -18,7 +18,7 @@ include_directories(.) # for local libfccp
 
 if (WIN32)
 	set(AM_SOURCES ${AM_SOURCES} audmes.rc)
-	set(wxWidgets_ROOT_DIR "C:/Users/ws/projects/wx3.0.5")
+	set(wxWidgets_ROOT_DIR "$ENV{HOMEDRIVE}$ENV{HOMEPATH}/projects/wx3.0.5")
 	set(wxWidgets_LIB_DIR "${wxWidgets_ROOT_DIR}/lib/gcc810_dll")
 	set(wxWidgets_CONFIGURATION mswu)
 endif()
