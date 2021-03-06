@@ -77,13 +77,9 @@ CtrlOScope::CtrlOScope(wxWindow* parent, wxString xname, wxString yname, int tra
 /////////////////////////////////////////////////////////////////////////////
 CtrlOScope::~CtrlOScope() {}  // ~CtrlOScope
 
-void CtrlOScope::SetTrack(wxArrayDouble ardbl) {
-  m_points = ardbl;
-}
+void CtrlOScope::SetTrack(wxArrayDouble ardbl) { m_points = ardbl; }
 
-void CtrlOScope::SetTrack2(wxArrayDouble ardbl) {
-  m_points2 = ardbl;
-}
+void CtrlOScope::SetTrack2(wxArrayDouble ardbl) { m_points2 = ardbl; }
 
 /////////////////////////////////////////////////////////////////////////////
 void CtrlOScope::SetXRange(double dLower, double dUpper, int logrange) {
@@ -217,7 +213,6 @@ void CtrlOScope::PaintAllFunction(wxDC& dc) {
   /* ******************************************************************* */
   /* vertical lines depending on linear or log scale  */
   if (1 == m_LogX) {
-
     /* draw vertical lines */
     float ndecs = log10(m_MaxXValue / m_MinXValue);
     float xstep = (rec.width - ldist - rdist) / ndecs;
