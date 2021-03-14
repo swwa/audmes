@@ -4,13 +4,13 @@ Multi-platfrom system for audio measurement through sound card in the
 PC.  Incorporates Generator, Oscilloscope, Fast Fourier Transform,
 Sweep frequency characteristic.
 
-email: vaclavpe@seznam.cz
-
 Project page: <https://sourceforge.net/projects/audmes/>
 
 Source code: <https://sourceforge.net/p/audmes/git/ci/master/tree/>
 
-What works:
+Contact: see project page
+
+Features:
 
 - generator
 - spectrum analyzer
@@ -52,17 +52,12 @@ Test the result
 
     ./AudMeS
 
-If no window appears, check the exit status of AudMeS: `echo $?`.
-If is is not 0, then a sound card problem occurred.
-Make sure you have input and output available.
-You may need to plug in a cable.
-
 Package and install
 
     cmake --build . --target package
     sudo dpkg -i AudMeS-0.1.1-Linux.deb
 
-### Windows 10
+### Windows 10 with MinGW
 
 Get the following software:
 
@@ -98,6 +93,7 @@ WxWidgets <https://github.com/wxWidgets/wxWidgets/releases/tag/v3.0.5>
 Extract the archives to $ENV{HOMEDRIVE}$ENV{HOMEPATH}/projects/wx3.0.5.
 
 Clone audmes:
+
     cd $ENV{HOMEDRIVE}$ENV{HOMEPATH}/projects
     git clone https://git.code.sf.net/p/audmes/git audmes-git
 
@@ -129,27 +125,13 @@ Run the program:
 
     AudMeS.exe
 
-## ToDo
+## Troubleshooting
 
-### General
+If a popup appears about sound card issues,
+make sure you have stereo input and output available.
+You may need to plug in a cable.
 
-- extend OscopeCtrl to add more traces
-- extend OscopeCtrl to add zooming of waves
-- load/save of config
-
-### Oscilloscope
-
-- changeable length of buffer - problem with "slower" Xscale
-- peak-to-peak measurement
-
-### Spectrum Analyzer
-
-- averaging in spectrum analyzer
-- add switch between CH1 and CH2 ( left/right)
-
-### Frequency Response
-
-- add trace selector
-- support load/save measurements, for example as XML/CVS/JSON/IEC
-  60076-18 1.0/MLSSA/FRD File Format.
-- save pictures of measurement graph
+If you see messages like
+`WARNING **: invalid source position for vertical gradient`
+then your Gnome Theme has a bug. It is annoying but harmless.
+On Debian the issue disappears when using e.g. `materia-gtk-theme`.
