@@ -31,7 +31,7 @@
 #ifndef AUDMES_H
 #define AUDMES_H
 
-#define AUDMES_VERSION_STRING "2020-09-24 with RtAudio"
+#define AUDMES_VERSION_STRING "2021-03-14 with RtAudio"
 
 class MainFrame : public wxFrame {
   DECLARE_CLASS(MainFrame)

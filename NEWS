@@ -1,3 +1,14 @@
+2021-03-14
+----------
+- Use pulseaudio on Linux up to 192000 samples/s.
+- Catch sound card issues and show message in initialization.
+- Optimize screen repaint.
+- Improve graph and legend display.
+- Add Debian package support in CMake.
+- Add compiling instructions for Linux and Windows 10.
+- Add white noise to generator.
+- Use RMS level in frequency response instead of peak.
+
 2020-09-24
 ----------
 - Improve FFT interpolation.
