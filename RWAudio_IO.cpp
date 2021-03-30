@@ -40,12 +40,12 @@ FILE *ddbg;
 #endif
 
 // extern variables from AudMeS.cpp
-extern short *g_OscBuffer_Left;
-extern short *g_OscBuffer_Right;
+extern float *g_OscBuffer_Left;
+extern float *g_OscBuffer_Right;
 extern long int g_OscBufferPosition;
 
-extern short *g_SpeBuffer_Left;
-extern short *g_SpeBuffer_Right;
+extern float *g_SpeBuffer_Left;
+extern float *g_SpeBuffer_Right;
 extern long int g_SpeBufferPosition;
 
 extern int g_OscBufferChanged;
@@ -86,13 +86,13 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
     free(g_SpeBuffer_Right);
     g_OscBufferPosition = 0;
     g_SpeBufferPosition = 0;
-    g_OscBuffer_Left = (short *)malloc(aRWAudioClass->m_OscBufferLen * sizeof(short));
-    g_OscBuffer_Right = (short *)malloc(aRWAudioClass->m_OscBufferLen * sizeof(short));
-    g_SpeBuffer_Left = (short *)malloc(aRWAudioClass->m_SpeBufferLen * sizeof(short));
-    g_SpeBuffer_Right = (short *)malloc(aRWAudioClass->m_SpeBufferLen * sizeof(short));
+    g_OscBuffer_Left = (float *)malloc(aRWAudioClass->m_OscBufferLen * sizeof(float));
+    g_OscBuffer_Right = (float *)malloc(aRWAudioClass->m_OscBufferLen * sizeof(float));
+    g_SpeBuffer_Left = (float *)malloc(aRWAudioClass->m_SpeBufferLen * sizeof(float));
+    g_SpeBuffer_Right = (float *)malloc(aRWAudioClass->m_SpeBufferLen * sizeof(float));
   }
 
-  short *inBuf = (short *)inputBuffer;
+  float *inBuf = (float *)inputBuffer;
 
   // make a copy for oscilloscope
   if (0 == g_OscBufferChanged) {
@@ -111,7 +111,7 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
     }
   }
 
-  inBuf = (short *)inputBuffer;
+  inBuf = (float *)inputBuffer;
   // make a copy for spectrum analyzer
   if (0 == g_SpeBufferChanged) {
     for (i = 0; i < nBufferFrames; i++) {
@@ -130,7 +130,7 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
   }
 
   // fill output buffer
-  short *outBuf = (short *)outputBuffer;
+  float *outBuf = (float *)outputBuffer;
 
 #ifdef _DEBUG
   fprintf(ddbg, "\n Frames: %d\n ", nBufferFrames);
@@ -211,11 +211,11 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
     if ((2.0 * M_PI) < aRWAudioClass->m_genFI_l) aRWAudioClass->m_genFI_l -= 2.0 * M_PI;
     if ((2.0 * M_PI) < aRWAudioClass->m_genFI_r) aRWAudioClass->m_genFI_r -= 2.0 * M_PI;
 
-    *outBuf++ = (short)(32768.f * aRWAudioClass->m_genGain_l * y);
-    *outBuf++ = (short)(32768.f * aRWAudioClass->m_genGain_r * y2);
+    *outBuf++ = (float)(aRWAudioClass->m_genGain_l * y);
+    *outBuf++ = (float)(aRWAudioClass->m_genGain_r * y2);
 
 #ifdef _DEBUG
-    // fprintf(ddbg,"%04X %04X ",(short)(32768.f * y), (short)(32768.f * y2));
+    // fprintf(ddbg,"%04X %04X ",(float)(32768.f * y), (float)(32768.f * y2));
 #endif
   }
   return 0;
@@ -245,10 +245,10 @@ int RWAudio::InitSnd(long int oscbuflen, long int spebuflen) {
 
   g_OscBufferPosition = 0;
   g_SpeBufferPosition = 0;
-  g_OscBuffer_Left = (short *)malloc(m_OscBufferLen * sizeof(short));
-  g_OscBuffer_Right = (short *)malloc(m_OscBufferLen * sizeof(short));
-  g_SpeBuffer_Left = (short *)malloc(m_SpeBufferLen * sizeof(short));
-  g_SpeBuffer_Right = (short *)malloc(m_SpeBufferLen * sizeof(short));
+  g_OscBuffer_Left = (float *)malloc(m_OscBufferLen * sizeof(float));
+  g_OscBuffer_Right = (float *)malloc(m_OscBufferLen * sizeof(float));
+  g_SpeBuffer_Left = (float *)malloc(m_SpeBufferLen * sizeof(float));
+  g_SpeBuffer_Right = (float *)malloc(m_SpeBufferLen * sizeof(float));
   // init of RtAudio
   if (m_AudioDriver.getDeviceCount() < 1) return 1;
   // start audio streams
@@ -281,15 +281,20 @@ int RWAudio::RestartAudio(int recDevId, int playDevId) {
   rtAOptions.flags |= RTAUDIO_NONINTERLEAVED;
 
   try {
-    m_AudioDriver.openStream(&oParams, &iParams, RTAUDIO_SINT16, m_sampleRate, &bufferFrames,
+    m_AudioDriver.openStream(&oParams, &iParams, RTAUDIO_FLOAT32, m_sampleRate, &bufferFrames,
                              &inout, (void *)this);  //, &rtAOptions );
   } catch (RtAudioError &e) {
     // std::cerr << '\n' << e.getMessage() << '\n' << std::endl;
     return 1;
   }
-  m_bufferBytes = bufferFrames * iParams.nChannels * sizeof(short);
+  m_bufferBytes = bufferFrames * iParams.nChannels * sizeof(float);
 
-  m_AudioDriver.startStream();
+  try {
+    m_AudioDriver.startStream();
+  } catch (RtAudioError &e) {
+    // std::cerr << '\n' << e.getMessage() << '\n' << std::endl;
+    return 1;
+  }
 
   m_DrvRunning = 1;
 
@@ -305,6 +310,11 @@ int RWAudio::GetRWAudioDevices(RWAudioDevList *play, RWAudioDevList *record) {
 
   // Scan through devices for various capabilities
   RtAudio::DeviceInfo info;
+  // if stream is open (and running), stop it
+  if (m_AudioDriver.isStreamOpen()) {
+    m_AudioDriver.stopStream();
+    m_AudioDriver.closeStream();
+  }
 
   play->card_info.clear();
   record->card_info.clear();
