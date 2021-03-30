@@ -73,12 +73,12 @@ EVT_CHOICE(ID_OSCXSCALE, MainFrame::OnOscXScaleChanged)
 EVT_CHOICE(ID_FFTLENGTH, MainFrame::OnOscXScaleChanged)
 END_EVENT_TABLE()
 
-short* g_OscBuffer_Left;
-short* g_OscBuffer_Right;
+float* g_OscBuffer_Left;
+float* g_OscBuffer_Right;
 long int g_OscBufferPosition;
 
-short* g_SpeBuffer_Left;
-short* g_SpeBuffer_Right;
+float* g_SpeBuffer_Left;
+float* g_SpeBuffer_Right;
 long int g_SpeBufferPosition;
 
 int g_OscBufferChanged;
@@ -607,10 +607,10 @@ void MainFrame::OnLoadFRM(wxCommandEvent& WXUNUSED(event)) {
 
 void MainFrame::OnAutoCalClick(wxCommandEvent& WXUNUSED(event)) {
   if (button_osc_start->GetValue()) {
-    short minValueL = 32767;
-    short maxValueL = -32767;
-    short minValueR = 32767;
-    short maxValueR = -32767;
+    float minValueL = 1;
+    float maxValueL = -1;
+    float minValueR = 1;
+    float maxValueR = -1;
 
     for (unsigned long int i = 0; i < m_OscBufferLength; i++) {
       if (minValueL > g_OscBuffer_Left[i]) minValueL = g_OscBuffer_Left[i];
@@ -662,8 +662,8 @@ void MainFrame::CalcFreqResponse() {
         double r_rms = 0;
         // compute RMS value in the grabbed wave and store it as a result
         for (unsigned long int ii = 0; ii < m_SpeBufferLength; ii++) {
-          l_rms += (double)g_SpeBuffer_Left[ii] / 32768.0 * (double)g_SpeBuffer_Left[ii] / 32768.0;
-          r_rms += g_SpeBuffer_Right[ii] / 32768.0 * g_SpeBuffer_Right[ii] / 32768.0;
+          l_rms += g_SpeBuffer_Left[ii] * g_SpeBuffer_Left[ii];
+          r_rms += g_SpeBuffer_Right[ii] * g_SpeBuffer_Right[ii];
         }
         m_frm_freqs.Add(freq);
         m_frm_lgains.Add(sqrt(l_rms / m_SpeBufferLength));
@@ -728,11 +728,10 @@ void MainFrame::DrawOscilloscope(void) {
   double trigger_edge;
   double trigger_level;
   double hysteresis_level = 10;
-  long scope_resolution;
 
-  double range_div = pow(2, choice_osc_l_res->GetCurrentSelection());
+  double range_div = pow(2, choice_osc_l_res->GetCurrentSelection() - 15);
   double shft_val = 20.0 * (choice_osc_l_off->GetCurrentSelection() - 5) / 128.0;
-  double range_div2 = pow(2, choice_osc_l_res_copy->GetCurrentSelection());
+  double range_div2 = pow(2, choice_osc_l_res_copy->GetCurrentSelection() - 15);
   double shft_val2 = 20.0 * (choice_osc_l_off_copy->GetCurrentSelection() - 5) / 128.0;
   i = 0;
 
@@ -906,7 +905,7 @@ void MainFrame::DrawSpectrum(void) {
    * 16 bit samples and fft correction factor 4
    * 20 * log(1/65536 * 4) is -84.2 db
    */
-  const double dbscaler = -84.2;
+  const double dbscaler = 6;
 
   // left channel
   for (int i = 0; i < nsampl; i++) {
@@ -1035,7 +1034,6 @@ void MainFrame::OnFrmStart(wxCommandEvent& WXUNUSED(event)) {
   if (button_frm_start->GetValue()) {
     long ip;
     button_frm_start->SetLabel(_T("Stop"));
-
     wxString tpoints = text_ctrl1_frm->GetValue();
     tpoints.ToLong(&ip, 10);
     if (ip > 120) ip = 120;
