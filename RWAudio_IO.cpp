@@ -288,7 +288,12 @@ int RWAudio::RestartAudio(int recDevId, int playDevId) {
     return 1;
   }
 
+  try {
   m_AudioDriver.startStream();
+  } catch (RtAudioError &e) {
+    // std::cerr << '\n' << e.getMessage() << '\n' << std::endl;
+    return 1;
+  }
 
   m_DrvRunning = 1;
 
@@ -304,6 +309,11 @@ int RWAudio::GetRWAudioDevices(RWAudioDevList *play, RWAudioDevList *record) {
 
   // Scan through devices for various capabilities
   RtAudio::DeviceInfo info;
+  // if stream is open (and running), stop it
+  if (m_AudioDriver.isStreamOpen()) {
+    m_AudioDriver.stopStream();
+    m_AudioDriver.closeStream();
+  }
 
   play->card_info.clear();
   record->card_info.clear();
