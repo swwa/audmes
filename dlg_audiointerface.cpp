@@ -236,15 +236,17 @@ void AudioInterfaceDialog::SetDevices(RWAudioDevList devreclist, RWAudioDevList 
   }
   p_cho->Clear();
 
-  // compute the new list - find the same values in DevRecList and DevPlayList
-  for (unsigned int i = 0; i < m_DevPlayList.card_info[pldev].sampleRates.size(); i++) {
-    for (unsigned int j = 0; j < m_DevRecList.card_info[recdev].sampleRates.size(); j++) {
-      unsigned long int srateplay = m_DevPlayList.card_info[pldev].sampleRates[i];
-      unsigned long int sraterec = m_DevRecList.card_info[recdev].sampleRates[j];
+  if (0 < devreclist.card_info.size() && 0 < devpllist.card_info.size()) {
+    // compute the new list - find the same values in DevRecList and DevPlayList
+    for (unsigned int i = 0; i < m_DevPlayList.card_info[pldev].sampleRates.size(); i++) {
+      for (unsigned int j = 0; j < m_DevRecList.card_info[recdev].sampleRates.size(); j++) {
+        unsigned long int srateplay = m_DevPlayList.card_info[pldev].sampleRates[i];
+        unsigned long int sraterec = m_DevRecList.card_info[recdev].sampleRates[j];
 
-      if (srateplay == sraterec) {
-        p_cho->Append(wxString::Format(wxT("%ld "), srateplay));
-        if (srateplay == m_freq) cfreq = i;
+        if (srateplay == sraterec) {
+          p_cho->Append(wxString::Format(wxT("%ld "), srateplay));
+          if (srateplay == m_freq) cfreq = i;
+        }
       }
     }
   }
@@ -265,6 +267,7 @@ void AudioInterfaceDialog::GetSelectedDevs(unsigned int* recdev, unsigned int* p
   if (!p_cho) {
     return;
   }
+  if (0 >= m_DevPlayList.card_info.size()) return;
   seldev = p_cho->GetSelection();
   *playdev = m_DevPlayList.card_pos[seldev];
 
@@ -272,6 +275,7 @@ void AudioInterfaceDialog::GetSelectedDevs(unsigned int* recdev, unsigned int* p
   if (!p_cho) {
     return;
   }
+  if (0 >= m_DevRecList.card_info.size()) return;
   seldev = p_cho->GetSelection();
   *recdev = m_DevRecList.card_pos[seldev];
 
