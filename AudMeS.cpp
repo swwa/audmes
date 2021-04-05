@@ -33,7 +33,7 @@
 
 #include "dlg_audiointerface.h"
 #include "event_ids.h"
-#include "fourier.h"
+#include "FFT.h"
 
 //#define XSCALEINTIME 1
 
@@ -723,19 +723,19 @@ void MainFrame::DrawOscilloscope(void) {
     nsampl = (int)(pow(2, (int)(log10(nsampl) / log10(2))));
 
     if (nsampl > 0) {
-      double* realin = (double*)malloc(nsampl * sizeof(double));
-      double* realout = (double*)malloc(nsampl * sizeof(double));
-      double* imagout = (double*)malloc(nsampl * sizeof(double));
+      float* realin = (float*)malloc(nsampl * sizeof(float));
+      float* realout = (float*)malloc(nsampl * sizeof(float));
+      float* imagout = (float*)malloc(nsampl * sizeof(float));
 
       for (int i = 0; i < nsampl; i++) {
         realin[i] = g_OscBuffer_Left[i] / 2048.0;
       }
-      if (fft_double(nsampl, 0, realin, NULL, realout, imagout)) {
+      (RealFFT(nsampl, realin, realout, imagout)); {
         int i;
-        double dmax = realout[0] * realout[0] + imagout[0] * imagout[0];
+        float dmax = realout[0] * realout[0] + imagout[0] * imagout[0];
         int imax = 0;
         for (i = 1; i < nsampl / 2; i++) {
-          double dval = realout[i] * realout[i] + imagout[i] * imagout[i];
+          float dval = realout[i] * realout[i] + imagout[i] * imagout[i];
           if (dval > dmax) {
             dmax = dval;
             imax = i;
@@ -759,7 +759,7 @@ void MainFrame::DrawOscilloscope(void) {
 
 #endif
         // recompute the frequency
-        double freq = 1.0 * imax * m_SamplingFreq / nsampl;
+        float freq = 1.0 * imax * m_SamplingFreq / nsampl;
         wxString bla;
         bla.Printf(wxT("Frequency : %.1f "), freq);
         window_1->ShowUserText(bla, 100, 20);
@@ -800,78 +800,66 @@ void MainFrame::DrawOscilloscope(void) {
 }
 
 void MainFrame::DrawSpectrum(void) {
-  double *realin, *realout, *imagout, *windowf;
+  float *realin, *realout, *imagout, *windowf;
   int nsampl = m_SpeBufferLength;
-  realin = (double*)malloc(nsampl * sizeof(double));
-  realout = (double*)malloc(nsampl * sizeof(double));
-  imagout = (double*)malloc(nsampl * sizeof(double));
-  windowf = (double*)malloc(nsampl * sizeof(double));
+  realin = (float*)malloc(nsampl * sizeof(float));
+  realout = (float*)malloc(nsampl * sizeof(float));
+  imagout = (float*)malloc(nsampl * sizeof(float));
+  windowf = (float*)malloc(nsampl * sizeof(float));
   wxArrayDouble ardbl;
   wxArrayDouble ardbl2;
 
-  // calculate window
-  const double multiplier = 2 * M_PI / nsampl;
+  // select window
+  int which;
+  float corr = 0;
   switch (choice_fft->GetCurrentSelection()) {
     case 1:  // Hanning
-      for (int i = 0; i < nsampl; i++) {
-        windowf[i] = (1.0 + -1.0 * cos(i * multiplier)) / (double)nsampl;
-      }
+      which = eWinFuncHann;
+      corr = 2.0;
       break;
     case 2:  // Blackman
-      for (int i = 0; i < nsampl; i++) {
-        windowf[i] =
-            2.4 * (0.42 - 0.5 * cos(multiplier * i) + 0.08 * cos(multiplier * i)) / (double)nsampl;
-      }
+      which = eWinFuncBlackman;
+      corr = 2.4;
       break;
     default:  // Rectangle
-      for (int i = 0; i < nsampl; i++) {
-        windowf[i] = 1.0 / (double)nsampl;
-      }
+      which = eWinFuncRectangular;
+      corr = 1.0;
       break;
   }
 
   /*
-   * Scale max. amplitude to 1 which is 0 db.
-   * 16 bit samples and fft correction factor 4
-   * 20 * log(1/65536 * 4) is -84.2 db
+   * Scale max. amplitude to +-1 which is 0 db.
+   * 16 bit samples and fft used up to half sample rate
+   * 20 * log(2/65536 * 2) is -84.2 db
    */
-  const double dbscaler = -84.2;
+  const float dbscaler = -84.2;
 
   // left channel
   for (int i = 0; i < nsampl; i++) {
     // copy and apply window
-    realin[i] = g_SpeBuffer_Left[i] * windowf[i];
+    realin[i] = g_SpeBuffer_Left[i] * corr / nsampl;
   }
-
-  if (fft_double(nsampl, 0, realin, NULL, realout, imagout)) {
+  NewWindowFunc(which, nsampl, false, realin);
+  (RealFFT(nsampl, realin, realout, imagout)); {
     realout[0] = imagout[0] = 0;  // remove DC
     /* show only one half, this means nsampl/2 corresponds to fvz/2 */
     for (int i = 0; i < nsampl / 2; i++) {
       ardbl.Add(20.0 * log10(sqrt(realout[i] * realout[i] + imagout[i] * imagout[i])) + dbscaler);
-    }
-  } else {
-    /* wrong computation */
-    for (int i = 0; i < nsampl; i++) {
-      ardbl.Add(25 * (sin(0.01 * i) + sin(0.012 * i)));
     }
   }
 
   // right channel
   for (int i = 0; i < nsampl; i++) {
     // copy and apply window
-    realin[i] = g_SpeBuffer_Right[i] * windowf[i];
+    realin[i] = g_SpeBuffer_Right[i] * corr / nsampl;
   }
 
-  if (fft_double(nsampl, 0, realin, NULL, realout, imagout)) {
+  NewWindowFunc(which, nsampl, false, realin);
+  (RealFFT(nsampl, realin, realout, imagout)); {
     realout[0] = imagout[0] = 0;  // remove DC
     /* show only one half, this means nsampl/2 corresponds to fvz/2 */
     for (int i = 0; i < nsampl / 2; i++) {
       ardbl2.Add(20.0 * log10(sqrt(realout[i] * realout[i] + imagout[i] * imagout[i])) + dbscaler);
-    }
-  } else {
-    /* wrong computation */
-    for (int i = 0; i < nsampl; i++) {
-      ardbl2.Add(25 * (sin(0.01 * i) + sin(0.012 * i)));
     }
   }
 

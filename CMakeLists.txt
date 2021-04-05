@@ -9,7 +9,8 @@ set(AM_SOURCES
 	AudMeS.cpp
 	CtrlOScope.cpp
 	dlg_audiointerface.cpp
-	fourier.c
+	FFT.cpp
+	RealFFTf.cpp
 	RWAudio_IO.cpp
 	rtaudio/RtAudio.cpp
 )
