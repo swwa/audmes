@@ -819,8 +819,8 @@ void MainFrame::DrawSpectrum(void) {
       break;
     case 2:  // Blackman
       for (int i = 0; i < nsampl; i++) {
-        windowf[i] =
-            2.4 * (0.42 - 0.5 * cos(multiplier * i) + 0.08 * cos(multiplier * i)) / (double)nsampl;
+        windowf[i] = 2.4 * (0.42 - 0.5 * cos(multiplier * i) + 0.08 * cos(2 * multiplier * i)) /
+                     (double)nsampl;
       }
       break;
     default:  // Rectangle
