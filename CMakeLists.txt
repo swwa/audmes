@@ -22,8 +22,8 @@ set(AM_SOURCES
 	${CPP_SOURCES}
 	rtaudio/RtAudio.cpp
 	rtaudio/RtAudio.h
-	fourier.c
-	fourier.h
+	FFT.cpp
+	RealFFTf.cpp
 	)
 
 add_subdirectory (tests)

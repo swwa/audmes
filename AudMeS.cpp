@@ -33,7 +33,7 @@
 
 #include "dlg_audiointerface.h"
 #include "event_ids.h"
-#include "fourier.h"
+#include "FFT.h"
 
 wxIMPLEMENT_CLASS(MainFrame, wxFrame);
 
@@ -898,42 +898,35 @@ double MainFrame::calc_dc(const float* data, int size) {
 }
 
 void MainFrame::DrawSpectrum(void) {
-  double *realin, *realout, *imagout, *windowf;
+  float *realin, *realout, *imagout, *windowf;
   int nsampl = m_SpeBufferLength;
-  realin = (double*)malloc(nsampl * sizeof(double));
-  realout = (double*)malloc(nsampl * sizeof(double));
-  imagout = (double*)malloc(nsampl * sizeof(double));
-  windowf = (double*)malloc(nsampl * sizeof(double));
+  realin = (float*)malloc(nsampl * sizeof(float));
+  realout = (float*)malloc(nsampl * sizeof(float));
+  imagout = (float*)malloc(nsampl * sizeof(float));
+  windowf = (float*)malloc(nsampl * sizeof(float));
   spe_freqs.Clear();
   spe_lmagns.Clear();
   spe_rmagns.Clear();
 
-  // calculate window
-  const double multiplier = 2 * M_PI / nsampl;
-  switch (choice_fft->GetSelection()) {
+  // select window
+  int which;
+  float corr = 0;
+  switch (choice_fft->GetCurrentSelection()) {
     case 1:  // Hanning
-      for (int i = 0; i < nsampl; i++) {
-        windowf[i] = 2 * (0.5 + -0.5 * cos(i * multiplier)) / (double)nsampl;
-      }
+      which = eWinFuncHann;
+      corr = 2.0;
       break;
     case 2:  // Blackman
-      for (int i = 0; i < nsampl; i++) {
-        windowf[i] = 2.4 * (0.42 - 0.5 * cos(multiplier * i) + 0.08 * cos(2 * multiplier * i)) /
-                     (double)nsampl;
-      }
+      which = eWinFuncBlackman;
+      corr = 2.4;
       break;
     case 3:  // Blackman Harris minimum 4 term
-      for (int i = 0; i < nsampl; i++) {
-        windowf[i] = 2.63 *
-                     (0.35875 + -0.48829 * cos(i * multiplier) + 0.14128 * cos(i * multiplier * 2) +
-                      -0.01168 * cos(i * multiplier * 3)) /
-                     (double)nsampl;
-      }
+      corr = 2.63;
+      which = eWinFuncBlackmanHarris;
       break;
     default:  // Rectangle
-      for (int i = 0; i < nsampl; i++) {
-        windowf[i] = 1.0 / (double)nsampl;
-      }
+      which = eWinFuncRectangular;
+      corr = 1.0;
       break;
   }
 
@@ -945,11 +938,12 @@ void MainFrame::DrawSpectrum(void) {
   double offsetL = calc_dc(g_SpeBuffer_Left, nsampl);
   for (int i = 0; i < nsampl; i++) {
     // copy and apply window
-    realin[i] = (g_SpeBuffer_Left[i] - offsetL) * windowf[i];
+    realin[i] = (g_SpeBuffer_Left[i] - offsetL) * corr / nsampl;
   }
 
-  if (fft_double(nsampl, 0, realin, NULL, realout, imagout)) {
-    // use only up to nsampl/2 and skip DC
+  NewWindowFunc(which, nsampl, false, realin);
+  (RealFFT(nsampl, realin, realout, imagout)); {
+    // use only up to nsampl/2 and remove DC
     for (int i = 1; i < nsampl / 2; i++) {
       // multiply amplitude by 2 to compensate
       dval = 2 * sqrt(realout[i] * realout[i] + imagout[i] * imagout[i]);
@@ -957,13 +951,7 @@ void MainFrame::DrawSpectrum(void) {
       dval_db = 20.0 * log10(m_SMASpeLeft->GetSMA(i));
       spe_lmagns.Add(dval_db);
     }
-  } else {
-    /* wrong computation */
-    for (int i = 0; i < nsampl / 2; i++) {
-      spe_lmagns.Add(-150);
-    }
   }
-
   /* find frequency index with highest amplitude */
   int fmax = 0;
   for (int i = 0; i < nsampl / 2; i++) {
@@ -1005,21 +993,17 @@ void MainFrame::DrawSpectrum(void) {
   double offsetR = calc_dc(g_SpeBuffer_Right, nsampl);
   for (int i = 0; i < nsampl; i++) {
     // copy and apply window
-    realin[i] = (g_SpeBuffer_Right[i] - offsetR) * windowf[i];
+    realin[i] = (g_SpeBuffer_Right[i] - offsetR) * corr / nsampl;
   }
 
-  if (fft_double(nsampl, 0, realin, NULL, realout, imagout)) {
-    // use only up to nsampl/2 and skip DC
+  NewWindowFunc(which, nsampl, false, realin);
+  (RealFFT(nsampl, realin, realout, imagout)); {
+    // use only up to nsampl/2 and remove DC
     for (int i = 1; i < nsampl / 2; i++) {
       dval = 2 * sqrt(realout[i] * realout[i] + imagout[i] * imagout[i]);
       m_SMASpeRight->AddVal(i, dval);
       dval_db = (20.0 * log10(m_SMASpeRight->GetSMA(i)));
       spe_rmagns.Add(dval_db);
-    }
-  } else {
-    /* wrong computation */
-    for (int i = 0; i < nsampl / 2; i++) {
-      spe_rmagns.Add(-150);
     }
   }
 
