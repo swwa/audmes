@@ -12,8 +12,8 @@ set(AM_SOURCES
 	CtrlOScope.h
 	dlg_audiointerface.cpp
 	dlg_audiointerface.h
-	fourier.c
-	fourier.h
+	FFT.cpp
+	RealFFTf.cpp
 	RWAudio_IO.cpp
 	RWAudio_IO.h
 	rtaudio/RtAudio.cpp
