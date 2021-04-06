@@ -58,6 +58,7 @@ class MainFrame : public wxFrame {
   void OnFrmStart(wxCommandEvent& event);
   void OnAboutClick(wxCommandEvent& event);
   void OnExitClick(wxCommandEvent& event);
+  void OnClose(wxCloseEvent& event);
   void OnSoundInput(wxEvent& event);
   void OnTimer(wxTimerEvent& event);
   void OnGeneratorChanged(wxCommandEvent& event);

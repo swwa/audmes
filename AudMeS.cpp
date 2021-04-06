@@ -46,6 +46,7 @@ EVT_TOGGLEBUTTON(ID_OSCSTART, MainFrame::OnOscStart)
 EVT_TOGGLEBUTTON(ID_FRMSTART, MainFrame::OnFrmStart)
 EVT_MENU(wxID_ABOUT, MainFrame::OnAboutClick)
 EVT_MENU(wxID_EXIT, MainFrame::OnExitClick)
+EVT_CLOSE(MainFrame::OnClose)
 EVT_MENU(ID_SNDCARD, MainFrame::OnSelectSndCard)
 EVT_TIMER(ID_TIMERID, MainFrame::OnTimer)
 EVT_CHECKBOX(ID_GENLENB, MainFrame::OnGeneratorChanged)
@@ -518,6 +519,11 @@ void MainFrame::OnAboutClick(wxCommandEvent& WXUNUSED(event)) {
 }
 
 void MainFrame::OnExitClick(wxCommandEvent& WXUNUSED(event)) { Close(); }
+
+void MainFrame::OnClose(wxCloseEvent& WXUNUSED(event)) {
+  m_timer->Stop();
+  Destroy();
+}
 
 void MainFrame::OnOpenClick(wxCommandEvent& WXUNUSED(event)) {
   wxMessageBox(wxT("Not yet implemented"), _T("About application"), wxICON_INFORMATION | wxOK);
