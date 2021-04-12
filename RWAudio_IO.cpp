@@ -269,7 +269,7 @@ int RWAudio::RestartAudio(int recDevId, int playDevId) {
   RtAudio::StreamParameters iParams;
   RtAudio::StreamParameters oParams;
   RtAudio::StreamOptions rtAOptions;
-  unsigned int bufferFrames = 512;
+  unsigned int bufferFrames = 64;
 
   iParams.deviceId = recDevId;
   oParams.deviceId = playDevId;
