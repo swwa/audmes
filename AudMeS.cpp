@@ -820,7 +820,7 @@ void MainFrame::DrawSpectrum(void) {
   switch (choice_fft->GetCurrentSelection()) {
     case 1:  // Hanning
       for (int i = 0; i < nsampl; i++) {
-        windowf[i] = (1.0 + -1.0 * cos(i * multiplier)) / (double)nsampl;
+        windowf[i] = 2 * (0.5 + -0.5 * cos(i * multiplier)) / (double)nsampl;
       }
       break;
     case 2:  // Blackman
