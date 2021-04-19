@@ -207,8 +207,9 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
 
   // Spectrum analyzer
   label_5 = new wxStaticText(notebook_1_spe, -1, wxT("FFT Window Type:"));
-  const wxString choice_fft_choices[] = {wxT("Rect"), wxT("Hanning"), wxT("Blackman")};
-  choice_fft = new wxChoice(notebook_1_spe, ID_FFTWINDOW, wxDefaultPosition, wxDefaultSize, 3,
+  const wxString choice_fft_choices[] = {wxT("Rect"), wxT("Hanning"), wxT("Blackman"),
+                                         wxT("BlackHarr")};
+  choice_fft = new wxChoice(notebook_1_spe, ID_FFTWINDOW, wxDefaultPosition, wxDefaultSize, 4,
                             choice_fft_choices, 0);
 
   label_9 = new wxStaticText(notebook_1_spe, -1, wxT("Number of samples:"));
@@ -890,6 +891,14 @@ void MainFrame::DrawSpectrum(void) {
     case 2:  // Blackman
       for (int i = 0; i < nsampl; i++) {
         windowf[i] = 2.4 * (0.42 - 0.5 * cos(multiplier * i) + 0.08 * cos(2 * multiplier * i)) /
+                     (double)nsampl;
+      }
+      break;
+    case 3:  // Blackman Harris minimum 4 term
+      for (int i = 0; i < nsampl; i++) {
+        windowf[i] = 2.63 *
+                     (0.35875 + -0.48829 * cos(i * multiplier) + 0.14128 * cos(i * multiplier * 2) +
+                      -0.01168 * cos(i * multiplier * 3)) /
                      (double)nsampl;
       }
       break;
