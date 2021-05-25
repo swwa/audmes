@@ -30,7 +30,7 @@ Dependencies:
 
 ### Linux
 
-The following istructions are for Debian, Ubuntu and similar.
+The following instructions are for Debian, Ubuntu and similar.
 
 Install the basic development tools and dependencies
 
@@ -73,6 +73,10 @@ Install the 32 bit version:
     Exceptions  sjlj
     Build       0
 
+If you have a previous MinGW installation, say in "C:\MinGW",
+take care not to the two. See setting the path below or simply
+uninstall the previous installation.
+
 Git <https://git-scm.com/download/win>
 
 - Git-2.26.2-64-bit.exe
@@ -80,6 +84,9 @@ Git <https://git-scm.com/download/win>
 Cmake <https://cmake.org/download/>
 
 - cmake-3.17.2-win64-x64.msi
+
+The next instructions assume that you use git bash (not command.exe).
+Use the desktop shortcut "Git bash" you get after after installing git.
 
 Create a directory to store the project.
 
@@ -103,9 +110,14 @@ FCCP <https://github.com/ben-strasser/fast-cpp-csv-parser>
 
 Clone into $ENV{HOMEDRIVE}$ENV{HOMEPATH}/projects/audmes-git/libfccp
 
-Make sure you have wingw-w64 and cmake in your bash path.
+Make sure you have mingw and cmake in your bash path.
+You need to add the following using the windows
+"System Properties->Environment Variables" window.
+    "C:\Program Files (x86)\mingw-w64\i686-8.1.0-posix-sjlj-rt_v6-rev0\mingw32\bin"
+    "C:\Program Files\CMake\bin"
+or add it to the path in the bash profile.
 
-Compile 32bit version with (git bash in source directory):
+Compile 32bit Windows version (git bash in source directory):
 
     cd $ENV{HOMEDRIVE}$ENV{HOMEPATH}/projects/audmes-git
     mkdir build && cd build
@@ -115,7 +127,7 @@ Compile 32bit version with (git bash in source directory):
 
 Install libraries:
 
-    cp /c/Program\ Files\ \(x86\)/mingw-w64/i686-8.1.0-posix-sjlj-rt_v6-rev0/mingw32/bin/libwinpthread-1.dll.
+    cp /c/Program\ Files\ \(x86\)/mingw-w64/i686-8.1.0-posix-sjlj-rt_v6-rev0/mingw32/bin/libwinpthread-1.dll .
     cp /c/Program\ Files\ \(x86\)/mingw-w64/i686-8.1.0-posix-sjlj-rt_v6-rev0/mingw32/bin/libstdc++-6.dll .
     cp /c/Program\ Files\ \(x86\)/mingw-w64/i686-8.1.0-posix-sjlj-rt_v6-rev0/mingw32/bin/libgcc_s_sjlj-1.dll .
     cp ../../wx3.0.5/lib/gcc810_dll/wxbase30u_gcc810.dll .
@@ -130,8 +142,13 @@ Run the program:
 If a popup appears about sound card issues,
 make sure you have stereo input and output available.
 You may need to plug in a cable.
+Mono channels on sound cards are not yet supported, sorry.
 
 If you see messages like
 `WARNING **: invalid source position for vertical gradient`
 then your Gnome Theme has a bug. It is annoying but harmless.
 On Debian the issue disappears when using e.g. `materia-gtk-theme`.
+
+If you get an error like `wxbase30ud_gcc810.dll not found` (note the "d_")
+when running AudMeS.exe, you compiled in Debug mode. Run cmake again with
+"-DCMAKE_BUILD_TYPE=Release".
