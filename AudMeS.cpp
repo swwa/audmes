@@ -742,10 +742,7 @@ void MainFrame::DrawOscilloscope(void) {
   switch (choice_osc_trig_source->GetCurrentSelection()) {
     case 1:
       // left channel - look for the value under hysteresis point and then over 0
-      choice_osc_l_res->GetString(choice_osc_l_res->GetCurrentSelection())
-          .ToLong(&scope_resolution);
-      hysteresis_level =
-          scope_resolution /
+      hysteresis_level = range_div /
           10.0;  // later the hysteresis percent will be maybe settable in the control
       while (i < m_OscBufferLength) {
         if ((trigger_level - hysteresis_level) > (trigger_edge * g_OscBuffer_Left[i])) {
@@ -763,10 +760,8 @@ void MainFrame::DrawOscilloscope(void) {
       break;
     case 2:
       // right channel
-      choice_osc_l_res_copy->GetString(choice_osc_l_res_copy->GetCurrentSelection())
-          .ToLong(&scope_resolution);
       hysteresis_level =
-          scope_resolution /
+          range_div2 /
           10.0;  // later the hysteresis percent will be maybe settable in the control
       while (i < m_OscBufferLength) {
         if ((trigger_level - hysteresis_level) > (trigger_edge * g_OscBuffer_Right[i])) {
