@@ -78,6 +78,7 @@ class MainFrame : public wxFrame {
   void OnAutoCalClick(wxCommandEvent& event);
   void OnOscXScaleChanged(wxCommandEvent& event);
   void DrawFreqResponse(void);
+  void CalcFreqResponse(void);
   void DrawOscilloscope(void);
   void DrawSpectrum(void);
 
@@ -152,8 +153,11 @@ class MainFrame : public wxFrame {
 
   RWAudio* m_RWAudio;
   wxTimer* m_timer;
-  // RWPlayer i_pl;
+
   bool frm_running;
+  int frm_ipoints;
+  int frm_istep;
+  int frm_measure;
 
   wxArrayDouble m_frm_freqs;
   wxArrayDouble m_frm_lgains;

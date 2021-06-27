@@ -84,8 +84,6 @@ long int g_SpeBufferPosition;
 int g_OscBufferChanged;
 int g_SpeBufferChanged;
 
-static const int frm_low = 20;
-
 ///////////////////////////////////////////////////////////////////////
 MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPoint& pos,
                      const wxSize& size, long WXUNUSED(style))
@@ -616,6 +614,51 @@ void MainFrame::OnAutoCalClick(wxCommandEvent& WXUNUSED(event)) {
   }
 }
 
+static const int frm_low = 20;
+
+void MainFrame::CalcFreqResponse() {
+  static const int frm_cycles = 2;
+  /* periodically called by OnTimer
+   * delays for measuring work by waiting for the next call
+   */
+  if (frm_running) {
+    if (frm_istep <= (int)frm_ipoints) {
+      float freq = frm_low * pow(10.0, 3.0 * frm_istep / frm_ipoints);
+      if (0 == frm_measure) {
+        // set new frequency e.g. from 20Hz to 20kHz
+        m_RWAudio->PlaySetGenerator(freq, freq, 0, 0, pow(10, slide_l_am->GetValue() / 20.0),
+                                    pow(10, slide_r_am->GetValue() / 20.0));
+        wxString bla;
+        bla.Printf(wxT("Frequency : %.1f "), freq);
+        window_1_frm->ShowUserText(bla, 100, 20);
+      }
+      if (frm_measure >= frm_cycles) {
+        // we waited for new audio data
+        // find RMS value in the grabbed wave and store it as a result
+        // NOTE: depends on the spectrum buffer size - which may be small
+        double l_rms = 0;
+        double r_rms = 0;
+        for (unsigned long int ii = 0; ii < m_SpeBufferLength; ii++) {
+          l_rms += (double)g_SpeBuffer_Left[ii] / 32768.0 * (double)g_SpeBuffer_Left[ii] / 32768.0;
+          r_rms += g_SpeBuffer_Right[ii] / 32768.0 * g_SpeBuffer_Right[ii] / 32768.0;
+        }
+        m_frm_freqs.Add(freq);
+        m_frm_lgains.Add(sqrt(l_rms / m_SpeBufferLength));
+        m_frm_rgains.Add(sqrt(r_rms / m_SpeBufferLength));
+        frm_measure = -1;  // zero after increment
+        frm_istep++;
+      }
+      frm_measure++;
+    } else {
+      frm_running = false;
+      window_1_frm->ShowUserText(wxString(""), 0, 0);
+      button_frm_start->SetValue(false);
+      button_frm_start->SetLabel(_T("Start"));
+      SendGenSettings();  // stop generator
+    }
+  }
+}
+
 void MainFrame::DrawFreqResponse(void) {
   wxArrayDouble left, right;
 
@@ -898,12 +941,12 @@ void MainFrame::DrawSpectrum(void) {
 
 void MainFrame::OnTimer(wxTimerEvent& WXUNUSED(event)) {
   bool refresh = false;
-  if (0 != g_OscBufferChanged && button_osc_start->GetValue()) {
+  if (g_OscBufferChanged && button_osc_start->GetValue()) {
     DrawOscilloscope();
     g_OscBufferChanged = 0;
     refresh = true;
   }
-  if (0 != g_SpeBufferChanged) {
+  if (g_SpeBufferChanged) {
     if (button_spe_start->GetValue()) {
       DrawSpectrum();
       refresh = true;
@@ -914,6 +957,7 @@ void MainFrame::OnTimer(wxTimerEvent& WXUNUSED(event)) {
     }
     g_SpeBufferChanged = 0;
   }
+  CalcFreqResponse();
   if (refresh) {
     Refresh();
     Update();
@@ -967,57 +1011,28 @@ void MainFrame::OnOscStart(wxCommandEvent& WXUNUSED(event)) {
 }
 
 void MainFrame::OnFrmStart(wxCommandEvent& WXUNUSED(event)) {
-  long ipoints;
-
   if (button_frm_start->GetValue()) {
+    long ip;
     button_frm_start->SetLabel(_T("Stop"));
-
-    // make steppings and measurement
-    wxString tpoints = text_ctrl1_frm->GetValue();
-
-    tpoints.ToLong(&ipoints, 10);
-    if (ipoints > 120) ipoints = 120;
-    if (ipoints < 1) ipoints = 1;
-
+    frm_measure = 0;
     frm_running = true;
+
+    wxString tpoints = text_ctrl1_frm->GetValue();
+    tpoints.ToLong(&ip, 10);
+    if (ip > 120) ip = 120;
+    if (ip < 1) ip = 1;
+    frm_ipoints = (int)ip;
+    frm_istep = 0;
 
     m_frm_freqs.Clear();
     m_frm_lgains.Clear();
     m_frm_rgains.Clear();
-    for (int i = 0; i <= (int)ipoints; i++) {
-      // from 20Hz to 20kHz
-      float freq = frm_low * pow(10.0, 3.0 * i / ipoints);
-      m_RWAudio->PlaySetGenerator(freq, freq, 0, 0, pow(10, slide_l_am->GetValue() / 20.0),
-                                  pow(10, slide_r_am->GetValue() / 20.0));
-      wxString bla;
-      bla.Printf(wxT("Frequency : %.1f "), freq);
-      window_1_frm->ShowUserText(bla, 100, 20);
-      sleep(200);
-      wxYield();
-      sleep(400);
-      wxYield();
-      // find RMS value in the grabbed wave and store it as a result
-      // TODO: depends on the spectrum buffer size - which may be small
-      double l_rms = 0;
-      double r_rms = 0;
-      for (unsigned long int ii = 0; ii < m_SpeBufferLength; ii++) {
-        l_rms += (double)g_SpeBuffer_Left[ii] / 32768.0 * (double)g_SpeBuffer_Left[ii] / 32768.0;
-        r_rms += g_SpeBuffer_Right[ii] / 32768.0 * g_SpeBuffer_Right[ii] / 32768.0;
-      }
-      m_frm_freqs.Add(freq);
-      m_frm_lgains.Add(sqrt(l_rms / m_SpeBufferLength));
-      m_frm_rgains.Add(sqrt(r_rms / m_SpeBufferLength));
-
-      if (!frm_running) break;
-    }
-    sleep(200);
-    wxYield();
+  } else {
+    frm_running = false;
     button_frm_start->SetValue(false);
+    button_frm_start->SetLabel(_T("Start"));
+    SendGenSettings();  // stop generator
   }
-  button_frm_start->SetLabel(_T("Start"));
-  frm_running = false;
-  SendGenSettings();
-  window_1_frm->ShowUserText(wxString(""), 0, 0);
 }
 
 void MainFrame::OnGeneratorChanged(wxCommandEvent& WXUNUSED(event)) {
@@ -1167,14 +1182,6 @@ void MainFrame::OnTxtFreqRChanged(wxCommandEvent& WXUNUSED(event)) {
   if (button_gen_start->GetValue()) {
     SendGenSettings();
   }
-}
-
-void MainFrame::sleep(int ms) {
-#ifdef __WXMSW__
-  Sleep(ms);
-#else
-  usleep(ms * 1000);
-#endif
 }
 
 class AudMeSApp : public wxApp {
