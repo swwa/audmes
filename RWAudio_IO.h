@@ -58,9 +58,6 @@ class RWAudio {
 
   int GetRunningStatus(void) { return m_DrvRunning; };
 
-  /* stuff for callback function */
-  unsigned int m_bufferBytes;
-
   /* generator */
   float m_genFR_l, m_genFR_r;
   int m_genShape_l, m_genShape_r;

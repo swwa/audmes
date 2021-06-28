@@ -287,7 +287,6 @@ int RWAudio::RestartAudio(int recDevId, int playDevId) {
     // std::cerr << '\n' << e.getMessage() << '\n' << std::endl;
     return 1;
   }
-  m_bufferBytes = bufferFrames * iParams.nChannels * sizeof(short);
 
   m_AudioDriver.startStream();
 
