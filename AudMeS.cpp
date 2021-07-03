@@ -482,7 +482,9 @@ void MainFrame::set_custom_props() {
   g_OscBufferChanged = 0;
   g_SpeBufferChanged = 0;
 
-  frm_running = false;
+  frm_running = 0;
+  frm_measure = 0;
+  frm_istep = 0;
 
   m_configfilename = wxT("");
 
@@ -617,27 +619,28 @@ void MainFrame::OnAutoCalClick(wxCommandEvent& WXUNUSED(event)) {
 static const int frm_low = 20;
 
 void MainFrame::CalcFreqResponse() {
-  static const int frm_cycles = 2;
   /* periodically called by OnTimer
    * delays for measuring work by waiting for the next call
    */
   if (frm_running) {
     if (frm_istep <= (int)frm_ipoints) {
       float freq = frm_low * pow(10.0, 3.0 * frm_istep / frm_ipoints);
+
       if (0 == frm_measure) {
-        // set new frequency e.g. from 20Hz to 20kHz
+        // play new frequency e.g. from 20Hz to 20kHz
         m_RWAudio->PlaySetGenerator(freq, freq, 0, 0, pow(10, slide_l_am->GetValue() / 20.0),
                                     pow(10, slide_r_am->GetValue() / 20.0));
         wxString bla;
         bla.Printf(wxT("Frequency : %.1f "), freq);
         window_1_frm->ShowUserText(bla, 100, 20);
       }
-      if (frm_measure >= frm_cycles) {
-        // we waited for new audio data
-        // find RMS value in the grabbed wave and store it as a result
-        // NOTE: depends on the spectrum buffer size - which may be small
+      if (1 == frm_measure) g_SpeBufferChanged = 0;  // now get audio data
+
+      if (g_SpeBufferChanged && frm_measure > 1) {
+        // new audio data has arrived
         double l_rms = 0;
         double r_rms = 0;
+        // compute RMS value in the grabbed wave and store it as a result
         for (unsigned long int ii = 0; ii < m_SpeBufferLength; ii++) {
           l_rms += (double)g_SpeBuffer_Left[ii] / 32768.0 * (double)g_SpeBuffer_Left[ii] / 32768.0;
           r_rms += g_SpeBuffer_Right[ii] / 32768.0 * g_SpeBuffer_Right[ii] / 32768.0;
@@ -946,18 +949,16 @@ void MainFrame::OnTimer(wxTimerEvent& WXUNUSED(event)) {
     g_OscBufferChanged = 0;
     refresh = true;
   }
-  if (g_SpeBufferChanged) {
-    if (button_spe_start->GetValue()) {
-      DrawSpectrum();
-      refresh = true;
-    }
-    if (button_frm_start->GetValue()) {
-      DrawFreqResponse();
-      refresh = true;
-    }
+  CalcFreqResponse();
+  if (button_frm_start->GetValue()) {
+    DrawFreqResponse();
+    refresh = true;
+  }
+  if (g_SpeBufferChanged && button_spe_start->GetValue()) {
+    DrawSpectrum();
+    refresh = true;
     g_SpeBufferChanged = 0;
   }
-  CalcFreqResponse();
   if (refresh) {
     Refresh();
     Update();
@@ -1014,8 +1015,6 @@ void MainFrame::OnFrmStart(wxCommandEvent& WXUNUSED(event)) {
   if (button_frm_start->GetValue()) {
     long ip;
     button_frm_start->SetLabel(_T("Stop"));
-    frm_measure = 0;
-    frm_running = true;
 
     wxString tpoints = text_ctrl1_frm->GetValue();
     tpoints.ToLong(&ip, 10);
@@ -1027,6 +1026,9 @@ void MainFrame::OnFrmStart(wxCommandEvent& WXUNUSED(event)) {
     m_frm_freqs.Clear();
     m_frm_lgains.Clear();
     m_frm_rgains.Clear();
+
+    frm_measure = 0;
+    frm_running = true;
   } else {
     frm_running = false;
     button_frm_start->SetValue(false);
