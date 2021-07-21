@@ -34,12 +34,13 @@ The following instructions are for Debian, Ubuntu and similar.
 
 Install the basic development tools and dependencies
 
-    apt install build-essential git
-    apt install cmake libfccp-dev libwxgtk3.0-dev libpulse-dev
+    sudo apt install build-essential git
+    sudo apt install libwxgtk3.0-dev # libwxgtk3.0-gtk3-dev in Debian 11
+    sudo apt install cmake libfccp-dev libpulse-dev
 
 Fetch the source
 
-    git clone git clone https://git.code.sf.net/p/audmes/git audmes-git
+    git clone https://git.code.sf.net/p/audmes/git audmes-git
 
 Compile
 
