@@ -487,6 +487,8 @@ void MainFrame::set_custom_props() {
   g_OscBufferChanged = 0;
   g_SpeBufferChanged = 0;
 
+  frm_running = false;
+
   m_configfilename = wxT("");
 
   m_timer = new wxTimer(this, ID_TIMERID);
@@ -980,7 +982,7 @@ void MainFrame::OnFrmStart(wxCommandEvent& WXUNUSED(event)) {
     if (ipoints > 120) ipoints = 120;
     if (ipoints < 1) ipoints = 1;
 
-    frm_running = 1;
+    frm_running = true;
 
     m_frm_freqs.Clear();
     m_frm_lgains.Clear();
@@ -1009,14 +1011,14 @@ void MainFrame::OnFrmStart(wxCommandEvent& WXUNUSED(event)) {
       m_frm_lgains.Add(sqrt(l_rms / m_SpeBufferLength));
       m_frm_rgains.Add(sqrt(r_rms / m_SpeBufferLength));
 
-      if (0 == frm_running) break;
+      if (!frm_running) break;
     }
     sleep(200);
     wxYield();
     button_frm_start->SetValue(false);
   }
   button_frm_start->SetLabel(_T("Start"));
-  frm_running = 0;
+  frm_running = false;
   SendGenSettings();
   window_1_frm->ShowUserText(wxString(""), 0, 0);
 }

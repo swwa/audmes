@@ -153,7 +153,7 @@ class MainFrame : public wxFrame {
   RWAudio* m_RWAudio;
   wxTimer* m_timer;
   // RWPlayer i_pl;
-  int frm_running;
+  bool frm_running;
 
   wxArrayDouble m_frm_freqs;
   wxArrayDouble m_frm_lgains;
