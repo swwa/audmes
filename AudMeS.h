@@ -118,6 +118,8 @@ class MainFrame : public wxFrame {
   wxStaticText* label_gen_ampl_r;
   wxSlider* slide_r_am;
   wxToggleButton* button_gen_start;
+  wxToggleButton* button_spe_gen_start;
+
   wxPanel* notebook_1_gen;
 
   CtrlOScope* window_osc;
@@ -174,6 +176,7 @@ class MainFrame : public wxFrame {
   SMA_2D* m_SMASpeRight;
 
   bool frm_running;
+  bool gen_running;
   int frm_ipoints;
   int frm_istep;
   int frm_measure;

@@ -151,7 +151,6 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
   slide_r_fr = new wxSlider(notebook_1_gen, ID_GENRFREQ, 80, 0, 200);
   label_gen_ampl_r = new wxStaticText(notebook_1_gen, -1, wxT("Amplitude [0..-60dB]: "));
   slide_r_am = new wxSlider(notebook_1_gen, ID_GENRAMP, 0, -60, 0);
-  button_gen_start = new wxToggleButton(notebook_1_gen, ID_GENSTART, wxT("Start"));
 
   checkbox_gen_sync = new wxCheckBox(notebook_1_gen, ID_GENSYNC, wxT("L and R are synchronized"));
   label_gen_sync =
@@ -215,6 +214,7 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
   const wxString choice_osc_trig_edge_choices[] = {wxT("Rising edge"), wxT("Falling edge")};
   choice_osc_trig_edge = new wxChoice(notebook_1_osc, ID_OSCRTRIG, wxDefaultPosition, wxDefaultSize,
                                       2, choice_osc_trig_edge_choices, 0);
+  button_gen_start = new wxToggleButton(notebook_1_osc, ID_GENSTART, wxT("Gen-Start"));
 
   button_osc_start = new wxToggleButton(notebook_1_osc, ID_OSCSTART, wxT("Start"));
 
@@ -255,6 +255,7 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
 
   window_1_spe = new CtrlOScope(notebook_1_spe, _T("Hz"), _T("dB"));
   button_spe_start = new wxToggleButton(notebook_1_spe, ID_SPANSTART, wxT("Start"));
+  button_spe_gen_start = new wxToggleButton(notebook_1_spe, ID_GENSTART, wxT("Gen-Start"));
 
   /* Frequency response */
   label_1_frm = new wxStaticText(notebook_1_frm, -1, wxT("Number of points (max 120):"));
@@ -319,6 +320,8 @@ void MainFrame::do_layout() {
   wxStaticBoxSizer* sizer_GenEnR = new wxStaticBoxSizer(sizer_gen_r_staticbox, wxVERTICAL);
   wxBoxSizer* sizer_gen_sync = new wxBoxSizer(wxHORIZONTAL);
   wxBoxSizer* sizer_gen_sync2 = new wxBoxSizer(wxHORIZONTAL);
+  wxBoxSizer* sizer_osc_1 = new wxBoxSizer(wxHORIZONTAL);
+  wxBoxSizer* sizer_spe_1 = new wxBoxSizer(wxHORIZONTAL);
 
   wxBoxSizer* sizer_9_frm = new wxBoxSizer(wxVERTICAL);
   wxBoxSizer* sizer_10_frm = new wxBoxSizer(wxVERTICAL);
@@ -377,7 +380,6 @@ void MainFrame::do_layout() {
                        wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
   sizer_2->Add(sizer_gen_sync, 0, wxALIGN_CENTER_HORIZONTAL, 0);
   sizer_2->Add(sizer_gen_sync2, 0, wxALIGN_CENTER_HORIZONTAL, 0);
-  sizer_2->Add(button_gen_start, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
   notebook_1_gen->SetAutoLayout(true);
   notebook_1_gen->SetSizer(sizer_2);
   sizer_2->Fit(notebook_1_gen);
@@ -444,7 +446,12 @@ void MainFrame::do_layout() {
   sizer_11->Add(sizer_12H, 1, wxEXPAND, 0);
   sizer_10->Add(sizer_11, 0, 0, 0);
   sizer_9->Add(sizer_10, 1, wxEXPAND, 0);
-  sizer_9->Add(button_osc_start, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
+  sizer_osc_1->Add(button_gen_start, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
+                   5);
+  sizer_osc_1->Add(20, 20, 0, 0, 0);
+  sizer_osc_1->Add(button_osc_start, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
+                   5);
+  sizer_9->Add(sizer_osc_1, 0, 0, 0);
   notebook_1_osc->SetAutoLayout(true);
   notebook_1_osc->SetSizer(sizer_9);
   sizer_9->Fit(notebook_1_osc);
@@ -493,8 +500,12 @@ void MainFrame::do_layout() {
 
   sizer_spe_10->Add(sizer_spe_ctrl, 0, wxEXPAND, 0);
   sizer_spe_9->Add(sizer_spe_10, 1, wxEXPAND, 0);
-  sizer_spe_9->Add(button_spe_start, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
+  sizer_spe_1->Add(button_spe_gen_start, 0,
+                   wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
+  sizer_spe_1->Add(20, 20, 0, 0, 0);
+  sizer_spe_1->Add(button_spe_start, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
                    5);
+  sizer_spe_9->Add(sizer_spe_1, 0, 0, 0);
   notebook_1_spe->SetAutoLayout(true);
   notebook_1_spe->SetSizer(sizer_spe_9);
   sizer_spe_9->Fit(notebook_1_spe);
@@ -572,9 +583,10 @@ void MainFrame::set_custom_props() {
   window_1_frm->SetXRange(20, 20000, 1);
   window_1_frm->SetYRange(-80, 0, 0);
 
-  frm_running = 0;
   frm_measure = 0;
   frm_istep = 0;
+  frm_running = false;
+  gen_running = false;
 
   m_configfilename = wxT("");
 
@@ -1113,10 +1125,18 @@ void MainFrame::OnSpanStart(wxCommandEvent& WXUNUSED(event)) {
 }
 
 void MainFrame::OnGenStart(wxCommandEvent& WXUNUSED(event)) {
-  if (button_gen_start->GetValue()) {
-    button_gen_start->SetLabel(_T("Stop"));
+  if (gen_running) {
+    button_gen_start->SetLabel(_T("Gen-Start"));
+    button_spe_gen_start->SetLabel(_T("Gen-Start"));
+    button_gen_start->SetValue(false);
+    button_spe_gen_start->SetValue(false);
+    gen_running = false;
   } else {
-    button_gen_start->SetLabel(_T("Start"));
+    button_gen_start->SetLabel(_T("Gen-Stop"));
+    button_spe_gen_start->SetLabel(_T("Gen-Stop"));
+    button_gen_start->SetValue(true);
+    button_spe_gen_start->SetValue(true);
+    gen_running = true;
   }
   SendGenSettings();
 }
@@ -1169,7 +1189,7 @@ void MainFrame::OnGeneratorChanged(wxCommandEvent& WXUNUSED(event)) {
     label_gen_freq_r->Enable(true);
   }
 
-  if (button_gen_start->GetValue()) {
+  if (gen_running) {
     SendGenSettings();
   }
 }
@@ -1181,7 +1201,7 @@ void MainFrame::OnGenScrollLChanged(wxScrollEvent& WXUNUSED(event)) {
 
   bla.Printf(wxT("%.1f"), floor(20.0 * pow(10.0, 3.0 * slide_l_fr->GetValue() / 200.0)));
   txt_freq_l->SetValue(bla);
-  if (button_gen_start->GetValue()) {
+  if (gen_running) {
     SendGenSettings();
   }
 }
@@ -1191,7 +1211,7 @@ void MainFrame::OnGenScrollRChanged(wxScrollEvent& WXUNUSED(event)) {
 
   bla.Printf(wxT("%.1f"), floor(20.0 * pow(10.0, 3.0 * slide_r_fr->GetValue() / 200.0)));
   txt_freq_r->SetValue(bla);
-  if (button_gen_start->GetValue()) {
+  if (gen_running) {
     SendGenSettings();
   }
 }
@@ -1205,7 +1225,7 @@ void MainFrame::OnGenScrollChanged(wxScrollEvent& WXUNUSED(event)) {
   bla.Printf(wxT("Amplitude: %d dB"), slide_r_am->GetValue());
   label_gen_ampl_r->SetLabel(bla);
 
-  if (button_gen_start->GetValue()) {
+  if (gen_running) {
     SendGenSettings();
   }
 }
@@ -1216,12 +1236,12 @@ void MainFrame::SendGenSettings() {
   double doubleToFreq;
   float gain_l, gain_r;
 
-  if ((checkbox_l_en->IsChecked()) && (button_gen_start->GetValue())) {
+  if ((checkbox_l_en->IsChecked()) && (gen_running)) {
     gain_l = 1.0 * pow(10, slide_l_am->GetValue() / 20.0);
   } else {
     gain_l = 0.0;
   }
-  if ((checkbox_r_en->IsChecked()) && (button_gen_start->GetValue())) {
+  if ((checkbox_r_en->IsChecked()) && (gen_running)) {
     gain_r = 1.0 * pow(10, slide_r_am->GetValue() / 20.0);
   } else {
     gain_r = 0.0;
@@ -1281,13 +1301,13 @@ void MainFrame::OnSelectSndCard(wxCommandEvent& WXUNUSED(event)) {
 }
 
 void MainFrame::OnTxtFreqLChanged(wxCommandEvent& WXUNUSED(event)) {
-  if (button_gen_start->GetValue()) {
+  if (gen_running) {
     SendGenSettings();
   }
 }
 
 void MainFrame::OnTxtFreqRChanged(wxCommandEvent& WXUNUSED(event)) {
-  if (button_gen_start->GetValue()) {
+  if (gen_running) {
     SendGenSettings();
   }
 }
