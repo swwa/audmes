@@ -505,8 +505,8 @@ void MainFrame::set_custom_props() {
 #endif
 
   if (ret)
-    wxMessageBox(_T("Sound card issue: please check settings\n"), _T("Alert"),
-                 wxICON_INFORMATION | wxOK);
+    wxMessageBox(_T("Sound card issue:\n\nPlease check\nTools -> Audio interface Configuration\n"),
+                 _T("Alert"), wxICON_INFORMATION | wxOK);
 }
 
 void MainFrame::OnAboutClick(wxCommandEvent& WXUNUSED(event)) {
