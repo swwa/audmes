@@ -313,7 +313,7 @@ int RWAudio::RestartAudio(int recDevId, int playDevId) {
   iParams.firstChannel = 0;
   oParams.firstChannel = 0;
 
-  rtAOptions.flags |= RTAUDIO_NONINTERLEAVED;
+  //rtAOptions.flags |= RTAUDIO_NONINTERLEAVED;
 
   try {
     m_AudioDriver.openStream(&oParams, &iParams, RTAUDIO_SINT16, m_sampleRate, &bufferFrames,
