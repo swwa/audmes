@@ -23,6 +23,8 @@
 
 #include "RWAudio_IO.h"
 
+#include <map>
+
 #include <math.h>
 #include <stdio.h>
 #include <wx/defs.h>  // for WXUNUSED
@@ -249,8 +251,41 @@ int RWAudio::InitSnd(long int oscbuflen, long int spebuflen) {
   g_OscBuffer_Right = (short *)malloc(m_OscBufferLen * sizeof(short));
   g_SpeBuffer_Left = (short *)malloc(m_SpeBufferLen * sizeof(short));
   g_SpeBuffer_Right = (short *)malloc(m_SpeBufferLen * sizeof(short));
+
+  RtAudio::DeviceInfo info;
+  unsigned int devices;
+
+  // Create an api map.
+  std::map<int, std::string> apiMap;
+  apiMap[RtAudio::MACOSX_CORE] = "OS-X Core Audio";
+  apiMap[RtAudio::WINDOWS_ASIO] = "Windows ASIO";
+  apiMap[RtAudio::WINDOWS_DS] = "Windows DirectSound";
+  apiMap[RtAudio::WINDOWS_WASAPI] = "Windows WASAPI";
+  apiMap[RtAudio::UNIX_JACK] = "Jack Client";
+  apiMap[RtAudio::LINUX_ALSA] = "Linux ALSA";
+  apiMap[RtAudio::LINUX_PULSE] = "Linux PulseAudio";
+  apiMap[RtAudio::LINUX_OSS] = "Linux OSS";
+  apiMap[RtAudio::RTAUDIO_DUMMY] = "RtAudio Dummy";
+
+  std::vector< RtAudio::Api > apis;
   // init of RtAudio
-  if (m_AudioDriver.getDeviceCount() < 1) return 1;
+  RtAudio::getCompiledApi( apis );
+
+  std::cout << "\nRtAudio Version " << RtAudio::getVersion() << std::endl;
+
+  std::cout << "\nCompiled APIs:\n";
+  for ( unsigned int i=0; i<apis.size(); i++ )
+    std::cout << "  " << apiMap[ apis[i] ] << std::endl;
+
+  std::cout << "\nCurrent API: " << apiMap[ m_AudioDriver.getCurrentApi() ] << std::endl;
+
+  devices = m_AudioDriver.getDeviceCount();
+  if(devices < 1) return 1;
+
+  for (unsigned int i=0; i<devices; i++) {
+    info = m_AudioDriver.getDeviceInfo(i);
+  }
+
   // start audio streams
   if (RestartAudio(m_AudioDriver.getDefaultInputDevice(), m_AudioDriver.getDefaultOutputDevice())) {
     return 2;
