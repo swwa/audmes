@@ -68,9 +68,9 @@ CtrlOScope::CtrlOScope(wxWindow* parent, wxString xname, wxString yname, int tra
   m_UserTextPosX = 0;
   m_UserTextPosY = 0;
 
-  Connect(-1, wxEVT_SIZE, (wxObjectEventFunction)&CtrlOScope::OnSize);
-  Connect(-1, wxEVT_PAINT, (wxObjectEventFunction)&CtrlOScope::OnPaint);
-  Connect(-1, wxEVT_ERASE_BACKGROUND, (wxObjectEventFunction)&CtrlOScope::OnEraseBackground);
+  Bind(wxEVT_SIZE, &CtrlOScope::OnSize, this);
+  Bind(wxEVT_PAINT, &CtrlOScope::OnPaint, this);
+  Bind(wxEVT_ERASE_BACKGROUND, &CtrlOScope::OnEraseBackground, this);
 
 }  // CtrlOScope
 
