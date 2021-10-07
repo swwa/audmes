@@ -161,6 +161,7 @@ class MainFrame : public wxFrame {
 
   wxButton* button_autocalibrate;
   wxString m_configfilename;
+  std::string m_rtinfo;
 
   unsigned long int m_OscBufferLength;
   unsigned long int m_SpeBufferLength;

@@ -36,7 +36,7 @@ class RWAudio {
   RWAudio();
   ~RWAudio();
 
-  int InitSnd(long int oscbuflen, long int spebuflen);
+  int InitSnd(long int oscbuflen, long int spebuflen, std::string &rtinfo);
 
   void SetSndDevices(unsigned int irec = 1000, unsigned int iplay = 1000,
                      unsigned long int freq = 44100);

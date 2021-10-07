@@ -501,9 +501,9 @@ void MainFrame::set_custom_props() {
   int ret = 0;
 #ifdef XSCALEINTIME
   ret = m_RWAudio->InitSnd((long int)(1.5 * m_OscBufferLength * m_SamplingFreq / 10000 + 10),
-                           m_SpeBufferLength);
+                           m_SpeBufferLength, m_rtinfo);
 #else
-  ret = m_RWAudio->InitSnd((long int)(1.5 * m_OscBufferLength), m_SpeBufferLength);
+  ret = m_RWAudio->InitSnd((long int)(1.5 * m_OscBufferLength), m_SpeBufferLength, m_rtinfo);
 #endif
 
   if (ret)
@@ -513,9 +513,8 @@ void MainFrame::set_custom_props() {
 
 void MainFrame::OnAboutClick(wxCommandEvent& WXUNUSED(event)) {
   wxString s;
-  s << wxT("Tiny audio laboratory version ") wxT(AUDMES_VERSION_STRING)
-           wxT("\nVaclav Peroutka - vaclavpe@seznam.cz\n\n")
-    << wxT("Project page: https://sourceforge.net/projects/audmes/\n\n");
+  s << wxT("Tiny audio laboratory version\nVaclav Peroutka - vaclavpe@seznam.cz\n\n")
+    << wxT("Project page: https://sourceforge.net/projects/audmes/\n\n") << m_rtinfo;
 
   wxMessageBox(s, _T("About application"), wxICON_INFORMATION | wxOK);
 }

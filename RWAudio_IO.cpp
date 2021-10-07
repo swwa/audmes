@@ -23,11 +23,11 @@
 
 #include "RWAudio_IO.h"
 
-#include <map>
-
 #include <math.h>
 #include <stdio.h>
 #include <wx/defs.h>  // for WXUNUSED
+
+#include <map>
 
 //#define _DEBUG
 
@@ -235,7 +235,7 @@ RWAudio::~RWAudio() {
 }
 
 // Initialize RtAudio and start audio stream
-int RWAudio::InitSnd(long int oscbuflen, long int spebuflen) {
+int RWAudio::InitSnd(long int oscbuflen, long int spebuflen, std::string &rtinfo) {
   m_OscBufferLen = oscbuflen;
   m_SpeBufferLen = spebuflen;
 
@@ -267,22 +267,20 @@ int RWAudio::InitSnd(long int oscbuflen, long int spebuflen) {
   apiMap[RtAudio::LINUX_OSS] = "Linux OSS";
   apiMap[RtAudio::RTAUDIO_DUMMY] = "RtAudio Dummy";
 
-  std::vector< RtAudio::Api > apis;
+  std::vector<RtAudio::Api> apis;
   // init of RtAudio
-  RtAudio::getCompiledApi( apis );
+  RtAudio::getCompiledApi(apis);
 
-  std::cout << "\nRtAudio Version " << RtAudio::getVersion() << std::endl;
+  rtinfo = "\nRtAudio Version ";
+  rtinfo = rtinfo + RtAudio::getVersion() + "\nCompiled APIs:\n";
+  for (unsigned int i = 0; i < apis.size(); i++) rtinfo = rtinfo + "  " + apiMap[apis[i]] + "\n";
 
-  std::cout << "\nCompiled APIs:\n";
-  for ( unsigned int i=0; i<apis.size(); i++ )
-    std::cout << "  " << apiMap[ apis[i] ] << std::endl;
-
-  std::cout << "\nCurrent API: " << apiMap[ m_AudioDriver.getCurrentApi() ] << std::endl;
+  rtinfo = rtinfo + "Current API: " + apiMap[m_AudioDriver.getCurrentApi()] + "\n";
 
   devices = m_AudioDriver.getDeviceCount();
-  if(devices < 1) return 1;
+  if (devices < 1) return 1;
 
-  for (unsigned int i=0; i<devices; i++) {
+  for (unsigned int i = 0; i < devices; i++) {
     info = m_AudioDriver.getDeviceInfo(i);
   }
 
@@ -313,7 +311,7 @@ int RWAudio::RestartAudio(int recDevId, int playDevId) {
   iParams.firstChannel = 0;
   oParams.firstChannel = 0;
 
-  //rtAOptions.flags |= RTAUDIO_NONINTERLEAVED;
+  // rtAOptions.flags |= RTAUDIO_NONINTERLEAVED;
 
   try {
     m_AudioDriver.openStream(&oParams, &iParams, RTAUDIO_SINT16, m_sampleRate, &bufferFrames,
@@ -324,7 +322,7 @@ int RWAudio::RestartAudio(int recDevId, int playDevId) {
   }
 
   try {
-  m_AudioDriver.startStream();
+    m_AudioDriver.startStream();
   } catch (RtAudioError &e) {
     // std::cerr << '\n' << e.getMessage() << '\n' << std::endl;
     return 1;
