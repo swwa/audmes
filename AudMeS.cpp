@@ -246,11 +246,7 @@ void MainFrame::set_properties() {
   SetTitle(wxT("AUDio MEasurement System"));
   int frame_1_statusbar_widths[] = {-1};
   frame_1_statusbar->SetStatusWidths(1, frame_1_statusbar_widths);
-  const wxString frame_1_statusbar_fields[] = {wxT("AUDio MEasurement System - version ")
-                                                   wxT(AUDMES_VERSION_STRING)};
-  for (int i = 0; i < frame_1_statusbar->GetFieldsCount(); ++i) {
-    frame_1_statusbar->SetStatusText(frame_1_statusbar_fields[i], i);
-  }
+  frame_1_statusbar->SetStatusText("AUDio MEasurement System - version " AUDMES_VERSION_STRING);
   choice_l_wav->SetSelection(0);
   choice_r_wav->SetSelection(0);
   choice_osc_l_swp_copy->SetSelection(0);
@@ -513,7 +509,8 @@ void MainFrame::set_custom_props() {
 
 void MainFrame::OnAboutClick(wxCommandEvent& WXUNUSED(event)) {
   wxString s;
-  s << wxT("Tiny audio laboratory version\nVaclav Peroutka - vaclavpe@seznam.cz\n\n")
+  s << wxT("AUDio MEasurement System - version ") << AUDMES_VERSION_STRING
+    << wxT("\nVaclav Peroutka - vaclavpe@seznam.cz\n\n")
     << wxT("Project page: https://sourceforge.net/projects/audmes/\n\n") << m_rtinfo;
 
   wxMessageBox(s, _T("About application"), wxICON_INFORMATION | wxOK);
