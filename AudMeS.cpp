@@ -536,7 +536,7 @@ void MainFrame::OnSaveAsClick(wxCommandEvent& WXUNUSED(event)) {
 }
 
 void MainFrame::OnSaveFRM(wxCommandEvent& WXUNUSED(event)) {
-  wxFileDialog saveFileDialog(this, _("Save frequency reponse file"), "", "",
+  wxFileDialog saveFileDialog(this, _("Save frequency response file"), "", "",
                               "CSV files (*.csv)|*.csv", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
   if (saveFileDialog.ShowModal() == wxID_CANCEL) return;
 
