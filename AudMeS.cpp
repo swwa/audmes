@@ -101,7 +101,6 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
   sizer_12_copy_staticbox = new wxStaticBox(notebook_1_osc, -1, wxT("Right channel (Green)"));
   sizer_4_staticbox = new wxStaticBox(notebook_1_gen, -1, wxT("Left channel"));
   frame_1_menubar = new wxMenuBar();
-  SetMenuBar(frame_1_menubar);
   wxMenu* wxglade_tmp_menu_1 = new wxMenu();
   wxglade_tmp_menu_1->Append(wxID_OPEN, wxT("&Open config...\tAlt+O"), wxT(""), wxITEM_NORMAL);
   wxglade_tmp_menu_1->Append(wxID_SAVE, wxT("&Save config...\tAlt+S"), wxT(""), wxITEM_NORMAL);
@@ -118,6 +117,8 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
   wxMenu* wxglade_tmp_menu_3 = new wxMenu();
   wxglade_tmp_menu_3->Append(wxID_ABOUT, wxT("&About..."), wxT(""), wxITEM_NORMAL);
   frame_1_menubar->Append(wxglade_tmp_menu_3, wxT("&Help"));
+  SetMenuBar(frame_1_menubar);
+
   frame_1_statusbar = CreateStatusBar(1, 0);
 
   /* generator panel */
