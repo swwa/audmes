@@ -40,6 +40,11 @@ if (${APPLE})
 	find_library(COREAUDIO_LIB CoreAudio)
 	find_library(COREFOUNDATION_LIB CoreFoundation)
 	target_link_libraries(${PROJECT_NAME} ${wxWidgets_LIBRARIES} ${COREAUDIO_LIB} ${COREFOUNDATION_LIB})
+	set_target_properties(AudMeS PROPERTIES
+		MACOSX_BUNDLE TRUE
+		XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY ""
+		MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist
+	)
 endif()
 
 if (MINGW)
