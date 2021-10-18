@@ -48,8 +48,8 @@ if (${APPLE})
 endif()
 
 if (MINGW)
-	add_definitions(-D__WINDOWS_DS__ -D__WXMSW__)
-	target_link_libraries(${PROJECT_NAME} -mwindows -static ${wxWidgets_LIBRARIES} dsound)
+	add_definitions(-D__WINDOWS_WASAPI__ -D__WXMSW__)
+	target_link_libraries(${PROJECT_NAME} -mwindows -static ${wxWidgets_LIBRARIES} ksuser mfplat mfuuid wmcodecdspuuid)
 endif()
 
 if (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Linux")
