@@ -138,6 +138,21 @@ Run the program:
 
     AudMeS.exe
 
+### MacOSX
+
+On MacOSX you need Xcode. Install it from the App Store.
+
+Next install homebrew. See https://brew.sh
+
+Install wxWidgets
+
+    brew install wxwidgets
+
+Install CMake
+
+Tools to fix paths in App: `install_name_tool` `otool`
+
+
 ## Troubleshooting
 
 If a popup appears about sound card issues,
