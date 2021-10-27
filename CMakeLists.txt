@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.0)
+cmake_minimum_required (VERSION 3.1)
 
 project (AudMeS)
 
@@ -27,7 +27,7 @@ endif()
 find_package(wxWidgets COMPONENTS core base REQUIRED)
 include("${wxWidgets_USE_FILE}")
 
-add_executable(AudMeS ${AM_SOURCES})
+add_executable(AudMeS MACOSX_BUNDLE ${AM_SOURCES})
 
 if (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Linux")
 	add_definitions(-D__LINUX_ALSA__ -D__LINUX_PULSE__ -D__LINUX__ -DHAVE_GETTIMEOFDAY)
@@ -45,10 +45,6 @@ if (${APPLE})
 		XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY ""
 		MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist
 	)
-	set(CMAKE_MACOSX_RPATH ON)
-	set(CMAKE_INSTALL_RPATH_USE_LINK_PATH ON)
-	set(CMAKE_INSTALL_RPATH /Applications/AudMes/Contents/FRAMEWORKS)
-	set(CPACK_BINARY_DRAGNDROP ON)
 endif()
 
 if (MINGW)
@@ -84,4 +80,20 @@ if (MINGW)
 	install(FILES "${wxWidgets_ROOT_DIR}/lib/gcc810_dll/wxmsw30u_core_gcc810.dll" DESTINATION "bin")
 	set(CPACK_GENERATOR "ZIP")
 endif()
+
+if (APPLE)
+	set(APP_NAME AudMeS)
+	install(TARGETS ${APP_NAME}
+	    BUNDLE DESTINATION . COMPONENT Runtime
+	    RUNTIME DESTINATION bin COMPONENT Runtime
+	)
+	set(APPS "\${CMAKE_INSTALL_PREFIX}/${APP_NAME}.app")
+	set(CMAKE_MACOSX_RPATH ON)
+	set(DIRS ${CMAKE_BINARY_DIR})
+	install(CODE "include(BundleUtilities)
+		set(BU_CHMOD_BUNDLE_ITEMS ON)
+		fixup_bundle(\"${APPS}\" \"\" \"${DIRS}\")")
+	set(CPACK_GENERATOR "DragNDrop")
+endif()
+
 INCLUDE(CPack)
