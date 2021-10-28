@@ -27,7 +27,8 @@ endif()
 find_package(wxWidgets COMPONENTS core base REQUIRED)
 include("${wxWidgets_USE_FILE}")
 
-add_executable(AudMeS MACOSX_BUNDLE ${AM_SOURCES})
+set(audmes_icon "${CMAKE_CURRENT_SOURCE_DIR}/audmes.icns")
+add_executable(AudMeS MACOSX_BUNDLE ${audmes_icon} ${AM_SOURCES})
 
 if (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Linux")
 	add_definitions(-D__LINUX_ALSA__ -D__LINUX_PULSE__ -D__LINUX__ -DHAVE_GETTIMEOFDAY)
@@ -40,10 +41,11 @@ if (${APPLE})
 	find_library(COREAUDIO_LIB CoreAudio)
 	find_library(COREFOUNDATION_LIB CoreFoundation)
 	target_link_libraries(${PROJECT_NAME} ${wxWidgets_LIBRARIES} ${COREAUDIO_LIB} ${COREFOUNDATION_LIB})
+	set_source_files_properties(${audmes_icon} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 	set_target_properties(AudMeS PROPERTIES
 		MACOSX_BUNDLE TRUE
 		XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY ""
-		MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist
+		MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/Info.plist"
 	)
 endif()
 
@@ -88,11 +90,14 @@ if (APPLE)
 	    RUNTIME DESTINATION bin COMPONENT Runtime
 	)
 	set(APPS "\${CMAKE_INSTALL_PREFIX}/${APP_NAME}.app")
+	#set(CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/README.md")
 	set(CMAKE_MACOSX_RPATH ON)
 	set(DIRS ${CMAKE_BINARY_DIR})
 	install(CODE "include(BundleUtilities)
 		set(BU_CHMOD_BUNDLE_ITEMS ON)
 		fixup_bundle(\"${APPS}\" \"\" \"${DIRS}\")")
+	install(FILES "${CMAKE_SOURCE_DIR}/README.md" DESTINATION .)
+	install(FILES "${CMAKE_SOURCE_DIR}/NEWS" DESTINATION .)
 	set(CPACK_GENERATOR "DragNDrop")
 endif()
 

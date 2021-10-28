@@ -13,7 +13,7 @@
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.education</string>
 	<key>CFBundleIconFile</key>
-	<string>AudMes.icns</string>
+	<string>audmes</string>
 	<key>CFBundleIdentifier</key>
 	<string>audmes</string>
 	<key>CFBundleInfoDictionaryVersion</key>

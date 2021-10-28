@@ -140,17 +140,25 @@ Run the program:
 
 ### MacOSX
 
-On MacOSX you need Xcode. Install it from the App Store.
+Xcode:
 
-Next install homebrew. See https://brew.sh
+- Install Xcode from the App Store. It comes with the necessary compilers and tools for MacOSX.
+  Tools to fix paths in App: `install_name_tool`.
+  `otool` is the MacOSX equivalent for Linux `ldd`.
 
-Install wxWidgets
+CMake:
 
+- Download it from <https://cmake.org/download/> "cmake-3.16.0-rc3-Darwin-x86_64.dmg"
+
+wxWidgets:
+
+- Install Homebrew <https://brew.sh> first and then use `brew` to install wxWidgets
+
+    brew analytics off
     brew install wxwidgets
 
-Install CMake
 
-Tools to fix paths in App: `install_name_tool` `otool`
+
 
 
 ## Troubleshooting
