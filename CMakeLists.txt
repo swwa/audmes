@@ -1,6 +1,6 @@
-cmake_minimum_required (VERSION 3.0)
+cmake_minimum_required (VERSION 3.1)
 
-project (AudMeS)
+project(AudMeS)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -16,6 +16,11 @@ set(AM_SOURCES
 
 include_directories(.) # for local libfccp
 
+# Default build type is Release
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+   set(CMAKE_BUILD_TYPE "Release")
+endif()
+
 if (WIN32)
 	set(AM_SOURCES ${AM_SOURCES} audmes.rc)
 	string(REPLACE "\\" "/" HDIR $ENV{HOMEDRIVE}$ENV{HOMEPATH})
@@ -24,10 +29,15 @@ if (WIN32)
 	set(wxWidgets_CONFIGURATION mswu)
 endif()
 
+if (${APPLE})
+	set(audmes_icon "${CMAKE_CURRENT_SOURCE_DIR}/audmes.icns")
+	set(AM_SOURCES ${audmes_icon} ${AM_SOURCES})
+endif()
+
 find_package(wxWidgets COMPONENTS core base REQUIRED)
 include("${wxWidgets_USE_FILE}")
 
-add_executable(AudMeS ${AM_SOURCES})
+add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${AM_SOURCES})
 
 if (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Linux")
 	add_definitions(-D__LINUX_ALSA__ -D__LINUX_PULSE__ -D__LINUX__ -DHAVE_GETTIMEOFDAY)
@@ -40,10 +50,12 @@ if (${APPLE})
 	find_library(COREAUDIO_LIB CoreAudio)
 	find_library(COREFOUNDATION_LIB CoreFoundation)
 	target_link_libraries(${PROJECT_NAME} ${wxWidgets_LIBRARIES} ${COREAUDIO_LIB} ${COREFOUNDATION_LIB})
-	set_target_properties(AudMeS PROPERTIES
+	set_source_files_properties(${audmes_icon} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+	# Create app Bundle but skip signing
+	set_target_properties(${PROJECT_NAME} PROPERTIES
 		MACOSX_BUNDLE TRUE
 		XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY ""
-		MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist
+		MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/Info.plist"
 	)
 endif()
 
@@ -53,7 +65,7 @@ if (MINGW)
 endif()
 
 if (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Linux")
-	install(TARGETS "AudMeS" DESTINATION "bin")
+	install(TARGETS ${PROJECT_NAME} DESTINATION "bin")
 	install(FILES "audmes.desktop" DESTINATION "share/applications")
 	install(FILES "README.md" DESTINATION "share/doc/audmes")
 	install(FILES "NEWS" DESTINATION "share/doc/audmes")
@@ -70,7 +82,7 @@ endif()
 
 if (MINGW)
     set(CMAKE_INSTALL_PREFIX ".")
-	install(TARGETS "AudMeS" DESTINATION "bin")
+	install(TARGETS ${PROJECT_NAME} DESTINATION "bin")
 	install(FILES "${CMAKE_SOURCE_DIR}/README.md" DESTINATION "bin")
 	install(FILES "${CMAKE_SOURCE_DIR}/NEWS" RENAME "NEWS.txt" DESTINATION "bin")
 	install(FILES "c:/Program Files (x86)/mingw-w64/i686-8.1.0-posix-sjlj-rt_v6-rev0/mingw32/bin/libwinpthread-1.dll" DESTINATION "bin")
@@ -80,4 +92,25 @@ if (MINGW)
 	install(FILES "${wxWidgets_ROOT_DIR}/lib/gcc810_dll/wxmsw30u_core_gcc810.dll" DESTINATION "bin")
 	set(CPACK_GENERATOR "ZIP")
 endif()
+
+if (APPLE)
+	set(APP_NAME ${PROJECT_NAME})
+	# Install app and libraries
+	install(TARGETS ${APP_NAME}
+	    BUNDLE DESTINATION . COMPONENT Runtime
+	    RUNTIME DESTINATION bin COMPONENT Runtime
+	)
+	set(APPS "\${CMAKE_INSTALL_PREFIX}/${APP_NAME}.app")
+	set(CMAKE_MACOSX_RPATH ON)
+	set(DIRS ${CMAKE_BINARY_DIR})
+	# Replace absolut library paths with relative to app paths
+	install(CODE "include(BundleUtilities)
+		set(BU_CHMOD_BUNDLE_ITEMS ON)
+		fixup_bundle(\"${APPS}\" \"\" \"${DIRS}\")")
+	# Add files to top level dmg directoy
+	install(FILES "${CMAKE_SOURCE_DIR}/README.md" DESTINATION .)
+	install(FILES "${CMAKE_SOURCE_DIR}/NEWS" DESTINATION .)
+	set(CPACK_GENERATOR "DragNDrop")
+endif()
+
 INCLUDE(CPack)
