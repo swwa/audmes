@@ -29,17 +29,11 @@
 
 #include <map>
 
-//#define _DEBUG
-
-#ifdef _DEBUG
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#define new DEBUG_NEW
+#ifndef M_PI
+    #define M_PI 3.14159265358979323846
 #endif
 
-#ifdef _DEBUG
-FILE *ddbg;
-#endif
+
 
 // extern variables from AudMeS.cpp
 extern float *g_OscBuffer_Left;
@@ -79,9 +73,6 @@ void catcherr(RtAudioError::Type WXUNUSED(type), const std::string &errorText) {
  */
 int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
           double WXUNUSED(streamTime), RtAudioStreamStatus status, void *data) {
-#ifdef _DEBUG
-  fprintf(ddbg, "Jsme tady ");
-#endif
 
   RWAudio *aRWAudioClass = (RWAudio *)data;
   unsigned long i;
@@ -144,7 +135,7 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
   float *outBuf = (float *)outputBuffer;
 
 #ifdef _DEBUG
-  fprintf(ddbg, "\n Frames: %d\n ", nBufferFrames);
+  //fprintf(ddbg, "\n Frames: %d\n ", nBufferFrames);
 #endif
 
   /* calculate the wave form according to the selected shape */

@@ -42,7 +42,7 @@ endif()
 find_package(wxWidgets REQUIRED core base)
 include("${wxWidgets_USE_FILE}")
 
-add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${AM_SOURCES})
+add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${AM_SOURCES})
 
 if (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Linux")
 	add_definitions(-D__LINUX_ALSA__ -D__LINUX_PULSE__ -D__LINUX__ -DHAVE_GETTIMEOFDAY)
@@ -62,6 +62,11 @@ if (${APPLE})
 		XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY ""
 		MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/Info.plist"
 	)
+endif()
+
+if (MSVC)
+	add_definitions(-D__WINDOWS_WASAPI__)
+	target_link_libraries(${PROJECT_NAME} ${wxWidgets_LIBRARIES} ksuser mfplat mfuuid wmcodecdspuuid winmm ole32)
 endif()
 
 if (MINGW)
