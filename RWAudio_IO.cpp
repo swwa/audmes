@@ -30,10 +30,8 @@
 #include <map>
 
 #ifndef M_PI
-    #define M_PI 3.14159265358979323846
+#define M_PI 3.14159265358979323846
 #endif
-
-
 
 // extern variables from AudMeS.cpp
 extern float *g_OscBuffer_Left;
@@ -73,7 +71,6 @@ void catcherr(RtAudioError::Type WXUNUSED(type), const std::string &errorText) {
  */
 int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
           double WXUNUSED(streamTime), RtAudioStreamStatus status, void *data) {
-
   RWAudio *aRWAudioClass = (RWAudio *)data;
   unsigned long i;
 
@@ -135,7 +132,7 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
   float *outBuf = (float *)outputBuffer;
 
 #ifdef _DEBUG
-  //fprintf(ddbg, "\n Frames: %d\n ", nBufferFrames);
+  // fprintf(ddbg, "\n Frames: %d\n ", nBufferFrames);
 #endif
 
   /* calculate the wave form according to the selected shape */
@@ -318,7 +315,7 @@ int RWAudio::RestartAudio(int recDevId, int playDevId) {
 
   try {
     m_AudioDriver->openStream(&oParams, &iParams, RTAUDIO_FLOAT32, m_sampleRate, &bufferFrames,
-                             &inout, (void *)this, &rtAOptions, &catcherr);
+                              &inout, (void *)this, &rtAOptions, &catcherr);
   } catch (RtAudioError &e) {
     // std::cerr << '\n' << e.getMessage() << '\n' << std::endl;
     return 1;

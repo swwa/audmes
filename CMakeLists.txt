@@ -66,7 +66,10 @@ endif()
 
 if (MSVC)
 	add_definitions(-D__WINDOWS_WASAPI__)
-	target_link_libraries(${PROJECT_NAME} ${wxWidgets_LIBRARIES} ksuser mfplat mfuuid wmcodecdspuuid winmm ole32)
+	set(wxWidgets_EXCLUDE_COMMON_LIBRARIES TRUE)
+	find_library(WX_BASE wxbase30ud.lib "${wxWidgets_ROOT_DIR}/lib/vc142_dll")
+	find_library(WX_CORE wxmsw30ud_core.lib "${wxWidgets_ROOT_DIR}/lib/vc142_dll")
+	target_link_libraries(${PROJECT_NAME} ${wxWidgets_LIBRARIES} ${wxWidgets_LIBRARIES} ksuser mfplat mfuuid wmcodecdspuuid winmm ole32)
 endif()
 
 if (MINGW)
