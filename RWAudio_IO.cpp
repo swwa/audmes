@@ -68,16 +68,25 @@ bool lfsr16() {
 }
 
 /*
+ * callback function to catch runtime errors
+ */
+void catcherr(RtAudioError::Type WXUNUSED(type), const std::string &errorText) {
+  std::cerr << '\n' << errorText << '\n' << std::endl;
+}
+
+/*
  * callback function to fetch audio input and generate tones
  */
 int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
-          double WXUNUSED(streamTime), RtAudioStreamStatus WXUNUSED(status), void *data) {
+          double WXUNUSED(streamTime), RtAudioStreamStatus status, void *data) {
 #ifdef _DEBUG
   fprintf(ddbg, "Jsme tady ");
 #endif
 
   RWAudio *aRWAudioClass = (RWAudio *)data;
   unsigned long i;
+
+  if (status) std::cerr << "Audio stream over/underflow detected." << std::endl;
 
   // copy input buffer into two L/R channels
   if (0 != aRWAudioClass->m_Buflen_Changed) {
@@ -311,11 +320,11 @@ int RWAudio::RestartAudio(int recDevId, int playDevId) {
   iParams.firstChannel = 0;
   oParams.firstChannel = 0;
 
-  // rtAOptions.flags |= RTAUDIO_NONINTERLEAVED;
+  rtAOptions.flags = 0;
 
   try {
     m_AudioDriver.openStream(&oParams, &iParams, RTAUDIO_SINT16, m_sampleRate, &bufferFrames,
-                             &inout, (void *)this);  //, &rtAOptions );
+                             &inout, (void *)this, &rtAOptions, &catcherr);
   } catch (RtAudioError &e) {
     // std::cerr << '\n' << e.getMessage() << '\n' << std::endl;
     return 1;
