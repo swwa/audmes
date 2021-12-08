@@ -18,14 +18,16 @@ include_directories(.) # for local libfccp
 
 # Default build type is Release
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-   set(CMAKE_BUILD_TYPE "Release")
+	set(CMAKE_BUILD_TYPE "Release")
 endif()
+message("Build type is ${CMAKE_BUILD_TYPE}")
 
 if (WIN32)
 	set(AM_SOURCES ${AM_SOURCES} audmes.rc)
-	string(REPLACE "\\" "/" HDIR $ENV{HOMEDRIVE}$ENV{HOMEPATH})
+	string(REPLACE "\\" "/" HDIR "$ENV{HOMEDRIVE}$ENV{HOMEPATH}")
 	set(wxWidgets_ROOT_DIR "${HDIR}/projects/wx3.0.5")
 	set(wxWidgets_LIB_DIR "${wxWidgets_ROOT_DIR}/lib/gcc810_dll")
+	message("wxWidgets LIB is: ${wxWidgets_LIB_DIR}")
 	set(wxWidgets_CONFIGURATION mswu)
 endif()
 
@@ -34,8 +36,9 @@ if (${APPLE})
 	set(AM_SOURCES ${audmes_icon} ${AM_SOURCES})
 endif()
 
-find_package(wxWidgets COMPONENTS core base REQUIRED)
+find_package(wxWidgets REQUIRED core base)
 include("${wxWidgets_USE_FILE}")
+message("wxWidgets lib settings: ${wxWidgets_LIBRARIES}")
 
 add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${AM_SOURCES})
 
@@ -61,7 +64,18 @@ endif()
 
 if (MINGW)
 	add_definitions(-D__WINDOWS_WASAPI__ -D__WXMSW__)
-	target_link_libraries(${PROJECT_NAME} -mwindows -static ${wxWidgets_LIBRARIES} ksuser mfplat mfuuid wmcodecdspuuid)
+	#add_definitions(-D__WINDOWS_DS__ -D__WXMSW__)
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -static-libgcc")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libgcc -static-libstdc++")
+	set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "${CMAKE_SHARED_LIBRARY_LINK_C_FLAGS} -static-libgcc")
+	set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "${CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS} -static-libgcc -static-libstdc++")
+	target_link_libraries(${PROJECT_NAME} -mwindows ${wxWidgets_LIBRARIES} ksuser mfplat mfuuid wmcodecdspuuid)
+	#target_link_libraries(${PROJECT_NAME} -mwindows ${wxWidgets_LIBRARIES} dsound)
+	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy "${wxWidgets_LIB_DIR}/wxbase30u_gcc810.dll" "."
+	COMMAND ${CMAKE_COMMAND} -E copy "${wxWidgets_LIB_DIR}/wxbase30ud_gcc810.dll" "."
+	COMMAND ${CMAKE_COMMAND} -E copy "${wxWidgets_LIB_DIR}/wxmsw30u_core_gcc810.dll" "."
+	COMMAND ${CMAKE_COMMAND} -E copy "${wxWidgets_LIB_DIR}/wxmsw30ud_core_gcc810.dll" ".")
 endif()
 
 if (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Linux")
@@ -81,15 +95,16 @@ if (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Linux")
 endif()
 
 if (MINGW)
-    set(CMAKE_INSTALL_PREFIX ".")
-	install(TARGETS ${PROJECT_NAME} DESTINATION "bin")
-	install(FILES "${CMAKE_SOURCE_DIR}/README.md" DESTINATION "bin")
-	install(FILES "${CMAKE_SOURCE_DIR}/NEWS" RENAME "NEWS.txt" DESTINATION "bin")
+	if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+		message(WARNING "Installation only in **Release** builds supported")
+	endif()
+	set(CMAKE_INSTALL_PREFIX .)
+	install(TARGETS ${PROJECT_NAME} DESTINATION .)
+	install(FILES "${CMAKE_SOURCE_DIR}/README.md" DESTINATION .)
+	install(FILES "${CMAKE_SOURCE_DIR}/NEWS" RENAME "NEWS.txt" DESTINATION .)
 	install(FILES "c:/Program Files (x86)/mingw-w64/i686-8.1.0-posix-sjlj-rt_v6-rev0/mingw32/bin/libwinpthread-1.dll" DESTINATION "bin")
-	install(FILES "c:/Program Files (x86)/mingw-w64/i686-8.1.0-posix-sjlj-rt_v6-rev0/mingw32/bin/libstdc++-6.dll" DESTINATION "bin")
-	install(FILES "c:/Program Files (x86)/mingw-w64/i686-8.1.0-posix-sjlj-rt_v6-rev0/mingw32/bin/libgcc_s_sjlj-1.dll" DESTINATION "bin")
-	install(FILES "${wxWidgets_ROOT_DIR}/lib/gcc810_dll/wxbase30u_gcc810.dll" DESTINATION "bin")
-	install(FILES "${wxWidgets_ROOT_DIR}/lib/gcc810_dll/wxmsw30u_core_gcc810.dll" DESTINATION "bin")
+	install(FILES "${wxWidgets_LIB_DIR}/wxbase30u_gcc810.dll" DESTINATION .)
+	install(FILES "${wxWidgets_LIB_DIR}/wxmsw30u_core_gcc810.dll" DESTINATION .)
 	set(CPACK_GENERATOR "ZIP")
 endif()
 
@@ -97,8 +112,8 @@ if (APPLE)
 	set(APP_NAME ${PROJECT_NAME})
 	# Install app and libraries
 	install(TARGETS ${APP_NAME}
-	    BUNDLE DESTINATION . COMPONENT Runtime
-	    RUNTIME DESTINATION bin COMPONENT Runtime
+		BUNDLE DESTINATION . COMPONENT Runtime
+		RUNTIME DESTINATION bin COMPONENT Runtime
 	)
 	set(APPS "\${CMAKE_INSTALL_PREFIX}/${APP_NAME}.app")
 	set(CMAKE_MACOSX_RPATH ON)
