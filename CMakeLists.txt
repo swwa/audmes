@@ -41,6 +41,7 @@ endif()
 
 find_package(wxWidgets REQUIRED core base)
 include("${wxWidgets_USE_FILE}")
+message("wxWidgets lib settings: ${wxWidgets_LIBRARIES}")
 
 add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${AM_SOURCES})
 
@@ -65,11 +66,19 @@ if (${APPLE})
 endif()
 
 if (MSVC)
-	add_definitions(-D__WINDOWS_WASAPI__)
+	add_definitions(-D__WINDOWS_WASAPI__ -D__WINDOWS_DS__)
 	set(wxWidgets_EXCLUDE_COMMON_LIBRARIES TRUE)
-	find_library(WX_BASE wxbase30ud.lib "${wxWidgets_ROOT_DIR}/lib/vc142_dll")
-	find_library(WX_CORE wxmsw30ud_core.lib "${wxWidgets_ROOT_DIR}/lib/vc142_dll")
-	target_link_libraries(${PROJECT_NAME} ${wxWidgets_LIBRARIES} ${wxWidgets_LIBRARIES} ksuser mfplat mfuuid wmcodecdspuuid winmm ole32)
+	target_link_libraries(${PROJECT_NAME} ${wxWidgets_LIBRARIES} dsound ksuser mfplat mfuuid wmcodecdspuuid winmm ole32)
+	if (EXISTS "${CMAKE_BINARY_DIR}/Release")
+		add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy "${wxWidgets_LIB_DIR}/wxbase30u_vc142.dll" "Release"
+        COMMAND ${CMAKE_COMMAND} -E copy "${wxWidgets_LIB_DIR}/wxmsw30u_core_vc142.dll" "Release")
+	endif()
+	if (EXISTS "${CMAKE_BINARY_DIR}/Debug")
+		add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy "${wxWidgets_LIB_DIR}/wxbase30ud_vc142.dll" "Debug"
+        COMMAND ${CMAKE_COMMAND} -E copy "${wxWidgets_LIB_DIR}/wxmsw30ud_core_vc142.dll" "Debug")
+    endif()
 endif()
 
 if (MINGW)
