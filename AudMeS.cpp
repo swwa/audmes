@@ -906,8 +906,8 @@ void MainFrame::DrawSpectrum(void) {
 
   /*
    * Scale max. amplitude to 1 which is 0 db.
-   * 16 bit samples and fft correction factor 4
-   * 20 * log(1/65536 * 4) is -84.2 db
+   * We only use use nsampl/2 of the FFT.
+   * Compensate with multiplying by 2 = 6dB.
    */
   const double dbscaler = 6;
 
@@ -919,14 +919,14 @@ void MainFrame::DrawSpectrum(void) {
 
   if (fft_double(nsampl, 0, realin, NULL, realout, imagout)) {
     realout[0] = imagout[0] = 0;  // remove DC
-    /* show only one half, this means nsampl/2 corresponds to fvz/2 */
+    /* show only half FFT */
     for (int i = 0; i < nsampl / 2; i++) {
       ardbl.Add(20.0 * log10(sqrt(realout[i] * realout[i] + imagout[i] * imagout[i])) + dbscaler);
     }
   } else {
     /* wrong computation */
     for (int i = 0; i < nsampl; i++) {
-      ardbl.Add(25 * (sin(0.01 * i) + sin(0.012 * i)));
+      ardbl.Add(-150);
     }
   }
 
@@ -938,14 +938,14 @@ void MainFrame::DrawSpectrum(void) {
 
   if (fft_double(nsampl, 0, realin, NULL, realout, imagout)) {
     realout[0] = imagout[0] = 0;  // remove DC
-    /* show only one half, this means nsampl/2 corresponds to fvz/2 */
+    /* show only half FFT */
     for (int i = 0; i < nsampl / 2; i++) {
       ardbl2.Add(20.0 * log10(sqrt(realout[i] * realout[i] + imagout[i] * imagout[i])) + dbscaler);
     }
   } else {
     /* wrong computation */
     for (int i = 0; i < nsampl; i++) {
-      ardbl2.Add(25 * (sin(0.01 * i) + sin(0.012 * i)));
+      ardbl2.Add(-150);
     }
   }
 
