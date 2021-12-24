@@ -26,9 +26,6 @@ if (WIN32)
 	set(AM_SOURCES ${AM_SOURCES} audmes.rc)
 	string(REPLACE "\\" "/" HDIR "$ENV{HOMEDRIVE}$ENV{HOMEPATH}")
 	set(wxWidgets_ROOT_DIR "${HDIR}/projects/wx3.0.5")
-	set(wxWidgets_LIB_DIR "${wxWidgets_ROOT_DIR}/lib/gcc810_dll")
-	message("wxWidgets LIB is: ${wxWidgets_LIB_DIR}")
-	set(wxWidgets_CONFIGURATION mswu)
 endif()
 
 if (${APPLE})
@@ -38,7 +35,6 @@ endif()
 
 find_package(wxWidgets REQUIRED core base)
 include("${wxWidgets_USE_FILE}")
-message("wxWidgets lib settings: ${wxWidgets_LIBRARIES}")
 
 add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${AM_SOURCES})
 
@@ -63,14 +59,8 @@ if (${APPLE})
 endif()
 
 if (MINGW)
-	add_definitions(-D__WINDOWS_WASAPI__ -D__WXMSW__)
-	#add_definitions(-D__WINDOWS_DS__ -D__WXMSW__)
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -static-libgcc")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libgcc -static-libstdc++")
-	set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "${CMAKE_SHARED_LIBRARY_LINK_C_FLAGS} -static-libgcc")
-	set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "${CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS} -static-libgcc -static-libstdc++")
-	target_link_libraries(${PROJECT_NAME} -mwindows ${wxWidgets_LIBRARIES} ksuser mfplat mfuuid wmcodecdspuuid)
-	#target_link_libraries(${PROJECT_NAME} -mwindows ${wxWidgets_LIBRARIES} dsound)
+	add_definitions(-D__WINDOWS_WASAPI__ -D__WINDOWS_DS__ -D__WXMSW__)
+	target_link_libraries(${PROJECT_NAME} -mwindows ${wxWidgets_LIBRARIES} dsound ksuser mfplat mfuuid wmcodecdspuuid)
 	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy "${wxWidgets_LIB_DIR}/wxbase30u_gcc810.dll" "."
 	COMMAND ${CMAKE_COMMAND} -E copy "${wxWidgets_LIB_DIR}/wxbase30ud_gcc810.dll" "."
@@ -102,7 +92,11 @@ if (MINGW)
 	install(TARGETS ${PROJECT_NAME} DESTINATION .)
 	install(FILES "${CMAKE_SOURCE_DIR}/README.md" DESTINATION .)
 	install(FILES "${CMAKE_SOURCE_DIR}/NEWS" RENAME "NEWS.txt" DESTINATION .)
-	install(FILES "c:/Program Files (x86)/mingw-w64/i686-8.1.0-posix-sjlj-rt_v6-rev0/mingw32/bin/libwinpthread-1.dll" DESTINATION "bin")
+	# add runtime libraries - static linking does not work with wxWidgets binaries
+	set(MINGW_LIBS "c:/Program Files (x86)/mingw-w64/i686-8.1.0-posix-sjlj-rt_v6-rev0/mingw32/bin")
+	install(FILES "${MINGW_LIBS}/libwinpthread-1.dll" DESTINATION .)
+	install(FILES "${MINGW_LIBS}/libstdc++-6.dll" DESTINATION .)
+	install(FILES "${MINGW_LIBS}/libgcc_s_sjlj-1.dll" DESTINATION .)
 	install(FILES "${wxWidgets_LIB_DIR}/wxbase30u_gcc810.dll" DESTINATION .)
 	install(FILES "${wxWidgets_LIB_DIR}/wxmsw30u_core_gcc810.dll" DESTINATION .)
 	set(CPACK_GENERATOR "ZIP")
