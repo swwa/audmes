@@ -742,8 +742,8 @@ void MainFrame::DrawOscilloscope(void) {
   switch (choice_osc_trig_source->GetCurrentSelection()) {
     case 1:
       // left channel - look for the value under hysteresis point and then over 0
-      hysteresis_level = range_div /
-          10.0;  // later the hysteresis percent will be maybe settable in the control
+      hysteresis_level =
+          range_div / 10.0;  // later the hysteresis percent will be maybe settable in the control
       while (i < m_OscBufferLength) {
         if ((trigger_level - hysteresis_level) > (trigger_edge * g_OscBuffer_Left[i])) {
           break;
@@ -761,8 +761,7 @@ void MainFrame::DrawOscilloscope(void) {
     case 2:
       // right channel
       hysteresis_level =
-          range_div2 /
-          10.0;  // later the hysteresis percent will be maybe settable in the control
+          range_div2 / 10.0;  // later the hysteresis percent will be maybe settable in the control
       while (i < m_OscBufferLength) {
         if ((trigger_level - hysteresis_level) > (trigger_edge * g_OscBuffer_Right[i])) {
           break;
@@ -911,6 +910,10 @@ void MainFrame::DrawSpectrum(void) {
    */
   const double dbscaler = 6;
 
+  double dval = 0.0;
+  double dmax = 0.0;
+  int imax = 0;
+
   // left channel
   for (int i = 0; i < nsampl; i++) {
     // copy and apply window
@@ -921,13 +924,37 @@ void MainFrame::DrawSpectrum(void) {
     realout[0] = imagout[0] = 0;  // remove DC
     /* show only half FFT */
     for (int i = 0; i < nsampl / 2; i++) {
-      ardbl.Add(20.0 * log10(sqrt(realout[i] * realout[i] + imagout[i] * imagout[i])) + dbscaler);
+      dval = realout[i] * realout[i] + imagout[i] * imagout[i];
+      if (dval > dmax) {
+        dmax = dval;
+        imax = i;
+      }
+      ardbl.Add(20.0 * log10(sqrt(dval)) + dbscaler);
     }
   } else {
     /* wrong computation */
-    for (int i = 0; i < nsampl; i++) {
+    for (int i = 0; i < nsampl / 2; i++) {
       ardbl.Add(-150);
     }
+  }
+
+  if (imax > 0) {
+    double freq = (double)imax * m_SamplingFreq / nsampl;
+    double thdval[10];
+    for (int i = 0; i < 10; i++) {
+      int j = imax * (i + 1);
+      if (j < nsampl / 2)
+        thdval[i] = sqrt(realout[j] * realout[j] + imagout[j] * imagout[j]);
+      else
+        thdval[i] = 0.0;
+    }
+    double thd = 100 *
+                 (thdval[1] + thdval[2] + thdval[3] + thdval[4] + thdval[5] + thdval[6] +
+                  thdval[7] + thdval[8] + thdval[9]) /
+                 thdval[0];
+    wxString freqency;
+    freqency.Printf(wxT("Frequency : %.1lf Hz, THD : %lf%%"), freq, thd);
+    frame_1_statusbar->SetStatusText(freqency);
   }
 
   // right channel
@@ -944,7 +971,7 @@ void MainFrame::DrawSpectrum(void) {
     }
   } else {
     /* wrong computation */
-    for (int i = 0; i < nsampl; i++) {
+    for (int i = 0; i < nsampl / 2; i++) {
       ardbl2.Add(-150);
     }
   }
