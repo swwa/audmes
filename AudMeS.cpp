@@ -953,7 +953,8 @@ void MainFrame::DrawSpectrum(void) {
                   thdval[7] + thdval[8] + thdval[9]) /
                  thdval[0];
     wxString freqency;
-    freqency.Printf(wxT("Frequency : %.1lf Hz, THD : %lf%%"), freq, thd);
+    freqency.Printf(wxT("Frequency : %.1lf Hz, Magnitude: %.1lf dB, THD : %lf%%"), freq,
+                    20.0 * log10(thdval[0]) + dbscaler, thd);
     frame_1_statusbar->SetStatusText(freqency);
   }
 
