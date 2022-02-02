@@ -1,0 +1,30 @@
+name: Build
+
+on:
+  push:
+    branches: [ master, develop ]
+
+jobs:
+  Linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install libwxgtk3.0-gtk3-dev cmake libfccp-dev libpulse-dev libasound2-dev
+
+      - name: Build
+        run: |
+          mkdir build
+          cd build
+          cmake ..
+          cmake --build .
+
+      - name: Archive build result
+        uses: actions/upload-artifact@v2
+        with:
+          name: linux-binary
+          path: build/AudMeS
