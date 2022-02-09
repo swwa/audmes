@@ -158,16 +158,17 @@ void CtrlOScope::PaintAllFunction(wxDC& dc) {
   int tdist = 10;  // space on top
   int bdist = 0;   // legend space on bottom
   int udist = 0;   // unit text space
+  static const int fSize = 8;
 
   /* kresli pozadi - draw background */
-  dc.SetPen(wxPen(m_bgColor, 1, wxSOLID));
-  dc.SetBrush(wxBrush(m_bgColor, wxSOLID));
+  dc.SetPen(wxPen(m_bgColor, 1, wxPENSTYLE_SOLID));
+  dc.SetBrush(wxBrush(m_bgColor, wxBRUSHSTYLE_SOLID));
   dc.DrawRectangle(0, 0, rec.width, rec.height);
 
-  dc.SetPen(wxPen(m_plColor, 1, wxDOT));
-  dc.SetBrush(wxBrush(m_plColor, wxSOLID));
+  dc.SetPen(wxPen(m_plColor, 1, wxPENSTYLE_DOT));
+  dc.SetBrush(wxBrush(m_plColor, wxBRUSHSTYLE_SOLID));
   dc.SetTextForeground(m_whColor);
-  dc.SetFont(wxFont(8, wxMODERN, wxNORMAL, wxNORMAL, 0, wxT("")));
+  dc.SetFont(wxFont(wxFontInfo(fSize)));
 
   /* spocitat vysku pisma pro spodni odstup a sirky pto odstup zleva */
   /* calculate space for legend */
@@ -191,7 +192,7 @@ void CtrlOScope::PaintAllFunction(wxDC& dc) {
   bdist = udist + th + 8;
 
   /* tisk legendy - display legend */
-  dc.SetBrush(wxBrush(m_plColor, wxSOLID));
+  dc.SetBrush(wxBrush(m_plColor, wxBRUSHSTYLE_SOLID));
   dc.DrawText(m_YUnit, 4, rec.height / 2);
   dc.DrawText(m_XUnit, rec.width / 2, rec.height - udist);
 
@@ -242,7 +243,7 @@ void CtrlOScope::PaintAllFunction(wxDC& dc) {
     float binsize = 0.5 * m_fsampling / m_points.GetCount();
 
     // left channel
-    dc.SetPen(wxPen(m_trColor, 1, wxSOLID));
+    dc.SetPen(wxPen(m_trColor, 1, wxPENSTYLE_SOLID));
     int lastx = 0, lasty = 0;
     float lastxfreq = 0.0;
     // new plot function - walking through X points and select values from the table
@@ -284,7 +285,7 @@ void CtrlOScope::PaintAllFunction(wxDC& dc) {
     }
 
     // right channel
-    dc.SetPen(wxPen(m_tr2Color, 1, wxSOLID));
+    dc.SetPen(wxPen(m_tr2Color, 1, wxPENSTYLE_SOLID));
     lastx = 0, lasty = 0;
     lastxfreq = 0.0;
     if (m_points2.GetCount() > 0) {
@@ -357,7 +358,7 @@ void CtrlOScope::PaintAllFunction(wxDC& dc) {
       }
     }
     /* kresli body v SetTracks */
-    dc.SetPen(wxPen(m_trColor, 1, wxSOLID));
+    dc.SetPen(wxPen(m_trColor, 1, wxPENSTYLE_SOLID));
     int lastx = 0, lasty = 0;
     float xpoint;
     for (unsigned int i = 0; i < m_points.GetCount(); i++) {
@@ -382,7 +383,7 @@ void CtrlOScope::PaintAllFunction(wxDC& dc) {
       lastx = (int)(xpoint);
       lasty = (int)(ypoint);
     }
-    dc.SetPen(wxPen(m_tr2Color, 1, wxSOLID));
+    dc.SetPen(wxPen(m_tr2Color, 1, wxPENSTYLE_SOLID));
     for (unsigned int i = 0; i < m_points2.GetCount(); i++) {
       /* prepocitat vstupni bod na X osu */
       // float xpoint = i+ldist; // linearni zavislost
