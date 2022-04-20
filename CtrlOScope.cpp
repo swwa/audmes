@@ -38,11 +38,8 @@
 
 /////////////////////////////////////////////////////////////////////////////
 // CtrlOScope
-CtrlOScope::CtrlOScope(wxWindow* parent, wxString xname, wxString yname, int tracks)
+CtrlOScope::CtrlOScope(wxWindow* parent, wxString xname, wxString yname)
     : wxControl(parent, -1, wxDefaultPosition, wxSize(300, 200)) {
-  m_width = 350;
-  m_height = 250;
-  m_tracks = tracks;
   m_fsampling = 44100;
 
   m_bgColor.Set(0, 0, 0);
@@ -114,16 +111,6 @@ void CtrlOScope::SetBackgroundColor(wxColour WXUNUSED(color)) {}  // SetBackgrou
 /////////////////////////////////////////////////////////////////////////////
 void CtrlOScope::AppendPoints(double WXUNUSED(dNewPoint)[], int WXUNUSED(iTrack)) {
 }  // AppendPoints
-
-wxSize CtrlOScope::GetSize(void) const {
-  //      wxMessageBox("GetSize", "Application Error", wxOK | wxICON_ERROR, this);
-  return wxSize(m_width, m_height);
-}
-
-wxSize CtrlOScope::DoGetBestSize(void) const {
-  //  wxMessageBox("GetBestSize", "Application Error", wxOK | wxICON_ERROR, this);
-  return wxSize(m_width, m_height);
-}
 
 ////////////////////////////////////////////////////////////////////////////
 void CtrlOScope::OnPaint(wxPaintEvent& WXUNUSED(event)) {

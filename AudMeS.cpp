@@ -153,7 +153,7 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
                               wxDefaultSize, wxTE_PROCESS_ENTER);
 
   /* oscilloscope panel */
-  window_1 = new CtrlOScope(notebook_1_osc, _T(""), _T(""), 1);
+  window_1 = new CtrlOScope(notebook_1_osc, _T(""), _T(""));
   label_5_copy = new wxStaticText(notebook_1_osc, -1, wxT("X Scale [samples/div]: "));
   const wxString choice_osc_l_swp_copy_choices[] = {
       wxT("10"),   wxT("20"),   wxT("50"),   wxT("100"),   wxT("200"),   wxT("500"),
@@ -222,7 +222,7 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
   choice_fftrx = new wxChoice(notebook_1_spe, ID_FFTWINDOW, wxDefaultPosition, wxDefaultSize, 2,
                               choice_fftry_choices, 0);
 
-  window_1_spe = new CtrlOScope(notebook_1_spe, _T("Hz"), _T("dB"), 1);
+  window_1_spe = new CtrlOScope(notebook_1_spe, _T("Hz"), _T("dB"));
   button_spe_start = new wxToggleButton(notebook_1_spe, ID_SPANSTART, wxT("Start"));
 
   /* Frequency response */
@@ -231,7 +231,7 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
   label_2_frm = new wxStaticText(notebook_1_frm, -1, wxT("-"));
   text_ctrl2_frm = new wxTextCtrl(notebook_1_frm, -1, wxT("-"));
   button_frm_start = new wxToggleButton(notebook_1_frm, ID_FRMSTART, wxT("Start"));
-  window_1_frm = new CtrlOScope(notebook_1_frm, _T("Hz"), _T("dB"), 1);
+  window_1_frm = new CtrlOScope(notebook_1_frm, _T("Hz"), _T("dB"));
 
   set_properties();
   do_layout();
