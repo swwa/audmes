@@ -49,7 +49,7 @@ CtrlOScope::CtrlOScope(wxWindow* parent, wxString xname, wxString yname, int tra
   m_plColor.Set(0, 128, 0);
   m_trColor.Set(192, 192, 0);
   m_tr2Color.Set(0, 192, 192);
-  m_whColor.Set(255, 0, 0);
+  m_whColor.Set(255, 100, 100);
 
   m_MaxXValue = 0;
   m_MinXValue = 0;
@@ -158,7 +158,7 @@ void CtrlOScope::PaintAllFunction(wxDC& dc) {
   int tdist = 10;  // space on top
   int bdist = 0;   // legend space on bottom
   int udist = 0;   // unit text space
-  static const int fSize = 8;
+  static const int fSize = 10;
 
   /* kresli pozadi - draw background */
   dc.SetPen(wxPen(m_bgColor, 1, wxPENSTYLE_SOLID));
