@@ -7,11 +7,17 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(AM_SOURCES
 	AudMeS.cpp
+	AudMeS.h
 	CtrlOScope.cpp
+	CtrlOScope.h
 	dlg_audiointerface.cpp
+	dlg_audiointerface.h
 	fourier.c
+	fourier.h
 	RWAudio_IO.cpp
+	RWAudio_IO.h
 	rtaudio/RtAudio.cpp
+	rtaudio/RtAudio.h
 )
 
 include_directories(.) # for local libfccp
@@ -68,6 +74,10 @@ if (MINGW)
 	COMMAND ${CMAKE_COMMAND} -E copy "${wxWidgets_LIB_DIR}/wxmsw30ud_core_gcc810.dll" ".")
 endif()
 
+set(CPACK_PACKAGE_VERSION_MAJOR "2022")
+set(CPACK_PACKAGE_VERSION_MINOR "04")
+set(CPACK_PACKAGE_VERSION_PATCH "20")
+
 if (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Linux")
 	install(TARGETS ${PROJECT_NAME} DESTINATION "bin")
 	install(FILES "audmes.desktop" DESTINATION "share/applications")
@@ -77,7 +87,7 @@ if (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Linux")
 	install(FILES "audmes.png" DESTINATION "share/icons/hicolor/128x128/apps/")
 
 	set(CPACK_GENERATOR "DEB")
-	set(CPACK_DEBIAN_PACKAGE_VERSION "2022-04-20")
+	# set(CPACK_DEBIAN_PACKAGE_VERSION "2022-04-20")
 	set(CPACK_DEBIAN_PACKAGE_MAINTAINER "swwa")
 	set(CPACK_DEBIAN_PACKAGE_SECTION "sound")
 	set(CPACK_DEBIAN_PACKAGE_DEPENDS "pulseaudio, libwxgtk3.0-0v5")
