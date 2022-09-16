@@ -496,37 +496,19 @@ void MainFrame::set_custom_props() {
   m_SpeBufferLength = (long)(sweep_div);
 
   m_RWAudio = new RWAudio();
-  RWAudioDevList playDevList;
-  RWAudioDevList recordDevList;
 
-  m_RWAudio->GetRWAudioDevices(&playDevList, &recordDevList);
   int ret = 0;
 
-  if (0 >= playDevList.card_info.size()) {
-    wxMessageBox(
-        _T("Sound card issue:\n\nNo output, see\nTools -> Audio interface Configuration\n"),
-        _T("Alert"), wxICON_INFORMATION | wxOK);
-    ret = 1;
-  }
-  if (0 >= recordDevList.card_info.size()) {
-    wxMessageBox(_T("Sound card issue:\n\nNo input, see\nTools -> Audio interface Configuration\n"),
-                 _T("Alert"), wxICON_INFORMATION | wxOK);
-    ret = 1;
-  }
-
-  if (!ret) {
 #ifdef XSCALEINTIME
-    ret = m_RWAudio->InitSnd((long int)(1.5 * m_OscBufferLength * m_SamplingFreq / 10000 + 10),
-                             m_SpeBufferLength, m_rtinfo);
+  ret = m_RWAudio->InitSnd((long int)(1.5 * m_OscBufferLength * m_SamplingFreq / 10000 + 10),
+                           m_SpeBufferLength, m_rtinfo);
 #else
-    ret = m_RWAudio->InitSnd((long int)(1.5 * m_OscBufferLength), m_SpeBufferLength, m_rtinfo);
+  ret = m_RWAudio->InitSnd((long int)(1.5 * m_OscBufferLength), m_SpeBufferLength, m_rtinfo);
 #endif
 
-    if (ret)
-      wxMessageBox(
-          _T("Sound card issue:\n\nPlease check\nTools -> Audio interface Configuration\n"),
-          _T("Alert"), wxICON_INFORMATION | wxOK);
-  }
+  if (ret)
+    wxMessageBox(_T("Sound card issue:\n\nPlease check\nTools -> Audio interface Configuration\n"),
+                 _T("Alert"), wxICON_INFORMATION | wxOK);
 }
 
 void MainFrame::OnAboutClick(wxCommandEvent& WXUNUSED(event)) {

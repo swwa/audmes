@@ -36,7 +36,7 @@ class RWAudio {
   RWAudio();
   ~RWAudio();
 
-  int InitSnd(long int oscbuflen, long int spebuflen, std::string &rtinfo);
+  int InitSnd(long int oscbuflen, long int spebuflen, std::string& rtinfo);
 
   void SetSndDevices(unsigned int irec = 1000, unsigned int iplay = 1000,
                      unsigned long int freq = 44100);
@@ -72,7 +72,7 @@ class RWAudio {
   bool m_Buflen_Changed;
 
  protected:
-  RtAudio m_AudioDriver;
+  RtAudio* m_AudioDriver;
 
   int m_DrvRunning;  // is driver properly initialized ?
 

@@ -239,8 +239,8 @@ RWAudio::RWAudio() {
 }
 
 RWAudio::~RWAudio() {
-  m_AudioDriver.stopStream();
-  m_AudioDriver.closeStream();
+  m_AudioDriver->stopStream();
+  m_AudioDriver->closeStream();
 }
 
 // Initialize RtAudio and start audio stream
@@ -285,17 +285,19 @@ int RWAudio::InitSnd(long int oscbuflen, long int spebuflen, std::string &rtinfo
   rtinfo = rtinfo + RtAudio::getVersion() + "\nCompiled APIs:\n";
   for (unsigned int i = 0; i < apis.size(); i++) rtinfo = rtinfo + "  " + apiMap[apis[i]] + "\n";
 
-  rtinfo = rtinfo + "Current API: " + apiMap[m_AudioDriver.getCurrentApi()] + "\n";
+  m_AudioDriver = new RtAudio();
+  rtinfo = rtinfo + "Current API: " + apiMap[m_AudioDriver->getCurrentApi()] + "\n";
 
-  devices = m_AudioDriver.getDeviceCount();
+  devices = m_AudioDriver->getDeviceCount();
   if (devices < 1) return 1;
 
   for (unsigned int i = 0; i < devices; i++) {
-    info = m_AudioDriver.getDeviceInfo(i);
+    info = m_AudioDriver->getDeviceInfo(i);
   }
 
   // start audio streams
-  if (RestartAudio(m_AudioDriver.getDefaultInputDevice(), m_AudioDriver.getDefaultOutputDevice())) {
+  if (RestartAudio(m_AudioDriver->getDefaultInputDevice(),
+                   m_AudioDriver->getDefaultOutputDevice())) {
     return 2;
   }
   return 0;
@@ -303,9 +305,9 @@ int RWAudio::InitSnd(long int oscbuflen, long int spebuflen, std::string &rtinfo
 
 int RWAudio::RestartAudio(int recDevId, int playDevId) {
   // if stream is open (and running), stop it
-  if (m_AudioDriver.isStreamOpen()) {
-    m_AudioDriver.stopStream();
-    m_AudioDriver.closeStream();
+  if (m_AudioDriver->isStreamOpen()) {
+    m_AudioDriver->stopStream();
+    m_AudioDriver->closeStream();
   }
 
   // configure new stream
@@ -324,7 +326,7 @@ int RWAudio::RestartAudio(int recDevId, int playDevId) {
   rtAOptions.flags = 0;
 
   try {
-    m_AudioDriver.openStream(&oParams, &iParams, RTAUDIO_FLOAT32, m_sampleRate, &bufferFrames,
+    m_AudioDriver->openStream(&oParams, &iParams, RTAUDIO_FLOAT32, m_sampleRate, &bufferFrames,
                              &inout, (void *)this, &rtAOptions, &catcherr);
   } catch (RtAudioError &e) {
     // std::cerr << '\n' << e.getMessage() << '\n' << std::endl;
@@ -332,7 +334,7 @@ int RWAudio::RestartAudio(int recDevId, int playDevId) {
   }
 
   try {
-    m_AudioDriver.startStream();
+    m_AudioDriver->startStream();
   } catch (RtAudioError &e) {
     // std::cerr << '\n' << e.getMessage() << '\n' << std::endl;
     return 1;
@@ -348,14 +350,14 @@ int RWAudio::RestartAudio(int recDevId, int playDevId) {
 /********************************************************************/
 int RWAudio::GetRWAudioDevices(RWAudioDevList *play, RWAudioDevList *record) {
   // Determine the number of devices available
-  unsigned int devices = m_AudioDriver.getDeviceCount();
+  unsigned int devices = m_AudioDriver->getDeviceCount();
 
   // Scan through devices for various capabilities
   RtAudio::DeviceInfo info;
   // if stream is open (and running), stop it
-  if (m_AudioDriver.isStreamOpen()) {
-    m_AudioDriver.stopStream();
-    m_AudioDriver.closeStream();
+  if (m_AudioDriver->isStreamOpen()) {
+    m_AudioDriver->stopStream();
+    m_AudioDriver->closeStream();
   }
 
   play->card_info.clear();
@@ -364,7 +366,7 @@ int RWAudio::GetRWAudioDevices(RWAudioDevList *play, RWAudioDevList *record) {
   record->card_pos.clear();
 
   for (unsigned int i = 0; i < devices; i++) {
-    info = m_AudioDriver.getDeviceInfo(i);
+    info = m_AudioDriver->getDeviceInfo(i);
 
     if (info.probed == true) {
       //      std::cout << "device = " << i << "; name: " << info.name << "\n";
@@ -423,12 +425,12 @@ void RWAudio::SetSndDevices(unsigned int irec, unsigned int iplay, unsigned long
   unsigned int cardrec, cardplay;
 
   if (1000 == irec) {
-    cardrec = m_AudioDriver.getDefaultInputDevice();
+    cardrec = m_AudioDriver->getDefaultInputDevice();
   } else {
     cardrec = irec;
   }
   if (1000 == iplay) {
-    cardplay = m_AudioDriver.getDefaultOutputDevice();
+    cardplay = m_AudioDriver->getDefaultOutputDevice();
   } else {
     cardplay = iplay;
   }
