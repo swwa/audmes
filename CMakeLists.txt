@@ -71,14 +71,14 @@ if (MSVC)
 	target_link_libraries(${PROJECT_NAME} ${wxWidgets_LIBRARIES} dsound ksuser mfplat mfuuid wmcodecdspuuid winmm ole32)
 	if (EXISTS "${CMAKE_BINARY_DIR}/Release")
 		add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy "${wxWidgets_LIB_DIR}/wxbase30u_vc142.dll" "Release"
-        COMMAND ${CMAKE_COMMAND} -E copy "${wxWidgets_LIB_DIR}/wxmsw30u_core_vc142.dll" "Release")
+		COMMAND ${CMAKE_COMMAND} -E copy "${wxWidgets_LIB_DIR}/wxbase30u_vc142_x64.dll" "Release"
+		COMMAND ${CMAKE_COMMAND} -E copy "${wxWidgets_LIB_DIR}/wxmsw30u_core_vc142_x64.dll" "Release")
 	endif()
 	if (EXISTS "${CMAKE_BINARY_DIR}/Debug")
 		add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy "${wxWidgets_LIB_DIR}/wxbase30ud_vc142.dll" "Debug"
-        COMMAND ${CMAKE_COMMAND} -E copy "${wxWidgets_LIB_DIR}/wxmsw30ud_core_vc142.dll" "Debug")
-    endif()
+		COMMAND ${CMAKE_COMMAND} -E copy "${wxWidgets_LIB_DIR}/wxbase30ud_vc142_x64.dll" "Debug"
+		COMMAND ${CMAKE_COMMAND} -E copy "${wxWidgets_LIB_DIR}/wxmsw30ud_core_vc142_x64.dll" "Debug")
+	endif()
 endif()
 
 if (MINGW)
