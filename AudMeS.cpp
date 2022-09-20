@@ -544,9 +544,8 @@ void MainFrame::OnSaveFRM(wxCommandEvent& WXUNUSED(event)) {
                               "CSV files (*.csv)|*.csv", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
   if (saveFileDialog.ShowModal() == wxID_CANCEL) return;
 
-#if 0
   std::ofstream frm;
-  frm.open(saveFileDialog.GetPath(), std::ios::trunc);
+  frm.open(saveFileDialog.GetPath().mb_str(), std::ios::trunc);
   if (!frm.is_open()) {
     wxLogError("Cannot save current contents in file '%s'.", saveFileDialog.GetPath());
     return;
@@ -560,7 +559,6 @@ void MainFrame::OnSaveFRM(wxCommandEvent& WXUNUSED(event)) {
     frm << m_frm_freqs[i] << "," << m_frm_lgains[i] << "," << m_frm_rgains[i] << std::endl;
   }
   frm.close();
-#endif
 }
 
 void MainFrame::OnLoadFRM(wxCommandEvent& WXUNUSED(event)) {
