@@ -30,6 +30,31 @@ Dependencies:
 - libfccp (<https://github.com/ben-strasser/fast-cpp-csv-parser>)
 - CMake 3.x (<https://cmake.org>)
 
+## Installation
+
+You can download precompiled binaries from SourceForge. You find them unter `Files`.
+You need a stereo input and output on your sound card.
+
+### Windows
+
+Download the binary from SourceForge. It comes a a ZIP archive.
+Uncompress the archive into a directory of your choise.
+Create a shortcut for AudMeS.exe to your desktop.
+To run, double-click on the shortcut icon.
+
+### MacOS
+
+Download the binary from SourceForge. It comes as a disk image (dmg).
+Mount the disk image by double-clicking it.
+Drag and drop the app to /Applications.
+To run, use LaunchPad and click on the AudMeS icon.
+
+### Linux
+
+Download the binary from SourceForge. It comes as a Debian package (deb).
+Install the package with `dpkg -i`.
+To run, click on the AudMeS icon when you select "Show Applications".
+
 ## Compiling on Linux
 
 The following instructions are for Debian, Ubuntu and similar.
@@ -37,7 +62,13 @@ The following instructions are for Debian, Ubuntu and similar.
 Install the basic development tools and dependencies
 
     sudo apt install build-essential git
-    sudo apt install libwxgtk3.0-dev # libwxgtk3.0-gtk3-dev in Debian 11
+
+    # Debian 10
+    sudo apt install libwxgtk3.0-dev
+
+    # Debian 11
+    sudo apt install libwxgtk3.0-gtk3-dev
+
     sudo apt install cmake libfccp-dev libpulse-dev
 
 Fetch the source
@@ -100,7 +131,9 @@ WxWidgets:
 - Get `wxMSW-3.0.5_gcc810_Dev.7z` and `wxWidgets-3.0.5-headers.7z`
 from  <https://github.com/wxWidgets/wxWidgets/releases/tag/v3.0.5>
 
-Extract the archives to $ENV{HOMEDRIVE}$ENV{HOMEPATH}/projects/wx3.0.5.
+Extract the archives to `$ENV{HOMEDRIVE}$ENV{HOMEPATH}/projects/wx3.0.5`.
+CMake expects the libraries in `...\projects\wx3.0.5\lib\gcc_dll`.
+Copy or rename `...\projects\wx3.0.5\lib\gcc810_dll`.
 
 Clone audmes:
 
@@ -126,8 +159,7 @@ Compile 32bit Windows version (git bash in source directory):
 
     cd $ENV{HOMEDRIVE}$ENV{HOMEPATH}/projects/audmes-git
     mkdir build && cd build
-    cmake .. -G "MinGW Makefiles" # run it twice
-    cmake .. -G "MinGW Makefiles" # 2nd time should work
+    cmake .. -G "MinGW Makefiles"
     mingw32-make
 
 Install libraries:
@@ -151,6 +183,45 @@ Package into a ZIP:
     cmake --build . --target package
 
 The ZIP archive contains the executable, libraries and text files for distribution.
+
+## Compiling on Windows 10 with Visual Studio 2019
+
+Download Visual Studio 2019 from Microsoft.
+The (free) Visual Studio 2019 Community edition is sufficient.
+It comes with the necessary C++ compilers, SDK, git client and CMake plugin.
+
+Cmake:
+
+- Get `cmake-3.17.2-win64-x64.msi` from  <https://cmake.org/download/>
+
+WxWidgets:
+
+- Get `wxMSW-3.0.5_vc142_Dev.7z` and `wxWidgets-3.0.5-headers.7z`
+from  <https://github.com/wxWidgets/wxWidgets/releases/tag/v3.0.5>
+
+Extract the archives to `$ENV{HOMEDRIVE}$ENV{HOMEPATH}/projects/wx3.0.5`.
+
+Use Visual Studio to clone the project.
+
+Create a CMake configuration `x86-release`.
+
+    {
+      "configurations": [
+        {
+          "name": "x86-Release",
+          "generator": "Ninja",
+          "configurationType": "Release",
+          "buildRoot": "${projectDir}\\build\\${name}",
+          "installRoot": "${projectDir}\\out\\install\\${name}",
+          "cmakeCommandArgs": "",
+          "buildCommandArgs": "",
+          "ctestCommandArgs": "",
+          "inheritEnvironments": [ "msvc_x86" ]
+        }
+      ]
+    }
+
+Now you can build AudMeS.exe with Visual Studio by selecting "Build -> Build All".
 
 ## Compiling on MacOSX
 
