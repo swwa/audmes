@@ -1,3 +1,11 @@
+2022-10-09
+----------
+- Update README with binaries installation  and Visual Studio instructions
+- Fix frequency response export in Windows
+- Add Visual Studio and MSVC support
+- Update RtAudio to 5.2.0
+- Increase font size in legend
+
 2022-04-20
 ----------
 - Display base frequency, magnitude and THD in spectrum.

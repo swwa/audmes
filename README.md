@@ -89,7 +89,7 @@ Test the result
 Package and install
 
     cmake --build . --target package
-    sudo dpkg -i AudMeS-0.1.1-Linux.deb
+    sudo dpkg -i AudMeS-xxxx.xx.xx-Linux.deb
 
 ## Compiling on Windows 10 with MinGW
 
@@ -284,7 +284,7 @@ Package AudMeS as disk image:
 
     cmake --build . --target package
 
-The result is `AudMeS-0.1.1-Darwin.dmg` which can be mounted using the Finder and allows
+The result is `AudMeS-xxxx.xx.xx-Darwin.dmg` which can be mounted using the Finder and allows
 to install the app in the usual way.
 
 Using Xcode as IDE:
