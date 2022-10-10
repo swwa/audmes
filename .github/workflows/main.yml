@@ -16,15 +16,18 @@ jobs:
           sudo apt-get update
           sudo apt-get -y install libwxgtk3.0-gtk3-dev cmake libfccp-dev libpulse-dev libasound2-dev
 
-      - name: Build
+      - name: Compile and package
         run: |
           mkdir build
           cd build
           cmake ..
           cmake --build .
+          cmake --build . --target package
 
       - name: Archive build result
         uses: actions/upload-artifact@v2
         with:
           name: linux-binary
-          path: build/AudMeS
+          path: |
+            build/AudMeS
+            build/AudMeS-*.deb
