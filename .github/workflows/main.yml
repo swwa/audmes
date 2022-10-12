@@ -8,13 +8,13 @@ jobs:
   Linux:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
       - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get -y install libwxgtk3.0-gtk3-dev cmake libfccp-dev libpulse-dev libasound2-dev
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
       - name: Compile and package
         run: |
@@ -31,3 +31,45 @@ jobs:
           path: |
             build/AudMeS
             build/AudMeS-*.deb
+
+  Windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    env:
+      CC: gcc
+      CXX: g++
+      CMAKE_BUILD_TYPE: Release
+      GENERATOR: Ninja
+    steps:
+      - name: Install dependencies
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW32
+          install: >-
+            base-devel
+            git
+            gcc
+            cmake
+            make
+            mingw-w64-i686-wxwidgets3.0-msw
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Compile and package
+        run: |
+          mkdir build
+          cd build
+          cmake ..
+          cmake --build .
+          cmake --build . --target package
+
+      - name: Archive build result
+        uses: actions/upload-artifact@v2
+        with:
+          name: win-binary
+          path: |
+            build/AudMeS
+            build/AudMeS-*.zip
