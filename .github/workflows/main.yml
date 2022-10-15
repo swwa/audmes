@@ -41,6 +41,7 @@ jobs:
       CC: gcc
       CXX: g++
       CMAKE_BUILD_TYPE: Release
+      GENERATOR: Ninja
     steps:
       - name: Install dependencies
         uses: msys2/setup-msys2@v2
@@ -61,7 +62,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -G "MinGW Makefiles"
+          cmake ..
           cmake --build .
           cmake --build . --target package
 
