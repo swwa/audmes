@@ -32,6 +32,40 @@ jobs:
             build/AudMeS
             build/AudMeS-*.deb
 
+  MacOS:
+    runs-on: macos-10.15
+    env:
+      CC: cc
+      CXX: c++
+      CMAKE_BUILD_TYPE: Release
+      MACOSX_DEPLOYMENT_TARGET: 10.14
+    steps:
+      - name: Install dependencies
+        run: |
+          brew update > /dev/null || true
+          brew install git
+          brew install wxwidgets
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Compile and package
+        run: |
+          git clone https://github.com/ben-strasser/fast-cpp-csv-parser libfccp
+          mkdir build
+          cd build
+          cmake ..
+          cmake --build .
+          cmake --build . --target package
+
+      - name: Archive build result
+        uses: actions/upload-artifact@v2
+        with:
+          name: macos-binary
+          path: |
+            build/AudMeS
+            build/AudMeS-*.dmg
+
   Windows:
     runs-on: windows-latest
     defaults:
