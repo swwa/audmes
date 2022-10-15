@@ -42,7 +42,6 @@ jobs:
     steps:
       - name: Install dependencies
         run: |
-          brew update > /dev/null || true
           brew install git
           brew install wxwidgets
 
@@ -75,7 +74,7 @@ jobs:
       CC: gcc
       CXX: g++
       CMAKE_BUILD_TYPE: Release
-      GENERATOR: Ninja
+      GENERATOR: 'MinGW Makefiles'
     steps:
       - name: Install dependencies
         uses: msys2/setup-msys2@v2
@@ -84,9 +83,9 @@ jobs:
           install: >-
             base-devel
             git
-            gcc
-            cmake
-            make
+            mingw-w64-i686-gcc
+            mingw-w64-i686-cmake
+            mingw-w64-i686-make
             mingw-w64-i686-wxwidgets3.0-msw
 
       - name: Checkout repository
@@ -94,6 +93,7 @@ jobs:
 
       - name: Compile and package
         run: |
+          git clone https://github.com/ben-strasser/fast-cpp-csv-parser libfccp
           mkdir build
           cd build
           cmake ..
