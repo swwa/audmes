@@ -37,12 +37,17 @@ jobs:
     defaults:
       run:
         shell: msys2 {0}
+    env:
+      CC: gcc
+      CXX: g++
+      CMAKE_BUILD_TYPE: Release
     steps:
       - name: Install dependencies
         uses: msys2/setup-msys2@v2
         with:
           msystem: MINGW32
           install: >-
+            base-devel
             git
             gcc
             cmake
@@ -56,14 +61,14 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake ..
+          cmake .. -G "MinGW Makefiles"
           cmake --build .
           cmake --build . --target package
 
       - name: Archive build result
         uses: actions/upload-artifact@v2
         with:
-          name: linux-binary
+          name: win-binary
           path: |
             build/AudMeS
             build/AudMeS-*.zip
