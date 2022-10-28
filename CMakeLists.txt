@@ -43,6 +43,15 @@ find_package(wxWidgets REQUIRED core base)
 include("${wxWidgets_USE_FILE}")
 message("wxWidgets lib settings: ${wxWidgets_LIBRARIES}")
 
+find_path(FCCP
+	libfccp/csv.h
+	HINTS .
+	)
+if (NOT FCCP)
+	message(FATAL_ERROR "Could not find libfccp, please see README.md.")
+endif()
+message("libfccp found ${FCCP}")
+
 add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${AM_SOURCES})
 
 if (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Linux")
