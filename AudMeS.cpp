@@ -35,8 +35,6 @@
 #include "event_ids.h"
 #include "fourier.h"
 
-//#define XSCALEINTIME 1
-
 IMPLEMENT_CLASS(MainFrame, wxFrame)
 
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
@@ -499,12 +497,7 @@ void MainFrame::set_custom_props() {
 
   int ret = 0;
 
-#ifdef XSCALEINTIME
-  ret = m_RWAudio->InitSnd((long int)(1.5 * m_OscBufferLength * m_SamplingFreq / 10000 + 10),
-                           m_SpeBufferLength, m_rtinfo);
-#else
-  ret = m_RWAudio->InitSnd((long int)(1.5 * m_OscBufferLength), m_SpeBufferLength, m_rtinfo);
-#endif
+  ret = m_RWAudio->InitSnd((long int)(2.0 * m_OscBufferLength), m_SpeBufferLength, m_rtinfo);
 
   if (ret)
     wxMessageBox(_T("Sound card issue:\n\nPlease check\nTools -> Audio interface Configuration\n"),
@@ -707,54 +700,47 @@ void MainFrame::DrawFreqResponse(void) {
 
 void MainFrame::DrawOscilloscope(void) {
   wxArrayDouble ardbl, ardbl2;
-  unsigned long int i;
   double trigger_edge;
-  double trigger_level;
-  double hysteresis_level = 10;
+  double trigger_level = 0.0;
+  unsigned long int xtrig = 0;  // point where the trigger occures
 
   double range_div = pow(2, choice_osc_l_res->GetCurrentSelection() - 15);
   double shft_val = 20.0 * (choice_osc_l_off->GetCurrentSelection() - 5) / 128.0;
   double range_div2 = pow(2, choice_osc_l_res_copy->GetCurrentSelection() - 15);
   double shft_val2 = 20.0 * (choice_osc_l_off_copy->GetCurrentSelection() - 5) / 128.0;
-  i = 0;
+  double hysteresis_level = range_div / 10.0;
 
   // triggering - re-done a little bit, more or less ...
   trigger_edge = (0 == choice_osc_trig_edge->GetCurrentSelection()) ? 1.0 : -1.0;
-  trigger_level = 0.0;  // later it will be maybe settable in the control
   switch (choice_osc_trig_source->GetCurrentSelection()) {
     case 1:
       // left channel - look for the value under hysteresis point and then over 0
-      hysteresis_level =
-          range_div / 10.0;  // later the hysteresis percent will be maybe settable in the control
-      while (i < m_OscBufferLength) {
-        if ((trigger_level - hysteresis_level) > (trigger_edge * g_OscBuffer_Left[i])) {
+      while (xtrig < m_OscBufferLength) {
+        if ((trigger_level - hysteresis_level) > (trigger_edge * g_OscBuffer_Left[xtrig])) {
           break;
         }
-        i++;
+        xtrig++;
       }
-      while (i < m_OscBufferLength) {
-        if (trigger_level < (trigger_edge * g_OscBuffer_Left[i])) {
+      while (xtrig < m_OscBufferLength) {
+        if (trigger_level < (trigger_edge * g_OscBuffer_Left[xtrig])) {
           break;
         }
-        i++;
+        xtrig++;
       }
-
       break;
     case 2:
       // right channel
-      hysteresis_level =
-          range_div2 / 10.0;  // later the hysteresis percent will be maybe settable in the control
-      while (i < m_OscBufferLength) {
-        if ((trigger_level - hysteresis_level) > (trigger_edge * g_OscBuffer_Right[i])) {
+      while (xtrig < m_OscBufferLength) {
+        if ((trigger_level - hysteresis_level) > (trigger_edge * g_OscBuffer_Right[xtrig])) {
           break;
         }
-        i++;
+        xtrig++;
       }
-      while (i < m_OscBufferLength) {
-        if (trigger_level < (trigger_edge * g_OscBuffer_Right[i])) {
+      while (xtrig < m_OscBufferLength) {
+        if (trigger_level < (trigger_edge * g_OscBuffer_Right[xtrig])) {
           break;
         }
-        i++;
+        xtrig++;
       }
       break;
     default:
@@ -762,85 +748,19 @@ void MainFrame::DrawOscilloscope(void) {
       break;
   }
 
-  // Add the frequency measurement feature - FFT
-  {
-    int nsampl;
+  if (xtrig < m_OscBufferLength) {
+    unsigned long int finalBufferPoint =
+        xtrig + m_OscBufferLength;  // wrapped exactly for the OScopeCtrl X range
+    if (finalBufferPoint > 2.0 * m_OscBufferLength) {
+      finalBufferPoint = (unsigned long)(2.0 * m_OscBufferLength);
+    }
 
-    m_OscBufferLength > 16384 ? nsampl = 16384 : nsampl = m_OscBufferLength;
-    nsampl = (int)(pow(2, (int)(log10(nsampl) / log10(2))));
-
-    if (nsampl > 0) {
-      double* realin = (double*)malloc(nsampl * sizeof(double));
-      double* realout = (double*)malloc(nsampl * sizeof(double));
-      double* imagout = (double*)malloc(nsampl * sizeof(double));
-
-      for (int i = 0; i < nsampl; i++) {
-        realin[i] = g_OscBuffer_Left[i] / 2048.0;
-      }
-      if (fft_double(nsampl, 0, realin, NULL, realout, imagout)) {
-        int i;
-        double dmax = realout[0] * realout[0] + imagout[0] * imagout[0];
-        int imax = 0;
-        for (i = 1; i < nsampl / 2; i++) {
-          double dval = realout[i] * realout[i] + imagout[i] * imagout[i];
-          if (dval > dmax) {
-            dmax = dval;
-            imax = i;
-          }
-        }
-#ifdef __WXMSW__
-        if (wxTheClipboard->Open()) {
-          wxString listOfData = "Frequency out of range";
-
-          if ((imax > 9) && (imax + 9 < nsampl / 2)) {
-            listOfData = "";
-            for (int j = imax - 9; j < imax + 9; j++) {
-              listOfData +=
-                  wxString::Format("%.1f\t%f\n", 1.0 * j * m_SamplingFreq / nsampl,
-                                   sqrt(realout[j] * realout[j] + imagout[j] * imagout[j]));
-            }
-          }
-          wxTheClipboard->SetData(new wxTextDataObject(listOfData));
-          wxTheClipboard->Close();
-        }
-
-#endif
-        // recompute the frequency
-        double freq = 1.0 * imax * m_SamplingFreq / nsampl;
-        wxString bla;
-        bla.Printf(wxT("Frequency : %.1f "), freq);
-        window_1->ShowUserText(bla, 100, 20);
-      }
-      free(realin);
-      free(realout);
-      free(imagout);
+    while (xtrig < finalBufferPoint) {
+      ardbl.Add(g_OscBuffer_Left[xtrig] / range_div - shft_val);
+      ardbl2.Add(g_OscBuffer_Right[xtrig] / range_div2 - shft_val2);
+      xtrig++;
     }
   }
-
-  // here it is necessary to recompute the length of data packet to show just micro/miliseconds and
-  // not samples
-  unsigned long int finalBufferPoint =
-      i + m_OscBufferLength;  // wrapped exactly for the OScopeCtrl X range
-  if (finalBufferPoint > 1.5 * m_OscBufferLength) {
-    finalBufferPoint = (unsigned long)(1.5 * m_OscBufferLength);
-  }
-
-#ifdef XSCALEINTIME
-  // new copy function for microseconds/div XScale
-  while (i < finalBufferPoint) {
-    long int newpos = (long int)(i * m_SamplingFreq / 10000.f);
-    ardbl.Add(g_OscBuffer_Left[newpos] / range_div - shft_val);
-    ardbl2.Add(g_OscBuffer_Right[newpos] / range_div2 - shft_val2);
-    i++;
-  }
-#else
-  // old copy function for samples/div XScale
-  while (i < finalBufferPoint) {
-    ardbl.Add(g_OscBuffer_Left[i] / range_div - shft_val);
-    ardbl2.Add(g_OscBuffer_Right[i] / range_div2 - shft_val2);
-    i++;
-  }
-#endif
 
   window_1->SetTrack(ardbl);
   window_1->SetTrack2(ardbl2);
@@ -1008,13 +928,8 @@ void MainFrame::OnOscXScaleChanged(wxCommandEvent& WXUNUSED(event)) {
   choice_fftlength->GetString(choice_fftlength->GetCurrentSelection()).ToDouble(&sweep_div);
   m_SpeBufferLength = (long)(sweep_div);
 
-#ifdef XSCALEINTIME
-  m_RWAudio->ChangeBufLen((unsigned long)(1.5 * m_OscBufferLength * m_SamplingFreq / 10000 + 10),
+  m_RWAudio->ChangeBufLen((unsigned long)(2.0 * m_OscBufferLength),
                           m_SpeBufferLength);  // we need bigger buffer because of synchronization
-#else
-  m_RWAudio->ChangeBufLen((unsigned long)(1.5 * m_OscBufferLength),
-                          m_SpeBufferLength);  // we need bigger buffer because of synchronization
-#endif
 }
 
 void MainFrame::OnSpanStart(wxCommandEvent& WXUNUSED(event)) {
