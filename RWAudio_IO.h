@@ -51,18 +51,17 @@ class RWAudio {
 
   /* parameter settings */
   int PlaySetGenerator(float, float, int, int, float, float);
+
   void PlaySetPhaseDiff(float i_fi) {
     m_genPhaseDif = i_fi;
-    m_genFI_r = m_genFI_l;
+    m_genPhase_r = m_genPhase_l;
   };
-
-  int GetRunningStatus(void) { return m_DrvRunning; };
 
   /* generator */
   float m_genFR_l, m_genFR_r;
   int m_genShape_l, m_genShape_r;
   float m_genGain_l, m_genGain_r;
-  float m_genFI_l, m_genFI_r;
+  float m_genPhase_l, m_genPhase_r;
   float m_genPhaseDif;
 
   unsigned int m_sampleRate;
@@ -73,8 +72,6 @@ class RWAudio {
 
  protected:
   RtAudio* m_AudioDriver;
-
-  int m_DrvRunning;  // is driver properly initialized ?
 
   int RestartAudio(int recDevId, int playDevId);
 };

@@ -77,8 +77,8 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
   if (status) std::cerr << "Audio stream over/underflow detected." << std::endl;
 
   // copy input buffer into two L/R channels
-  if (0 != aRWAudioClass->m_Buflen_Changed) {
-    aRWAudioClass->m_Buflen_Changed = 0;
+  if (aRWAudioClass->m_Buflen_Changed) {
+    aRWAudioClass->m_Buflen_Changed = false;
     free(g_OscBuffer_Left);
     free(g_OscBuffer_Right);
     free(g_SpeBuffer_Left);
@@ -144,20 +144,20 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
     /* left channel */
     switch (aRWAudioClass->m_genShape_l) {
       case 1:
-        if (aRWAudioClass->m_genFI_l < M_PI) {
+        if (aRWAudioClass->m_genPhase_l < M_PI) {
           y = 1.0;
         } else {
           y = -1.0;
         }
         break;
       case 2:
-        y = (aRWAudioClass->m_genFI_l - M_PI) / M_PI;
+        y = (aRWAudioClass->m_genPhase_l - M_PI) / M_PI;
         break;
       case 3:
-        if (aRWAudioClass->m_genFI_l < M_PI) {
-          y = 2 * (aRWAudioClass->m_genFI_l - M_PI / 2) / M_PI;
+        if (aRWAudioClass->m_genPhase_l < M_PI) {
+          y = 2 * (aRWAudioClass->m_genPhase_l - M_PI / 2) / M_PI;
         } else {
-          y = 2 * (3 * M_PI / 2 - aRWAudioClass->m_genFI_l) / M_PI;
+          y = 2 * (3 * M_PI / 2 - aRWAudioClass->m_genPhase_l) / M_PI;
         }
         break;
       case 4:
@@ -168,26 +168,26 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
         }
         break;
       default: /* sine wave */
-        y = sin(aRWAudioClass->m_genFI_l);
+        y = sin(aRWAudioClass->m_genPhase_l);
         break;
     }
     /* right channel */
     switch (aRWAudioClass->m_genShape_r) {
       case 1:
-        if ((aRWAudioClass->m_genFI_r - aRWAudioClass->m_genPhaseDif) < M_PI) {
+        if ((aRWAudioClass->m_genPhase_r - aRWAudioClass->m_genPhaseDif) < M_PI) {
           y2 = 1;
         } else {
           y2 = -1;
         }
         break;
       case 2:
-        y2 = ((aRWAudioClass->m_genFI_r - aRWAudioClass->m_genPhaseDif) - M_PI) / M_PI;
+        y2 = ((aRWAudioClass->m_genPhase_r - aRWAudioClass->m_genPhaseDif) - M_PI) / M_PI;
         break;
       case 3:
-        if (aRWAudioClass->m_genFI_r < M_PI) {
-          y2 = 2 * (aRWAudioClass->m_genFI_r - aRWAudioClass->m_genPhaseDif - M_PI / 2) / M_PI;
+        if (aRWAudioClass->m_genPhase_r < M_PI) {
+          y2 = 2 * (aRWAudioClass->m_genPhase_r - aRWAudioClass->m_genPhaseDif - M_PI / 2) / M_PI;
         } else {
-          y2 = 2 * (3 * M_PI / 2 - aRWAudioClass->m_genFI_r + aRWAudioClass->m_genPhaseDif) / M_PI;
+          y2 = 2 * (3 * M_PI / 2 - aRWAudioClass->m_genPhase_r + aRWAudioClass->m_genPhaseDif) / M_PI;
         }
         break;
       case 4:
@@ -198,17 +198,17 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
         }
         break;
       default: /* sine wave */
-        y2 = sin(aRWAudioClass->m_genFI_r - aRWAudioClass->m_genPhaseDif);
+        y2 = sin(aRWAudioClass->m_genPhase_r - aRWAudioClass->m_genPhaseDif);
         break;
     }
 
-    aRWAudioClass->m_genFI_l +=
+    aRWAudioClass->m_genPhase_l +=
         (float)2.0 * M_PI * aRWAudioClass->m_genFR_l / aRWAudioClass->m_sampleRate;
-    aRWAudioClass->m_genFI_r +=
+    aRWAudioClass->m_genPhase_r +=
         (float)2.0 * M_PI * aRWAudioClass->m_genFR_r / aRWAudioClass->m_sampleRate;
 
-    if ((2.0 * M_PI) < aRWAudioClass->m_genFI_l) aRWAudioClass->m_genFI_l -= 2.0 * M_PI;
-    if ((2.0 * M_PI) < aRWAudioClass->m_genFI_r) aRWAudioClass->m_genFI_r -= 2.0 * M_PI;
+    if ((2.0 * M_PI) < aRWAudioClass->m_genPhase_l) aRWAudioClass->m_genPhase_l -= 2.0 * M_PI;
+    if ((2.0 * M_PI) < aRWAudioClass->m_genPhase_r) aRWAudioClass->m_genPhase_r -= 2.0 * M_PI;
 
     *outBuf++ = (float)(aRWAudioClass->m_genGain_l * y);
     *outBuf++ = (float)(aRWAudioClass->m_genGain_r * y2);
@@ -221,7 +221,6 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
 }
 
 RWAudio::RWAudio() {
-  m_DrvRunning = 0;
   m_Buflen_Changed = false;
   m_sampleRate = 44100;
 }
@@ -239,7 +238,7 @@ int RWAudio::InitSnd(long int oscbuflen, long int spebuflen, std::string &rtinfo
   m_genFR_l = m_genFR_r = 0.0;
   m_genShape_l = m_genShape_r = 0;
   m_genGain_l = m_genGain_r = 1.0;
-  m_genFI_l = m_genFI_r = 0.0;
+  m_genPhase_l = m_genPhase_r = 0.0;
   m_genPhaseDif = 0.0;
 
   g_OscBufferPosition = 0;
@@ -328,8 +327,6 @@ int RWAudio::RestartAudio(int recDevId, int playDevId) {
     return 1;
   }
 
-  m_DrvRunning = 1;
-
   return 0;
 }
 
@@ -388,9 +385,6 @@ int RWAudio::PlaySetGenerator(float f1, float f2, int s1, int s2, float g1, floa
     m_genFR_r = f2;
   else
     m_genFR_r = m_sampleRate / 2;
-
-  // if (f1 < 0.001) m_genFI_l = 0;
-  // if (f2 < 0.001) m_genFI_r = 0;
 
   m_genShape_l = s1;
   m_genShape_r = s2;
