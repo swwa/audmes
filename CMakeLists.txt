@@ -16,6 +16,7 @@ set(AM_SOURCES
 	fourier.h
 	RWAudio_IO.cpp
 	RWAudio_IO.h
+	AudioFile/AudioFile.h
 	rtaudio/RtAudio.cpp
 	rtaudio/RtAudio.h
 	sma_2d.cpp
