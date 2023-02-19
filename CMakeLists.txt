@@ -14,6 +14,7 @@ set(CPP_SOURCES
 	dlg_audiointerface.h
 	RWAudio_IO.cpp
 	RWAudio_IO.h
+	AudioFile/AudioFile.h
 	sma_2d.cpp
 	sma_2d.h
 	)

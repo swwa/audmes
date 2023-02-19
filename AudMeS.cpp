@@ -63,7 +63,7 @@ wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_CHOICE(ID_GENSHP_R, MainFrame::OnGeneratorChanged)
   EVT_MENU(wxID_OPEN, MainFrame::OnOpenClick)
   EVT_MENU(wxID_SAVE, MainFrame::OnSaveClick)
-  EVT_MENU(wxID_SAVEAS, MainFrame::OnSaveAsClick)
+  EVT_MENU(ID_LOAD_AUD, MainFrame::OnOpenAUD)
   EVT_MENU(ID_LOAD_FRM, MainFrame::OnLoadFRM)
   EVT_MENU(ID_SAVE_FRM, MainFrame::OnSaveFRM)
   EVT_MENU(ID_SAVE_SPE, MainFrame::OnSaveSPE)
@@ -110,7 +110,7 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
   wxMenu* wxglade_tmp_menu_1 = new wxMenu();
   wxglade_tmp_menu_1->Append(wxID_OPEN, wxT("&Open config...\tAlt+O"), wxT(""), wxITEM_NORMAL);
   wxglade_tmp_menu_1->Append(wxID_SAVE, wxT("&Save config...\tAlt+S"), wxT(""), wxITEM_NORMAL);
-  wxglade_tmp_menu_1->Append(wxID_SAVEAS, wxT("Save &As"), wxT(""), wxITEM_NORMAL);
+  wxglade_tmp_menu_1->Append(ID_LOAD_AUD, wxT("&Load audio file\tAlt+A"), wxT(""), wxITEM_NORMAL);
   wxglade_tmp_menu_1->Append(ID_LOAD_FRM, wxT("Load freq.resp."), wxT(""), wxITEM_NORMAL);
   wxglade_tmp_menu_1->Append(ID_SAVE_FRM, wxT("Save freq.resp."), wxT(""), wxITEM_NORMAL);
   wxglade_tmp_menu_1->Append(ID_SAVE_SPE, wxT("Save spectrum"), wxT(""), wxITEM_NORMAL);
@@ -577,6 +577,7 @@ void MainFrame::set_custom_props() {
   frm_istep = 0;
 
   m_configfilename = wxT("");
+  m_audfile = wxT("");
 
   m_timer = new wxTimer(this, ID_TIMERID);
   m_timer->Start(100);
@@ -621,8 +622,13 @@ void MainFrame::OnSaveClick(wxCommandEvent& WXUNUSED(event)) {
   wxMessageBox(wxT("Not yet implemented"), _T("About application"), wxICON_INFORMATION | wxOK);
 }
 
-void MainFrame::OnSaveAsClick(wxCommandEvent& WXUNUSED(event)) {
-  wxMessageBox(wxT("Not yet implemented"), _T("About application"), wxICON_INFORMATION | wxOK);
+void MainFrame::OnOpenAUD(wxCommandEvent& WXUNUSED(event)) {
+  wxFileDialog openFileDialog(this, _("Open audio file"), "", "",
+                              "WAV files (*.wav)|*.wav", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+  if (openFileDialog.ShowModal() == wxID_CANCEL) return;
+
+  io::CSVReader<3> in(openFileDialog.GetPath());
+  m_audfile = openFileDialog.GetPath();
 }
 
 void MainFrame::OnSaveFRM(wxCommandEvent& WXUNUSED(event)) {

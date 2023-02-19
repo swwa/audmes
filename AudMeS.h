@@ -75,7 +75,7 @@ class MainFrame : public wxFrame {
   void OnTxtFreqRChanged(wxCommandEvent& event);
   void OnOpenClick(wxCommandEvent& event);
   void OnSaveClick(wxCommandEvent& event);
-  void OnSaveAsClick(wxCommandEvent& event);
+  void OnOpenAUD(wxCommandEvent& event);
   void OnLoadFRM(wxCommandEvent& event);
   void OnSaveFRM(wxCommandEvent& event);
   void OnSaveSPE(wxCommandEvent& event);
@@ -200,6 +200,7 @@ class MainFrame : public wxFrame {
   unsigned int m_PlayDev;
   unsigned int m_RecordDev;
   unsigned int m_SamplingFreq;
+  wxString m_audfile;
 };
 
 #endif  // AUDMES_H
