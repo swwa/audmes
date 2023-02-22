@@ -30,6 +30,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <atomic>
 
 #include "dlg_audiointerface.h"
 #include "event_ids.h"
@@ -79,8 +80,8 @@ float* g_SpeBuffer_Left;
 float* g_SpeBuffer_Right;
 long int g_SpeBufferPosition;
 
-int g_OscBufferChanged;
-int g_SpeBufferChanged;
+std::atomic<bool> g_OscBufferChanged{ false };
+std::atomic<bool> g_SpeBufferChanged{ false };
 
 ///////////////////////////////////////////////////////////////////////
 MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPoint& pos,
@@ -478,9 +479,6 @@ void MainFrame::set_custom_props() {
   window_1_frm->SetXRange(20, 20000, 1);
   window_1_frm->SetYRange(-80, 0, 0, 1);
 
-  g_OscBufferChanged = 0;
-  g_SpeBufferChanged = 0;
-
   frm_running = 0;
   frm_measure = 0;
   frm_istep = 0;
@@ -630,9 +628,9 @@ void MainFrame::CalcFreqResponse() {
         bla.Printf(wxT("Frequency : %.1f "), freq);
         window_1_frm->ShowUserText(bla, 100, 20);
       }
-      if (1 == frm_measure) g_SpeBufferChanged = 0;  // now get audio data
+      if (1 == frm_measure) g_SpeBufferChanged = false;  // now get audio data
 
-      if (g_SpeBufferChanged && frm_measure > 1) {
+      if (g_SpeBufferChanged.load() && frm_measure > 1) {
         // new audio data has arrived
         double l_rms = 0;
         double r_rms = 0;
@@ -897,9 +895,9 @@ void MainFrame::DrawSpectrum(void) {
 
 void MainFrame::OnTimer(wxTimerEvent& WXUNUSED(event)) {
   bool refresh = false;
-  if (g_OscBufferChanged && button_osc_start->GetValue()) {
+  if (g_OscBufferChanged.load() && button_osc_start->GetValue()) {
     DrawOscilloscope();
-    g_OscBufferChanged = 0;
+    g_OscBufferChanged = false;
     refresh = true;
   }
   CalcFreqResponse();
@@ -907,10 +905,10 @@ void MainFrame::OnTimer(wxTimerEvent& WXUNUSED(event)) {
     DrawFreqResponse();
     refresh = true;
   }
-  if (g_SpeBufferChanged && button_spe_start->GetValue()) {
+  if (g_SpeBufferChanged.load() && button_spe_start->GetValue()) {
     DrawSpectrum();
     refresh = true;
-    g_SpeBufferChanged = 0;
+    g_SpeBufferChanged = false;
   }
   if (refresh) {
     Refresh();

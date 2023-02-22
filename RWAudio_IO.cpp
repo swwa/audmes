@@ -28,6 +28,7 @@
 #include <wx/defs.h>  // for WXUNUSED
 
 #include <map>
+#include <atomic>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -42,8 +43,8 @@ extern float *g_SpeBuffer_Left;
 extern float *g_SpeBuffer_Right;
 extern long int g_SpeBufferPosition;
 
-extern int g_OscBufferChanged;
-extern int g_SpeBufferChanged;
+extern std::atomic<bool> g_OscBufferChanged;
+extern std::atomic<bool> g_SpeBufferChanged;
 
 /*
  * pseudo noise generator - linear feedback shift register
@@ -94,7 +95,7 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
   float *inBuf = (float *)inputBuffer;
 
   // make a copy for oscilloscope
-  if (0 == g_OscBufferChanged) {
+  if (!g_OscBufferChanged.load()) {
     for (i = 0; i < nBufferFrames; i++) {
       // copy audio signal to fft real component.
       g_OscBuffer_Left[g_OscBufferPosition] = *inBuf++;
@@ -104,7 +105,7 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
       // if the buffer is over we have to pick the data and then circullary fill the next one
       if (g_OscBufferPosition == aRWAudioClass->m_OscBufferLen) {
         g_OscBufferPosition = 0;
-        g_OscBufferChanged = 1;
+        g_OscBufferChanged = true;
         break;
       }
     }
@@ -112,7 +113,7 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
 
   inBuf = (float *)inputBuffer;
   // make a copy for spectrum analyzer
-  if (0 == g_SpeBufferChanged) {
+  if (!g_SpeBufferChanged.load()) {
     for (i = 0; i < nBufferFrames; i++) {
       // copy audio signal to fft real component.
       g_SpeBuffer_Left[g_SpeBufferPosition] = *inBuf++;
@@ -122,7 +123,7 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
       // if the buffer is over we have to pick the data and then circullary fill the next one
       if (g_SpeBufferPosition == aRWAudioClass->m_SpeBufferLen) {
         g_SpeBufferPosition = 0;
-        g_SpeBufferChanged = 1;
+        g_SpeBufferChanged = true;
         break;
       }
     }
