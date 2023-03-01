@@ -27,8 +27,8 @@
 #include <stdio.h>
 #include <wx/defs.h>  // for WXUNUSED
 
-#include <map>
 #include <atomic>
+#include <map>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -99,7 +99,10 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
     for (i = 0; i < nBufferFrames; i++) {
       // copy audio signal to fft real component.
       g_OscBuffer_Left[g_OscBufferPosition] = *inBuf++;
-      g_OscBuffer_Right[g_OscBufferPosition] = *inBuf++;
+      if (aRWAudioClass->m_channels_in > 1)
+        g_OscBuffer_Right[g_OscBufferPosition] = *inBuf++;
+      else
+        g_OscBuffer_Right[g_OscBufferPosition] = 0;
 
       g_OscBufferPosition++;
       // if the buffer is over we have to pick the data and then circullary fill the next one
@@ -117,7 +120,10 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
     for (i = 0; i < nBufferFrames; i++) {
       // copy audio signal to fft real component.
       g_SpeBuffer_Left[g_SpeBufferPosition] = *inBuf++;
-      g_SpeBuffer_Right[g_SpeBufferPosition] = *inBuf++;
+      if (aRWAudioClass->m_channels_in > 1)
+        g_SpeBuffer_Right[g_SpeBufferPosition] = *inBuf++;
+      else
+        g_SpeBuffer_Right[g_SpeBufferPosition] = 0;
 
       g_SpeBufferPosition++;
       // if the buffer is over we have to pick the data and then circullary fill the next one
@@ -188,7 +194,8 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
         if (aRWAudioClass->m_genPhase_r < M_PI) {
           y2 = 2 * (aRWAudioClass->m_genPhase_r - aRWAudioClass->m_genPhaseDif - M_PI / 2) / M_PI;
         } else {
-          y2 = 2 * (3 * M_PI / 2 - aRWAudioClass->m_genPhase_r + aRWAudioClass->m_genPhaseDif) / M_PI;
+          y2 = 2 * (3 * M_PI / 2 - aRWAudioClass->m_genPhase_r + aRWAudioClass->m_genPhaseDif) /
+               M_PI;
         }
         break;
       case 4:
@@ -212,10 +219,10 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
     if ((2.0 * M_PI) < aRWAudioClass->m_genPhase_r) aRWAudioClass->m_genPhase_r -= 2.0 * M_PI;
 
     *outBuf++ = (float)(aRWAudioClass->m_genGain_l * y);
-    *outBuf++ = (float)(aRWAudioClass->m_genGain_r * y2);
+    if (aRWAudioClass->m_channels_out > 1) *outBuf++ = (float)(aRWAudioClass->m_genGain_r * y2);
 
 #ifdef _DEBUG
-    // fprintf(ddbg,"%04X %04X ",(float)(32768.f * y), (float)(32768.f * y2));
+      // fprintf(ddbg,"%04X %04X ",(float)(32768.f * y), (float)(32768.f * y2));
 #endif
   }
   return 0;
@@ -298,6 +305,18 @@ int RWAudio::RestartAudio(int recDevId, int playDevId) {
     m_AudioDriver->closeStream();
   }
 
+  // adapt to number of channels
+  RtAudio::DeviceInfo info = m_AudioDriver->getDeviceInfo(recDevId);
+  if (info.inputChannels > 1 || info.duplexChannels > 1)
+    m_channels_in = 2;
+  else
+    m_channels_in = 1;
+  info = m_AudioDriver->getDeviceInfo(playDevId);
+  if (info.outputChannels > 1 || info.duplexChannels > 1)
+    m_channels_out = 2;
+  else
+    m_channels_out = 1;
+
   // configure new stream
   RtAudio::StreamParameters iParams;
   RtAudio::StreamParameters oParams;
@@ -306,8 +325,8 @@ int RWAudio::RestartAudio(int recDevId, int playDevId) {
 
   iParams.deviceId = recDevId;
   oParams.deviceId = playDevId;
-  iParams.nChannels = 2;
-  oParams.nChannels = 2;
+  iParams.nChannels = m_channels_in;
+  oParams.nChannels = m_channels_out;
   iParams.firstChannel = 0;
   oParams.firstChannel = 0;
 
@@ -358,13 +377,13 @@ int RWAudio::GetRWAudioDevices(RWAudioDevList *play, RWAudioDevList *record) {
       //      std::cout << "device = " << i << "; name: " << info.name << "\n";
 
       // add play card
-      if ((info.outputChannels > 1) || (info.duplexChannels > 1)) {
+      if ((info.outputChannels > 0) || (info.duplexChannels > 0)) {
         play->card_info.push_back(info);
         play->card_pos.push_back(i);
       }
 
       // add record card
-      if ((info.inputChannels > 1) || (info.duplexChannels > 1)) {
+      if ((info.inputChannels > 0) || (info.duplexChannels > 0)) {
         record->card_info.push_back(info);
         record->card_pos.push_back(i);
       }

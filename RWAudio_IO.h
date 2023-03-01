@@ -65,6 +65,8 @@ class RWAudio {
   float m_genPhaseDif;
 
   unsigned int m_sampleRate;
+  int m_channels_in;
+  int m_channels_out;
 
   long int m_OscBufferLen;
   long int m_SpeBufferLen;
