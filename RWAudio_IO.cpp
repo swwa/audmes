@@ -210,10 +210,17 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
         break;
     }
 
-    aRWAudioClass->m_genPhase_l +=
-        (float)2.0 * M_PI * aRWAudioClass->m_genFR_l / aRWAudioClass->m_sampleRate;
-    aRWAudioClass->m_genPhase_r +=
-        (float)2.0 * M_PI * aRWAudioClass->m_genFR_r / aRWAudioClass->m_sampleRate;
+    if (aRWAudioClass->m_genGain_l == 0.0)
+      aRWAudioClass->m_genPhase_l = 0.0;
+    else
+      aRWAudioClass->m_genPhase_l +=
+          (float)2.0 * M_PI * aRWAudioClass->m_genFR_l / aRWAudioClass->m_sampleRate;
+
+    if (aRWAudioClass->m_genGain_r == 0.0)
+      aRWAudioClass->m_genPhase_r = 0.0;
+    else
+      aRWAudioClass->m_genPhase_r +=
+          (float)2.0 * M_PI * aRWAudioClass->m_genFR_r / aRWAudioClass->m_sampleRate;
 
     if ((2.0 * M_PI) < aRWAudioClass->m_genPhase_l) aRWAudioClass->m_genPhase_l -= 2.0 * M_PI;
     if ((2.0 * M_PI) < aRWAudioClass->m_genPhase_r) aRWAudioClass->m_genPhase_r -= 2.0 * M_PI;
