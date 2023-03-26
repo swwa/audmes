@@ -24,7 +24,6 @@
 
 #ifdef __WXMSW__
 #include <windows.h>
-#include <wx/clipbrd.h>
 #endif
 #include <libfccp/csv.h>
 
@@ -204,7 +203,7 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
   choice_osc_trig_edge = new wxChoice(notebook_1_osc, ID_OSCRTRIG, wxDefaultPosition, wxDefaultSize,
                                       2, choice_osc_trig_edge_choices, 0);
 
-  // Spectrum analyzer
+  /* Spectrum analyzer */
   label_5 = new wxStaticText(notebook_1_spe, -1, wxT("FFT Window Type:"));
   const wxString choice_fft_choices[] = {wxT("Rect"), wxT("Hanning"), wxT("Blackman"),
                                          wxT("BlackHarr")};
@@ -226,7 +225,7 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
   window_1_spe = new CtrlOScope(notebook_1_spe, _T("Hz"), _T("dB"), 1);
   button_spe_start = new wxToggleButton(notebook_1_spe, ID_SPANSTART, wxT("Start"));
 
-  // Frequency response
+  /* Frequency response */
   label_1_frm = new wxStaticText(notebook_1_frm, -1, wxT("Number of points (max 120):"));
   text_ctrl1_frm = new wxTextCtrl(notebook_1_frm, -1, wxT("24"));
   label_2_frm = new wxStaticText(notebook_1_frm, -1, wxT("-"));
@@ -931,8 +930,6 @@ void MainFrame::OnOscXScaleChanged(wxCommandEvent& WXUNUSED(event)) {
 }
 
 void MainFrame::OnSpanStart(wxCommandEvent& WXUNUSED(event)) {
-  //  int buf[4096];
-
   if (button_spe_start->GetValue()) {
     button_spe_start->SetLabel(_T("Stop"));
   } else {
@@ -1087,32 +1084,13 @@ void MainFrame::OnSelectSndCard(wxCommandEvent& WXUNUSED(event)) {
 
   m_RWAudio->GetRWAudioDevices(&playDevList, &recordDevList);
 
-  //   bla = _T("Devices: ");
-  //   for (i = 0; i < play.card_name.size(); i++) {
-  //       wxString newstr(play.card_name[i].c_str(), wxConvUTF8);
-  //       arrplstr.Add(newstr);
-  //   }
-
-  //   for (i = 0; i < record.card_name.size(); i++) {
-  //       wxString newstr(record.card_name[i].c_str(), wxConvUTF8);
-  //       arrrecstr.Add(newstr);
-  //   }
-
-  //   for (i = 0; i < freqs.size(); i++) {
-  //     if ( 0 !=  freqs[i]) {
-  //       freqsstr.Add(wxString::Format(wxT("%ld "),freqs[i]));
-  //     }
-  //   }
-
   AudioInterfaceDialog dlg(this);
 
   dlg.SetDevices(recordDevList, playDevList, m_SamplingFreq);
   if (wxID_OK == dlg.ShowModal()) {
-    // poslat nastaveni do RW_AUDIO
+    // send settings to RWAudio
     dlg.GetSelectedDevs(&recdev, &pldev, &newFrequency);
     m_RWAudio->SetSndDevices(recdev, pldev, newFrequency);
-    // std::cerr << "Frequency changed from " << m_SamplingFreq << "Hz to " << newFrequency  <<
-    // "\n";
     m_SamplingFreq = newFrequency;
     window_1_spe->SetFsample(m_SamplingFreq);
     window_1_frm->SetFsample(m_SamplingFreq);
