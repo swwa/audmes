@@ -199,7 +199,6 @@ wxIcon AudioInterfaceDialog::GetIconResource(const wxString& name) {
 
 void AudioInterfaceDialog::SetDevices(RWAudioDevList devreclist, RWAudioDevList devpllist,
                                       unsigned long int freq) {
-  unsigned int i;
   unsigned int pldev = 0, recdev = 0;
   unsigned int cfreq = 0;
   m_DevRecList = devreclist;
@@ -212,7 +211,7 @@ void AudioInterfaceDialog::SetDevices(RWAudioDevList devreclist, RWAudioDevList 
   }
   p_cho->Clear();
 
-  for (i = 0; i < devpllist.card_info.size(); i++) {
+  for (unsigned int i = 0; i < devpllist.card_info.size(); i++) {
     wxString newstr(devpllist.card_info[i].name.c_str(), wxConvUTF8);
     p_cho->Append(newstr);
   }
@@ -224,7 +223,7 @@ void AudioInterfaceDialog::SetDevices(RWAudioDevList devreclist, RWAudioDevList 
   }
   p_cho->Clear();
 
-  for (i = 0; i < devreclist.card_info.size(); i++) {
+  for (unsigned int i = 0; i < devreclist.card_info.size(); i++) {
     wxString newstr(devreclist.card_info[i].name.c_str(), wxConvUTF8);
     p_cho->Append(newstr);
   }
@@ -244,8 +243,8 @@ void AudioInterfaceDialog::SetDevices(RWAudioDevList devreclist, RWAudioDevList 
         unsigned long int sraterec = m_DevRecList.card_info[recdev].sampleRates[j];
 
         if (srateplay == sraterec) {
+          if (srateplay == m_freq) cfreq = p_cho->GetCount();
           p_cho->Append(wxString::Format(wxT("%ld "), srateplay));
-          if (srateplay == m_freq) cfreq = i;
         }
       }
     }
@@ -319,8 +318,8 @@ void AudioInterfaceDialog::OnChoiceChanged(wxCommandEvent& WXUNUSED(event)) {
         unsigned long int sraterec = m_DevRecList.card_info[recdev].sampleRates[j];
 
         if (srateplay == sraterec) {
+          if (srateplay == m_freq) cfreq = p_cho->GetCount();
           p_cho->Append(wxString::Format(wxT("%ld "), srateplay));
-          if (srateplay == m_freq) cfreq = i;
         }
       }
     }
