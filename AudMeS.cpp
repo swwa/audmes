@@ -27,9 +27,9 @@
 #endif
 #include <libfccp/csv.h>
 
+#include <atomic>
 #include <fstream>
 #include <iostream>
-#include <atomic>
 
 #include "dlg_audiointerface.h"
 #include "event_ids.h"
@@ -79,8 +79,8 @@ float* g_SpeBuffer_Left;
 float* g_SpeBuffer_Right;
 long int g_SpeBufferPosition;
 
-std::atomic<bool> g_OscBufferChanged{ false };
-std::atomic<bool> g_SpeBufferChanged{ false };
+std::atomic<bool> g_OscBufferChanged{false};
+std::atomic<bool> g_SpeBufferChanged{false};
 
 ///////////////////////////////////////////////////////////////////////
 MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPoint& pos,
@@ -615,43 +615,41 @@ void MainFrame::CalcFreqResponse() {
   /* periodically called by OnTimer
    * delays for measuring work by waiting for the next call
    */
-  if (frm_running) {
-    if (frm_istep <= (int)frm_ipoints) {
-      float freq = frm_low * pow(10.0, 3.0 * frm_istep / frm_ipoints);
+  if (frm_istep <= (int)frm_ipoints) {
+    float freq = frm_low * pow(10.0, 3.0 * frm_istep / frm_ipoints);
 
-      if (0 == frm_measure) {
-        // play new frequency e.g. from 20Hz to 20kHz
-        m_RWAudio->PlaySetGenerator(freq, freq, 0, 0, pow(10, slide_l_am->GetValue() / 20.0),
-                                    pow(10, slide_r_am->GetValue() / 20.0));
-        wxString bla;
-        bla.Printf(wxT("Frequency : %.1f "), freq);
-        window_1_frm->ShowUserText(bla, 100, 20);
-      }
-      if (1 == frm_measure) g_SpeBufferChanged = false;  // now get audio data
-
-      if (g_SpeBufferChanged.load() && frm_measure > 1) {
-        // new audio data has arrived
-        double l_rms = 0;
-        double r_rms = 0;
-        // compute RMS value in the grabbed wave and store it as a result
-        for (unsigned long int ii = 0; ii < m_SpeBufferLength; ii++) {
-          l_rms += g_SpeBuffer_Left[ii] * g_SpeBuffer_Left[ii];
-          r_rms += g_SpeBuffer_Right[ii] * g_SpeBuffer_Right[ii];
-        }
-        m_frm_freqs.Add(freq);
-        m_frm_lgains.Add(sqrt(l_rms / m_SpeBufferLength));
-        m_frm_rgains.Add(sqrt(r_rms / m_SpeBufferLength));
-        frm_measure = -1;  // zero after increment
-        frm_istep++;
-      }
-      frm_measure++;
-    } else {
-      frm_running = false;
-      window_1_frm->ShowUserText(wxString(""), 0, 0);
-      button_frm_start->SetValue(false);
-      button_frm_start->SetLabel(_T("Start"));
-      SendGenSettings();  // stop generator
+    if (0 == frm_measure) {
+      // play new frequency e.g. from 20Hz to 20kHz
+      m_RWAudio->PlaySetGenerator(freq, freq, 0, 0, pow(10, slide_l_am->GetValue() / 20.0),
+                                  pow(10, slide_r_am->GetValue() / 20.0));
+      wxString bla;
+      bla.Printf(wxT("Frequency : %.1f "), freq);
+      window_1_frm->ShowUserText(bla, 100, 20);
     }
+    if (1 == frm_measure) g_SpeBufferChanged = false;  // now get audio data
+
+    if (g_SpeBufferChanged.load() && frm_measure > 1) {
+      // new audio data has arrived
+      double l_rms = 0;
+      double r_rms = 0;
+      // compute RMS value in the grabbed wave and store it as a result
+      for (unsigned long int ii = 0; ii < m_SpeBufferLength; ii++) {
+        l_rms += g_SpeBuffer_Left[ii] * g_SpeBuffer_Left[ii];
+        r_rms += g_SpeBuffer_Right[ii] * g_SpeBuffer_Right[ii];
+      }
+      m_frm_freqs.Add(freq);
+      m_frm_lgains.Add(sqrt(l_rms / m_SpeBufferLength));
+      m_frm_rgains.Add(sqrt(r_rms / m_SpeBufferLength));
+      frm_measure = -1;  // zero after increment
+      frm_istep++;
+    }
+    frm_measure++;
+  } else {
+    frm_running = false;
+    window_1_frm->ShowUserText(wxString(""), 0, 0);
+    button_frm_start->SetValue(false);
+    button_frm_start->SetLabel(_T("Start"));
+    SendGenSettings();  // stop generator
   }
 }
 
@@ -899,7 +897,9 @@ void MainFrame::OnTimer(wxTimerEvent& WXUNUSED(event)) {
     g_OscBufferChanged = false;
     refresh = true;
   }
-  CalcFreqResponse();
+  if (frm_running) {
+    CalcFreqResponse();
+  }
   if (button_frm_start->GetValue()) {
     DrawFreqResponse();
     refresh = true;
