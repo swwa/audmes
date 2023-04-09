@@ -104,11 +104,14 @@ endif()
 if (MINGW)
 	add_definitions(-D__WINDOWS_WASAPI__ -D__WINDOWS_DS__)
 	target_link_libraries(${PROJECT_NAME} -mwindows ${wxWidgets_LIBRARIES} dsound ksuser mfplat mfuuid wmcodecdspuuid winmm ole32)
-	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy "${wxWidgets_LIB_DIR}/wxbase30u_gcc810.dll" "."
-	COMMAND ${CMAKE_COMMAND} -E copy "${wxWidgets_LIB_DIR}/wxbase30ud_gcc810.dll" "."
-	COMMAND ${CMAKE_COMMAND} -E copy "${wxWidgets_LIB_DIR}/wxmsw30u_core_gcc810.dll" "."
-	COMMAND ${CMAKE_COMMAND} -E copy "${wxWidgets_LIB_DIR}/wxmsw30ud_core_gcc810.dll" ".")
+	# TODO remove this
+	if (EXISTS "${wxWidgets_LIB_DIR}/wxbase30u_gcc810.dll")
+		add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy "${wxWidgets_LIB_DIR}/wxbase30u_gcc810.dll" "."
+		COMMAND ${CMAKE_COMMAND} -E copy "${wxWidgets_LIB_DIR}/wxbase30ud_gcc810.dll" "."
+		COMMAND ${CMAKE_COMMAND} -E copy "${wxWidgets_LIB_DIR}/wxmsw30u_core_gcc810.dll" "."
+		COMMAND ${CMAKE_COMMAND} -E copy "${wxWidgets_LIB_DIR}/wxmsw30ud_core_gcc810.dll" ".")
+	endif()
 endif()
 
 set(CPACK_PACKAGE_VERSION_MAJOR "2024")
