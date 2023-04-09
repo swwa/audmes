@@ -21,11 +21,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <wx/defs.h>  // for WXUNUSED
 #include "RWAudio_IO.h"
 
 #include <math.h>
 #include <stdio.h>
-#include <wx/defs.h>  // for WXUNUSED
 
 #include <atomic>
 #include <map>
