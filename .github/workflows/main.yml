@@ -98,12 +98,10 @@ jobs:
           cd build
           cmake ..
           cmake --build .
-          cmake --build . --target package
 
       - name: Archive build result
         uses: actions/upload-artifact@v2
         with:
           name: win-binary
           path: |
-            build/AudMeS
-            build/AudMeS-*.zip
+            build/AudMeS.exe
