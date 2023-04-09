@@ -92,7 +92,7 @@ endif()
 
 if (MINGW)
 	add_definitions(-D__WINDOWS_WASAPI__ -D__WINDOWS_DS__ -D__WXMSW__)
-	target_link_libraries(${PROJECT_NAME} -mwindows ${wxWidgets_LIBRARIES} dsound ksuser mfplat mfuuid wmcodecdspuuid)
+	target_link_libraries(${PROJECT_NAME} -mwindows ${wxWidgets_LIBRARIES} dsound ksuser mfplat mfuuid wmcodecdspuuid winmm ole32)
 	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy "${wxWidgets_LIB_DIR}/wxbase30u_gcc810.dll" "."
 	COMMAND ${CMAKE_COMMAND} -E copy "${wxWidgets_LIB_DIR}/wxbase30ud_gcc810.dll" "."
