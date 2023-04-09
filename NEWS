@@ -1,10 +1,18 @@
 News
 ====
 
+2023-04-09
+----------
+
+- Add mono channel support as requested by users.
+- Refactor several files.
+- Drop frequency measurement in oscilloscope - spectrum does it now
+  and can be run in parallel. Gives better resolution and magnitude.
+
 2022-10-09
 ----------
 
-- Update README with binaries installation  and Visual Studio instructions
+- Update README with binaries installation and Visual Studio instructions
 - Fix frequency response export in Windows
 - Add Visual Studio and MSVC support
 - Update RtAudio to 5.2.0

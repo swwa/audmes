@@ -91,7 +91,7 @@ if (MSVC)
 endif()
 
 if (MINGW)
-	add_definitions(-D__WINDOWS_WASAPI__ -D__WINDOWS_DS__ -D__WXMSW__)
+	add_definitions(-D__WINDOWS_WASAPI__ -D__WINDOWS_DS__)
 	target_link_libraries(${PROJECT_NAME} -mwindows ${wxWidgets_LIBRARIES} dsound ksuser mfplat mfuuid wmcodecdspuuid winmm ole32)
 	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy "${wxWidgets_LIB_DIR}/wxbase30u_gcc810.dll" "."
@@ -100,8 +100,8 @@ if (MINGW)
 	COMMAND ${CMAKE_COMMAND} -E copy "${wxWidgets_LIB_DIR}/wxmsw30ud_core_gcc810.dll" ".")
 endif()
 
-set(CPACK_PACKAGE_VERSION_MAJOR "2022")
-set(CPACK_PACKAGE_VERSION_MINOR "10")
+set(CPACK_PACKAGE_VERSION_MAJOR "2023")
+set(CPACK_PACKAGE_VERSION_MINOR "04")
 set(CPACK_PACKAGE_VERSION_PATCH "09")
 
 if (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Linux")

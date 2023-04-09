@@ -26,7 +26,7 @@ Operating systems: Linux, Windows, MacOS
 Dependencies:
 
 - wxWidgets 3.0.x (<https://www.wxwidgets.org/>)
-- RtAudio 5.1 (<https://github.com/thestk/rtaudio>) - is already in git repo
+- RtAudio 5.2 (<https://github.com/thestk/rtaudio>) - is already in git repo
 - libfccp (<https://github.com/ben-strasser/fast-cpp-csv-parser>)
 - CMake 3.x (<https://cmake.org>)
 
