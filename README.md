@@ -68,8 +68,7 @@ Install the basic development tools and dependencies
 
     # Debian 11
     sudo apt install libwxgtk3.0-gtk3-dev
-
-    sudo apt install cmake libfccp-dev libpulse-dev
+    sudo apt install cmake libfccp-dev libpulse-dev libasound2-dev
 
 Fetch the source
 
