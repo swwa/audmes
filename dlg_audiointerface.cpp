@@ -198,12 +198,12 @@ wxIcon AudioInterfaceDialog::GetIconResource(const wxString& name) {
 }
 
 void AudioInterfaceDialog::SetDevices(RWAudioDevList devreclist, RWAudioDevList devpllist,
-                                      unsigned long int freq) {
+                                      AIStreamSettings streamSettings ) {
   unsigned int pldev = 0, recdev = 0;
   unsigned int cfreq = 0;
   m_DevRecList = devreclist;
   m_DevPlayList = devpllist;
-  m_freq = freq;
+  m_freq = streamSettings.freq;
 
   wxChoice* p_cho = (wxChoice*)FindWindow(ID_OUTDEV_CHO);
   if (!p_cho) {
@@ -211,11 +211,15 @@ void AudioInterfaceDialog::SetDevices(RWAudioDevList devreclist, RWAudioDevList 
   }
   p_cho->Clear();
 
+  int curSelection = 0;
   for (unsigned int i = 0; i < devpllist.card_info.size(); i++) {
     wxString newstr(devpllist.card_info[i].name.c_str(), wxConvUTF8);
     p_cho->Append(newstr);
+    if (devpllist.card_pos[i] == streamSettings.playDev) {
+      curSelection = i;
+    }
   }
-  p_cho->SetSelection(0);
+  p_cho->SetSelection(curSelection);
 
   p_cho = (wxChoice*)FindWindow(ID_INDEV_CHO);
   if (!p_cho) {
@@ -223,11 +227,15 @@ void AudioInterfaceDialog::SetDevices(RWAudioDevList devreclist, RWAudioDevList 
   }
   p_cho->Clear();
 
+  curSelection = 0;
   for (unsigned int i = 0; i < devreclist.card_info.size(); i++) {
     wxString newstr(devreclist.card_info[i].name.c_str(), wxConvUTF8);
     p_cho->Append(newstr);
+    if (devreclist.card_pos[i] == streamSettings.recordDev) {
+      curSelection = i;
+    }
   }
-  p_cho->SetSelection(0);
+  p_cho->SetSelection(curSelection);
 
   p_cho = (wxChoice*)FindWindow(ID_FREQ_CHO);
   if (!p_cho) {

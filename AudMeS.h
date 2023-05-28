@@ -170,6 +170,8 @@ class MainFrame : public wxFrame {
   unsigned long int m_OscBufferLength;
   unsigned long int m_SpeBufferLength;
 
+  unsigned int m_PlayDev;
+  unsigned int m_RecordDev;
   unsigned long int m_SamplingFreq;
 };
 

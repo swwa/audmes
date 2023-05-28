@@ -453,6 +453,8 @@ void MainFrame::set_custom_props() {
   SetIcon(wxICON(audmes));
 #endif
 
+  m_PlayDev = 0;
+  m_RecordDev = 0;
   m_SamplingFreq = 44100;
 
   choice_osc_l_res->SetSelection(15);
@@ -1081,16 +1083,22 @@ void MainFrame::OnSelectSndCard(wxCommandEvent& WXUNUSED(event)) {
   RWAudioDevList playDevList;
   RWAudioDevList recordDevList;
   unsigned long int newFrequency = m_SamplingFreq;
+  AIStreamSettings m_StreamSettings;
 
   m_RWAudio->GetRWAudioDevices(&playDevList, &recordDevList);
 
   AudioInterfaceDialog dlg(this);
 
-  dlg.SetDevices(recordDevList, playDevList, m_SamplingFreq);
+  m_StreamSettings.playDev = m_PlayDev;
+  m_StreamSettings.recordDev = m_RecordDev;
+  m_StreamSettings.freq = m_SamplingFreq;
+  dlg.SetDevices(recordDevList, playDevList, m_StreamSettings);
   if (wxID_OK == dlg.ShowModal()) {
     // send settings to RWAudio
     dlg.GetSelectedDevs(&recdev, &pldev, &newFrequency);
     m_RWAudio->SetSndDevices(recdev, pldev, newFrequency);
+	m_PlayDev = pldev;
+	m_RecordDev = recdev;
     m_SamplingFreq = newFrequency;
     window_1_spe->SetFsample(m_SamplingFreq);
     window_1_frm->SetFsample(m_SamplingFreq);
