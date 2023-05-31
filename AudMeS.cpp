@@ -491,6 +491,7 @@ void MainFrame::set_custom_props() {
   m_SpeBufferLength = (long)(sweep_div);
 
   m_RWAudio = new RWAudio();
+  m_sma_spe_l = new SMA_2D (m_SpeBufferLength >> 1, 20);
 
   int ret = 0;
 
@@ -809,6 +810,7 @@ void MainFrame::DrawSpectrum(void) {
 
   double dval = 0.0;
   double dmax = 0.0;
+  double dval_db = 0.0;
   int imax = 0;
 
   // left channel
@@ -826,7 +828,9 @@ void MainFrame::DrawSpectrum(void) {
         dmax = dval;
         imax = i;
       }
-      ardbl.Add(20.0 * log10(sqrt(dval)) + dbscaler);
+      dval_db = 20.0 * log10(sqrt(dval)) + dbscaler;
+      m_sma_spe_l->AddVal (i, dval_db);
+      ardbl.Add(m_sma_spe_l->GetSMA(i));
     }
   } else {
     /* wrong computation */
@@ -931,6 +935,7 @@ void MainFrame::OnOscXScaleChanged(wxCommandEvent& WXUNUSED(event)) {
 
 void MainFrame::OnSpanStart(wxCommandEvent& WXUNUSED(event)) {
   if (button_spe_start->GetValue()) {
+    m_sma_spe_l->Init (m_SpeBufferLength >> 1, 20);
     button_spe_start->SetLabel(_T("Stop"));
   } else {
     button_spe_start->SetLabel(_T("Start"));

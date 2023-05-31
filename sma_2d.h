@@ -82,6 +82,9 @@ class SMA_2D {
   /// Gets the current moving average value at record recordNum
   double GetSMA (int recordNum);
 
+  /// Get the number of values summed;
+  int GetNumSummed (int recordNum);
+
 private:
 
   int m_NumRecords;						// number of records (samples)

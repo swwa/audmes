@@ -27,6 +27,7 @@
 
 #include "CtrlOScope.h"
 #include "RWAudio_IO.h"
+#include "sma_2d.h"
 
 #ifndef AUDMES_H
 #define AUDMES_H
@@ -153,6 +154,7 @@ class MainFrame : public wxFrame {
 
   RWAudio* m_RWAudio;
   wxTimer* m_timer;
+  SMA_2D* m_sma_spe_l;
 
   bool frm_running;
   int frm_ipoints;

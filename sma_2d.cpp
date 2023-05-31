@@ -29,11 +29,7 @@
 
 SMA_2D::SMA_2D(int numRecords, int numAverage) {
   std::cerr << "SMA_2D constructor\n";
-
-  m_NumRecords = numRecords;
-  m_NumAverage = numAverage;  
-
-  Init (m_NumRecords, m_NumAverage);
+  Init (numRecords, numAverage);
 }
 	
 
@@ -82,11 +78,20 @@ double SMA_2D::GetSMA (int recordNum) {
   return sma;
 }
 
+int SMA_2D::GetNumSummed (int recordNum) {
+  return numSummed[recordNum];
+}
+
 void SMA_2D::Init (int numRecords, int numAverage) {
+
+  m_NumRecords = numRecords;
+  m_NumAverage = numAverage;  
+
   index.clear();
   sum.clear();
   numSummed.clear();
   prevValues.clear();
+
   index.resize (numRecords, 0);
   sum.resize (numRecords, 0);
   numSummed.resize (numRecords, 0);
