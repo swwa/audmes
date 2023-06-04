@@ -69,6 +69,7 @@ EVT_MENU(ID_SAVE_FRM, MainFrame::OnSaveFRM)
 EVT_BUTTON(ID_AUTOCAL, MainFrame::OnAutoCalClick)
 EVT_CHOICE(ID_OSCXSCALE, MainFrame::OnOscXScaleChanged)
 EVT_CHOICE(ID_FFTLENGTH, MainFrame::OnOscXScaleChanged)
+EVT_CHOICE(ID_FFTAVG, MainFrame::OnFFTAvgChanged)
 END_EVENT_TABLE()
 
 float* g_OscBuffer_Left;
@@ -218,9 +219,14 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
                                   10, choice_fftlength_choices, 0);
 
   label_rx = new wxStaticText(notebook_1_spe, -1, wxT("Freq:"));
-  const wxString choice_fftry_choices[] = {wxT("20-20k"), wxT("10-100k")};
-  choice_fftrx = new wxChoice(notebook_1_spe, ID_FFTWINDOW, wxDefaultPosition, wxDefaultSize, 2,
+  const wxString choice_fftry_choices[] = {wxT("20-2000"), wxT("20-20k"), wxT("10-100k")};
+  choice_fftrx = new wxChoice(notebook_1_spe, ID_FFTWINDOW, wxDefaultPosition, wxDefaultSize, 3,
                               choice_fftry_choices, 0);
+
+  label_avg = new wxStaticText(notebook_1_spe, -1, wxT("Avg:"));
+  const wxString choice_fftavg_choices[] = {wxT("1"), wxT("5"), wxT("10"), wxT("20")};
+  choice_fftavg = new wxChoice(notebook_1_spe, ID_FFTAVG, wxDefaultPosition, wxDefaultSize, 4,
+                              choice_fftavg_choices, 0);
 
   window_1_spe = new CtrlOScope(notebook_1_spe, _T("Hz"), _T("dB"));
   button_spe_start = new wxToggleButton(notebook_1_spe, ID_SPANSTART, wxT("Start"));
@@ -257,6 +263,7 @@ void MainFrame::set_properties() {
   choice_fft->SetSelection(1);
   choice_fftlength->SetSelection(4);
   choice_fftrx->SetSelection(1);
+  choice_fftavg->SetSelection(0);
   // end wxGlade
 }
 
@@ -398,6 +405,9 @@ void MainFrame::do_layout() {
   sizer_17->Add(label_rx, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
   sizer_17->Add(choice_fftrx, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
   sizer_17->Add(20, 20, 0, 0, 0);
+  sizer_17->Add(label_avg, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
+  sizer_17->Add(choice_fftavg, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
+  sizer_17->Add(20, 20, 0, 0, 0);
   sizer_10_copy->Add(sizer_17, 0, wxEXPAND, 0);
   sizer_10_copy->Add(window_1_spe, 1, wxEXPAND, 0);
   sizer_9_copy->Add(sizer_10_copy, 1, wxEXPAND, 0);
@@ -491,7 +501,8 @@ void MainFrame::set_custom_props() {
   m_SpeBufferLength = (long)(sweep_div);
 
   m_RWAudio = new RWAudio();
-  m_sma_spe_l = new SMA_2D (m_SpeBufferLength >> 1, 20);
+  m_SMASpeLeft = new SMA_2D (m_SpeBufferLength >> 1, 1);
+  m_SMASpeRight = new SMA_2D (m_SpeBufferLength >> 1, 1);
 
   int ret = 0;
 
@@ -829,8 +840,8 @@ void MainFrame::DrawSpectrum(void) {
         imax = i;
       }
       dval_db = 20.0 * log10(sqrt(dval)) + dbscaler;
-      m_sma_spe_l->AddVal (i, dval_db);
-      ardbl.Add(m_sma_spe_l->GetSMA(i));
+      m_SMASpeLeft->AddVal (i, dval_db);
+      ardbl.Add(m_SMASpeLeft->GetSMA(i));
     }
   } else {
     /* wrong computation */
@@ -854,8 +865,9 @@ void MainFrame::DrawSpectrum(void) {
                   thdval[7] + thdval[8] + thdval[9]) /
                  thdval[0];
     wxString freqency;
-    freqency.Printf(wxT("Frequency : %.1lf Hz, Magnitude: %.1lf dB, THD : %lf%%"), freq,
-                    20.0 * log10(thdval[0]) + dbscaler, thd);
+    freqency.Printf(wxT("Frequency : %.1lf Hz, Magnitude: %.1lf dB, THD : %lf%%, Avg: %d/%d"), freq,
+                    20.0 * log10(thdval[0]) + dbscaler, thd, 
+					m_SMASpeLeft->GetNumSummed(1), m_SMASpeLeft->GetNumAverage());
     frame_1_statusbar->SetStatusText(freqency);
   }
 
@@ -869,7 +881,9 @@ void MainFrame::DrawSpectrum(void) {
     realout[0] = imagout[0] = 0;  // remove DC
     /* show only half FFT */
     for (int i = 0; i < nsampl / 2; i++) {
-      ardbl2.Add(20.0 * log10(sqrt(realout[i] * realout[i] + imagout[i] * imagout[i])) + dbscaler);
+      dval_db = 20.0 * log10(sqrt(realout[i] * realout[i] + imagout[i] * imagout[i])) + dbscaler;
+      m_SMASpeRight->AddVal (i, dval_db);
+      ardbl2.Add(m_SMASpeLeft->GetSMA(i));
     }
   } else {
     /* wrong computation */
@@ -882,10 +896,13 @@ void MainFrame::DrawSpectrum(void) {
   window_1_spe->SetTrack2(ardbl2);
   switch (choice_fftrx->GetCurrentSelection()) {
     case 1:
+      window_1_spe->SetXRange(20, 20000, 1);
+      break;
+    case 2:
       window_1_spe->SetXRange(10, 100000, 1);
       break;
     default:
-      window_1_spe->SetXRange(20, 20000, 1);
+      window_1_spe->SetXRange(20, 2000, 1);
       break;
   }
   free(realin);
@@ -931,11 +948,21 @@ void MainFrame::OnOscXScaleChanged(wxCommandEvent& WXUNUSED(event)) {
 
   m_RWAudio->ChangeBufLen((unsigned long)(2.0 * m_OscBufferLength),
                           m_SpeBufferLength);  // we need bigger buffer because of synchronization
+  m_SMASpeLeft->SetNumRecords (m_SpeBufferLength >> 1);
+  m_SMASpeRight->SetNumRecords (m_SpeBufferLength >> 1);
+}
+
+void MainFrame::OnFFTAvgChanged(wxCommandEvent& WXUNUSED(event)) {
+    long numAverage;
+    choice_fftavg->GetString(choice_fftavg->GetCurrentSelection()).ToLong(&numAverage);
+    m_SMASpeLeft->SetNumAverage ((int) numAverage);
+    m_SMASpeRight->SetNumAverage ((int) numAverage);
 }
 
 void MainFrame::OnSpanStart(wxCommandEvent& WXUNUSED(event)) {
   if (button_spe_start->GetValue()) {
-    m_sma_spe_l->Init (m_SpeBufferLength >> 1, 20);
+    m_SMASpeLeft->SetNumRecords (m_SpeBufferLength >> 1);
+    m_SMASpeRight->SetNumRecords (m_SpeBufferLength >> 1);
     button_spe_start->SetLabel(_T("Stop"));
   } else {
     button_spe_start->SetLabel(_T("Start"));
@@ -1097,6 +1124,8 @@ void MainFrame::OnSelectSndCard(wxCommandEvent& WXUNUSED(event)) {
     dlg.GetSelectedDevs(&recdev, &pldev, &newFrequency);
     m_RWAudio->SetSndDevices(recdev, pldev, newFrequency);
     m_SamplingFreq = newFrequency;
+    m_SMASpeLeft->Init (m_SpeBufferLength >> 1, 20);
+    m_SMASpeRight->Init (m_SpeBufferLength >> 1, 20);
     window_1_spe->SetFsample(m_SamplingFreq);
     window_1_frm->SetFsample(m_SamplingFreq);
   }

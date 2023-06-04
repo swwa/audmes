@@ -78,8 +78,26 @@ double SMA_2D::GetSMA (int recordNum) {
   return sma;
 }
 
+int SMA_2D::GetNumAverage () {
+  return m_NumAverage;
+}
+
 int SMA_2D::GetNumSummed (int recordNum) {
   return numSummed[recordNum];
+}
+
+void SMA_2D::SetNumAverage (int numAverage) {
+// Alters the length of the averaging window
+// without changing the number of records
+// This re-initializes the vectors
+  Init (m_NumRecords, numAverage);
+}
+
+void SMA_2D::SetNumRecords (int numRecords) {
+// Alters the number of records without changing
+// the length of the averaging window
+// This re-initializes the vectors
+  Init (numRecords, m_NumAverage);
 }
 
 void SMA_2D::Init (int numRecords, int numAverage) {

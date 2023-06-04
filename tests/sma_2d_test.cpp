@@ -37,21 +37,34 @@ int main () {
   if ( ! realAvg.AddVal (3, 14.3) ) {
 	std::cout << "Out of bounds check recordNum failed\n";
   }
+
   // Check inbounds numRecords passes
   if ( realAvg.AddVal (2, 14) ) {
 	std::cout << "In bounds check recordNum failed\n";
   }
+
+  // Re-init the number of records, and check the number of records
+  realAvg.SetNumRecords(4);
+  if ( ! realAvg.AddVal (4, 14.3) ) {
+	std::cout << "Out of bounds check recordNum failed\n";
+  }
+  if ( realAvg.AddVal (3, 14) ) {
+	std::cout << "In bounds check recordNum failed\n";
+  }
+
   // Check average when less than all samples are added
   realAvg.AddVal (1,14.2);
   realAvg.AddVal (1,14.4);
   if ( fabs(realAvg.GetSMA(1) - 14.3) > EPSILON ) {
     std::cout << "Average with 2 samples failed\n";
   }
+
   // Check re-initialization
   realAvg.Init (3, 5);
   if ( fabs(realAvg.GetSMA(1)) > EPSILON ) {
     std::cout << "Re-initialization failed, value: " << std::to_string(realAvg.GetSMA(1)) << "\n";
   }
+
   // Check average with exactly 5 samples
   for ( int i = 0; i < 5; i++ ) {
     realAvg.AddVal (1, (double) i);
@@ -59,15 +72,27 @@ int main () {
   if ( fabs(realAvg.GetSMA(1) - 2.0) > EPSILON ) {
     std::cout << "Average with full average buffer failed, value: " << std::to_string(realAvg.GetSMA(1)) << "\n";
   }
+
   // Check continuation of average after 5 samples  
   realAvg.AddVal (1, 5);
   if ( fabs(realAvg.GetSMA(1) - 3.0) > EPSILON ) {
     std::cout << "Average with continue average buffer failed, value: " << std::to_string(realAvg.GetSMA(1)) << "\n";
   }
+
   // Check other record for zero and division by zero error
   if ( fabs(realAvg.GetSMA(2) > EPSILON) ) {
     std::cout << "Record with no entries remain zero failed, value: " << std::to_string(realAvg.GetSMA(2))<< "\n";
   }
+
+  // Re-init with a different average window lenght
+  realAvg.SetNumAverage(6);
+  for ( int i = 0; i < 6; i++ ) {
+    realAvg.AddVal (1, (double) i);
+  }
+  if ( fabs(realAvg.GetSMA(1) - 2.5) > EPSILON ) {
+    std::cout << "Re-init with different averagen length failed, value: " << std::to_string(realAvg.GetSMA(1)) << "\n";
+  }
+
   // Let's test with some real values now
   realAvg.Init (3, 5);
   std::vector<double> outputs {10.0, 10.5, 10.0, 11.0, 10.6, 11.0, 11.4, 11.2, 11.8, 12.0, 9.6, 7.0, 5.4, 2.0, 0.0};

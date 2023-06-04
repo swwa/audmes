@@ -78,6 +78,7 @@ class MainFrame : public wxFrame {
   void OnSaveFRM(wxCommandEvent& event);
   void OnAutoCalClick(wxCommandEvent& event);
   void OnOscXScaleChanged(wxCommandEvent& event);
+  void OnFFTAvgChanged(wxCommandEvent& event);
   void DrawFreqResponse(void);
   void CalcFreqResponse(void);
   void DrawOscilloscope(void);
@@ -133,6 +134,8 @@ class MainFrame : public wxFrame {
   wxChoice* choice_fftlength;
   wxStaticText* label_rx;
   wxChoice* choice_fftrx;
+  wxStaticText* label_avg;
+  wxChoice* choice_fftavg;
   CtrlOScope* window_1_spe;
   wxToggleButton* button_spe_start;
   wxPanel* notebook_1_spe;
@@ -154,7 +157,8 @@ class MainFrame : public wxFrame {
 
   RWAudio* m_RWAudio;
   wxTimer* m_timer;
-  SMA_2D* m_sma_spe_l;
+  SMA_2D* m_SMASpeLeft;
+  SMA_2D* m_SMASpeRight;
 
   bool frm_running;
   int frm_ipoints;
