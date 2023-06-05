@@ -28,13 +28,11 @@
 
 
 SMA_2D::SMA_2D(int numRecords, int numAverage) {
-  std::cerr << "SMA_2D constructor\n";
   Init (numRecords, numAverage);
 }
 	
 
 SMA_2D::~SMA_2D() {
-  std::cerr << "SMA_2D destructor\n";
   index.clear();
   sum.clear();
   numSummed.clear();

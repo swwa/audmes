@@ -839,7 +839,18 @@ void MainFrame::DrawSpectrum(void) {
         dmax = dval;
         imax = i;
       }
-      dval_db = 20.0 * log10(sqrt(dval)) + dbscaler;
+	  // Sometimes when the FFT size is changed right after program
+	  // start, dval returns zero. The log function cannot handle
+	  // and returns -INF. Which is a problem for the SMA function.
+	  // This is probably caused by changing and filling the audio buffers
+	  // is not synchronized.
+	  if (dval > 10E-18) { // sqrt(dval) > -160 dB
+        dval_db = 20.0 * log10(sqrt(dval)) + dbscaler;
+	  } else {
+        dval_db = -150;
+      }	
+      //ardbl.Add(20.0 * log10(sqrt(dval)) + dbscaler);
+	  //std::cerr << "dval_db: " << std::to_string(dval_db) << "\n";
       m_SMASpeLeft->AddVal (i, dval_db);
       ardbl.Add(m_SMASpeLeft->GetSMA(i));
     }
@@ -881,9 +892,14 @@ void MainFrame::DrawSpectrum(void) {
     realout[0] = imagout[0] = 0;  // remove DC
     /* show only half FFT */
     for (int i = 0; i < nsampl / 2; i++) {
-      dval_db = 20.0 * log10(sqrt(realout[i] * realout[i] + imagout[i] * imagout[i])) + dbscaler;
+      dval = realout[i] * realout[i] + imagout[i] * imagout[i];
+	  if (dval > 10E-18) { // sqrt(dval) > -160 dB
+        dval_db = 20.0 * log10(sqrt(dval)) + dbscaler;
+	  } else {
+        dval_db = -150;
+      }	
       m_SMASpeRight->AddVal (i, dval_db);
-      ardbl2.Add(m_SMASpeLeft->GetSMA(i));
+      ardbl2.Add(m_SMASpeRight->GetSMA(i));
     }
   } else {
     /* wrong computation */
