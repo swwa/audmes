@@ -344,19 +344,23 @@ void MainFrame::do_layout() {
   sizer_2->SetSizeHints(notebook_1_gen);
 
   // oscilloscope
-  sizer_10->Add(window_1, 1, wxEXPAND, 0);
-  sizer_13->Add(label_5_copy, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
-  sizer_13->Add(choice_osc_l_swp_copy, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
+  sizer_10->Add(window_1, 1, wxEXPAND, 0); //CtrlOScope
+  //sizer_13: wxHORIZONTAL
+  sizer_13->Add(label_5_copy, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5); //X Scale [samples/div]
+  sizer_13->Add(choice_osc_l_swp_copy, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5); //20, 50....50000
+  //sizer_11: wxVERTICAL
   sizer_11->Add(sizer_13, 0, wxALIGN_CENTER_HORIZONTAL, 0);
 
-  sizer_14->Add(label_6, 0, wxLEFT | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
-  sizer_14->Add(5, 5, 1, 0, 0);
-  sizer_14->Add(choice_osc_l_res, 0, wxALL, 5);
+  //sizer_14: wxHorizontal
+  sizer_14->Add(label_6, 0, wxLEFT | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5); // Res[V/Div]
+  sizer_14->Add(5, 5, 1, 0, 0); // spacer
+  sizer_14->Add(choice_osc_l_res, 0, wxALL, 5); //2, 4, 8......32768
+  // sizer_12: StaticBox Left Channel (Red)
   sizer_12->Add(sizer_14, 1, wxEXPAND, 0);
   sizer_15->Add(label_7, 0, wxLEFT | wxRIGHT | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
-                5);
-  sizer_15->Add(5, 5, 1, 0, 0);
-  sizer_15->Add(choice_osc_l_off, 0, wxLEFT | wxRIGHT | wxALIGN_CENTER_VERTICAL, 5);
+                5); // Offset [V/div]
+  sizer_15->Add(5, 5, 1, 0, 0); //spacer
+  sizer_15->Add(choice_osc_l_off, 0, wxLEFT | wxRIGHT | wxALIGN_CENTER_VERTICAL, 5); //100, 80, ... -100
   sizer_12->Add(sizer_15, 1, wxEXPAND, 0);
   sizer_11->Add(sizer_12, 0, wxALL | wxEXPAND, 5);
 
@@ -365,25 +369,26 @@ void MainFrame::do_layout() {
                 5);  // autocalibrate
 
   sizer_14_copy->Add(label_6_copy, 0, wxLEFT | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
-                     5);
-  sizer_14_copy->Add(5, 5, 1, 0, 0);
-  sizer_14_copy->Add(choice_osc_l_res_copy, 0, wxALL, 5);
+                     5); // Res[V/div]
+  sizer_14_copy->Add(5, 5, 1, 0, 0); // spacer
+  sizer_14_copy->Add(choice_osc_l_res_copy, 0, wxALL, 5); //2, 4, ... 32768
+  // sizer_12_copy: StaticBox Right Channel (Green)
   sizer_12_copy->Add(sizer_14_copy, 1, wxEXPAND, 0);
   sizer_15_copy->Add(label_7_copy, 0,
-                     wxLEFT | wxRIGHT | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
-  sizer_15_copy->Add(5, 5, 1, 0, 0);
-  sizer_15_copy->Add(choice_osc_l_off_copy, 0, wxLEFT | wxRIGHT | wxALIGN_CENTER_VERTICAL, 5);
+                     wxLEFT | wxRIGHT | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5); // Offset [V/div]
+  sizer_15_copy->Add(5, 5, 1, 0, 0); //spacer
+  sizer_15_copy->Add(choice_osc_l_off_copy, 0, wxLEFT | wxRIGHT | wxALIGN_CENTER_VERTICAL, 5); // 100, 80, ... -100
   sizer_12_copy->Add(sizer_15_copy, 1, wxEXPAND, 0);
   sizer_11->Add(sizer_12_copy, 0, wxALL | wxEXPAND, 5);
 
-  sizer_16->Add(label_8, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
-  sizer_16->Add(5, 5, 1, 0, 0);
-  sizer_16->Add(choice_osc_trig_source, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
+  sizer_16->Add(label_8, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5); // Trigger
+  sizer_16->Add(5, 5, 1, 0, 0); // spacer
+  sizer_16->Add(choice_osc_trig_source, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5); // Off, Lefft, ... Channel
   sizer_11->Add(sizer_16, 1, wxEXPAND, 0);
 
-  sizer_16_copy->Add(label_8_copy, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
-  sizer_16_copy->Add(5, 5, 1, 0, 0);
-  sizer_16_copy->Add(choice_osc_trig_edge, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
+  sizer_16_copy->Add(label_8_copy, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5); // Trigger Edge
+  sizer_16_copy->Add(5, 5, 1, 0, 0); // spacer
+  sizer_16_copy->Add(choice_osc_trig_edge, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5); // Rising, ... edge
   sizer_11->Add(sizer_16_copy, 1, wxEXPAND, 0);
 
   sizer_10->Add(sizer_11, 0, 0, 0);
