@@ -70,6 +70,8 @@ EVT_BUTTON(ID_AUTOCAL, MainFrame::OnAutoCalClick)
 EVT_CHOICE(ID_OSCXSCALE, MainFrame::OnOscXScaleChanged)
 EVT_CHOICE(ID_FFTLENGTH, MainFrame::OnOscXScaleChanged)
 EVT_CHOICE(ID_FFTAVG, MainFrame::OnFFTAvgChanged)
+EVT_CHOICE(ID_FFTREF, MainFrame::OnFFTScaleChanged)
+EVT_CHOICE(ID_FFTDBDIV, MainFrame::OnFFTScaleChanged)
 END_EVENT_TABLE()
 
 float* g_OscBuffer_Left;
@@ -97,6 +99,9 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
   sizer_12_staticbox = new wxStaticBox(notebook_1_osc, -1, wxT("Left channel (Red)"));
   sizer_12_copy_staticbox = new wxStaticBox(notebook_1_osc, -1, wxT("Right channel (Green)"));
   sizer_4_staticbox = new wxStaticBox(notebook_1_gen, -1, wxT("Left channel"));
+  sizer_spe_fft_staticbox = new wxStaticBox(notebook_1_spe, -1, wxT("FFT"));
+  sizer_spe_disp_staticbox = new wxStaticBox(notebook_1_spe, -1, wxT("Display"));
+  sizer_spe_scale_staticbox = new wxStaticBox(notebook_1_spe, -1, wxT("Scale"));
   frame_1_menubar = new wxMenuBar();
   wxMenu* wxglade_tmp_menu_1 = new wxMenu();
   wxglade_tmp_menu_1->Append(wxID_OPEN, wxT("&Open config...\tAlt+O"), wxT(""), wxITEM_NORMAL);
@@ -223,10 +228,21 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
   choice_fftrx = new wxChoice(notebook_1_spe, ID_FFTWINDOW, wxDefaultPosition, wxDefaultSize, 3,
                               choice_fftry_choices, 0);
 
-  label_avg = new wxStaticText(notebook_1_spe, -1, wxT("Avg:"));
+  label_avg = new wxStaticText(notebook_1_spe, -1, wxT("Averaging (N):"));
   const wxString choice_fftavg_choices[] = {wxT("1"), wxT("5"), wxT("10"), wxT("20")};
   choice_fftavg = new wxChoice(notebook_1_spe, ID_FFTAVG, wxDefaultPosition, wxDefaultSize, 4,
                               choice_fftavg_choices, 0);
+
+  label_spe_ref = new wxStaticText(notebook_1_spe, -1, wxT("Ref Level [dB]"));
+  const wxString choice_spe_ref_choices[] = {wxT("0"), wxT("-10"), wxT("-20"), wxT("-30"), 
+											wxT("-40"), wxT("-50")};
+  choice_spe_ref = new wxChoice(notebook_1_spe, ID_FFTREF, wxDefaultPosition, wxDefaultSize, 6,
+                              choice_spe_ref_choices, 0);
+
+  label_spe_dbdiv = new wxStaticText(notebook_1_spe, -1, wxT("Amplitude [dB/div]"));
+  const wxString choice_spe_dbdiv_choices[] = {wxT("3"), wxT("5"), wxT("10")};
+  choice_spe_dbdiv = new wxChoice(notebook_1_spe, ID_FFTDBDIV, wxDefaultPosition, wxDefaultSize, 3,
+                              choice_spe_dbdiv_choices, 0);
 
   window_1_spe = new CtrlOScope(notebook_1_spe, _T("Hz"), _T("dB"));
   button_spe_start = new wxToggleButton(notebook_1_spe, ID_SPANSTART, wxT("Start"));
@@ -264,6 +280,8 @@ void MainFrame::set_properties() {
   choice_fftlength->SetSelection(4);
   choice_fftrx->SetSelection(1);
   choice_fftavg->SetSelection(0);
+  choice_spe_ref->SetSelection(0);
+  choice_spe_dbdiv->SetSelection(2);
   // end wxGlade
 }
 
@@ -271,8 +289,8 @@ void MainFrame::do_layout() {
   // begin wxGlade: MainFrame::do_layout
   wxBoxSizer* sizer_1 = new wxBoxSizer(wxVERTICAL);
   wxBoxSizer* sizer_9_copy = new wxBoxSizer(wxVERTICAL);
-  wxBoxSizer* sizer_10_copy = new wxBoxSizer(wxVERTICAL);
-  wxBoxSizer* sizer_17 = new wxBoxSizer(wxHORIZONTAL);
+  wxBoxSizer* sizer_10_copy = new wxBoxSizer(wxHORIZONTAL);
+  //wxBoxSizer* sizer_17 = new wxBoxSizer(wxHORIZONTAL);
   wxBoxSizer* sizer_9 = new wxBoxSizer(wxVERTICAL);
   wxBoxSizer* sizer_10 = new wxBoxSizer(wxHORIZONTAL);
   wxBoxSizer* sizer_11 = new wxBoxSizer(wxVERTICAL);
@@ -301,6 +319,17 @@ void MainFrame::do_layout() {
 
   wxFlexGridSizer* sizer_GenL = new wxFlexGridSizer(3, 2, 5, 5);
   wxFlexGridSizer* sizer_GenR = new wxFlexGridSizer(3, 2, 5, 5);
+
+  wxBoxSizer* sizer_spe_ctrl = new wxBoxSizer(wxVERTICAL);
+  wxBoxSizer* sizer_spe_window = new wxBoxSizer (wxHORIZONTAL);
+  wxBoxSizer* sizer_spe_samples = new wxBoxSizer (wxHORIZONTAL);
+  wxBoxSizer* sizer_spe_span = new wxBoxSizer (wxHORIZONTAL);
+  wxBoxSizer* sizer_spe_avg = new wxBoxSizer (wxHORIZONTAL);
+  wxBoxSizer* sizer_spe_ref = new wxBoxSizer (wxHORIZONTAL);
+  wxBoxSizer* sizer_spe_dbdiv = new wxBoxSizer (wxHORIZONTAL);
+  wxStaticBoxSizer* sizer_spe_fft = new wxStaticBoxSizer (sizer_spe_fft_staticbox, wxVERTICAL);
+  wxStaticBoxSizer* sizer_spe_disp = new wxStaticBoxSizer (sizer_spe_disp_staticbox, wxVERTICAL);
+  wxStaticBoxSizer* sizer_spe_scale = new wxStaticBoxSizer (sizer_spe_scale_staticbox, wxVERTICAL);
 
   // generator
   sizer_4->Add(checkbox_l_en, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
@@ -400,21 +429,43 @@ void MainFrame::do_layout() {
   sizer_9->SetSizeHints(notebook_1_osc);
 
   // analyzer
-  sizer_17->Add(label_5, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
-  sizer_17->Add(choice_fft, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
-  sizer_17->Add(20, 20, 0, 0, 0);
-  sizer_17->Add(label_9, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
-  sizer_17->Add(choice_fftlength, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
-                5);
-  sizer_17->Add(20, 20, 0, 0, 0);
-  sizer_17->Add(label_rx, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
-  sizer_17->Add(choice_fftrx, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
-  sizer_17->Add(20, 20, 0, 0, 0);
-  sizer_17->Add(label_avg, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
-  sizer_17->Add(choice_fftavg, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
-  sizer_17->Add(20, 20, 0, 0, 0);
-  sizer_10_copy->Add(sizer_17, 0, wxEXPAND, 0);
   sizer_10_copy->Add(window_1_spe, 1, wxEXPAND, 0);
+  wxSize window_1_spe_size = window_1_spe->GetSize();
+  sizer_10_copy->SetMinSize(4*window_1_spe_size.GetHeight(), window_1_spe_size.GetHeight());
+  sizer_spe_window->Add(label_5, 0, wxLEFT | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
+  sizer_spe_window->Add(5, 5, 1, 0, 0);
+  sizer_spe_window->Add(choice_fft, 0, wxALL, 5);
+  sizer_spe_fft->Add(sizer_spe_window, 1, wxEXPAND, 0);
+
+  sizer_spe_samples->Add(label_9, 0, wxLEFT | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
+  sizer_spe_samples->Add(5, 5, 1, 0, 0);
+  sizer_spe_samples->Add(choice_fftlength, 0, wxALL, 5);
+  sizer_spe_fft->Add(sizer_spe_samples, 1, wxEXPAND, 0);
+  sizer_spe_ctrl->Add(sizer_spe_fft, 0, wxALL | wxEXPAND, 5);
+
+  sizer_spe_span->Add(label_rx, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
+  sizer_spe_span->Add(5, 5, 1, 0, 0);
+  sizer_spe_span->Add(choice_fftrx, 0, wxALL, 5);
+  sizer_spe_disp->Add(sizer_spe_span, 1, wxEXPAND, 0);
+
+  sizer_spe_avg->Add(label_avg, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
+  sizer_spe_avg->Add(5, 5, 1, 0, 0);
+  sizer_spe_avg->Add(choice_fftavg, 0, wxALL, 5);
+  sizer_spe_disp->Add(sizer_spe_avg, 1, wxEXPAND, 0);
+  sizer_spe_ctrl->Add(sizer_spe_disp, 0, wxALL | wxEXPAND, 5);
+
+  sizer_spe_ref->Add(label_spe_ref, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
+  sizer_spe_ref->Add(5, 5, 1, 0, 0);
+  sizer_spe_ref->Add(choice_spe_ref, 0, wxALL, 5);
+  sizer_spe_scale->Add(sizer_spe_ref, 1, wxEXPAND, 0);
+
+  sizer_spe_dbdiv->Add(label_spe_dbdiv, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
+  sizer_spe_dbdiv->Add(5, 5, 1, 0, 0);
+  sizer_spe_dbdiv->Add(choice_spe_dbdiv, 0, wxALL, 5);
+  sizer_spe_scale->Add(sizer_spe_dbdiv, 1, wxEXPAND, 0);
+  sizer_spe_ctrl->Add(sizer_spe_scale, 0, wxALL | wxEXPAND, 5);
+
+  sizer_10_copy->Add(sizer_spe_ctrl, 0, wxEXPAND, 0);
   sizer_9_copy->Add(sizer_10_copy, 1, wxEXPAND, 0);
   sizer_9_copy->Add(button_spe_start, 0,
                     wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
@@ -978,6 +1029,15 @@ void MainFrame::OnFFTAvgChanged(wxCommandEvent& WXUNUSED(event)) {
     choice_fftavg->GetString(choice_fftavg->GetCurrentSelection()).ToLong(&numAverage);
     m_SMASpeLeft->SetNumAverage ((int) numAverage);
     m_SMASpeRight->SetNumAverage ((int) numAverage);
+}
+
+void MainFrame::OnFFTScaleChanged(wxCommandEvent& WXUNUSED(event)) {
+  double ref;
+  double dbDiv;
+  choice_spe_ref->GetString(choice_spe_ref->GetCurrentSelection()).ToDouble(&ref);
+  choice_spe_dbdiv->GetString(choice_spe_dbdiv->GetCurrentSelection()).ToDouble(&dbDiv);
+  double lo = ref - 10 * dbDiv;
+  window_1_spe->SetYRange(lo, ref, 0, 1);
 }
 
 void MainFrame::OnSpanStart(wxCommandEvent& WXUNUSED(event)) {

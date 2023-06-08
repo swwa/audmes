@@ -79,6 +79,7 @@ class MainFrame : public wxFrame {
   void OnAutoCalClick(wxCommandEvent& event);
   void OnOscXScaleChanged(wxCommandEvent& event);
   void OnFFTAvgChanged(wxCommandEvent& event);
+  void OnFFTScaleChanged(wxCommandEvent& event);
   void DrawFreqResponse(void);
   void CalcFreqResponse(void);
   void DrawOscilloscope(void);
@@ -92,6 +93,9 @@ class MainFrame : public wxFrame {
   wxStaticBox* sizer_12_staticbox;
   wxStaticBox* sizer_4_copy_staticbox;
   wxStaticBox* sizer_4_staticbox;
+  wxStaticBox* sizer_spe_fft_staticbox;
+  wxStaticBox* sizer_spe_disp_staticbox;
+  wxStaticBox* sizer_spe_scale_staticbox;
   wxMenuBar* frame_1_menubar;
   wxStatusBar* frame_1_statusbar;
   wxCheckBox* checkbox_l_en;
@@ -136,6 +140,10 @@ class MainFrame : public wxFrame {
   wxChoice* choice_fftrx;
   wxStaticText* label_avg;
   wxChoice* choice_fftavg;
+  wxStaticText* label_spe_ref;
+  wxChoice* choice_spe_ref;
+  wxStaticText* label_spe_dbdiv;
+  wxChoice* choice_spe_dbdiv;
   CtrlOScope* window_1_spe;
   wxToggleButton* button_spe_start;
   wxPanel* notebook_1_spe;
