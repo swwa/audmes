@@ -28,7 +28,7 @@
 
 struct RWAudioDevList {
   std::vector<RtAudio::DeviceInfo> card_info;
-  std::vector<int> card_pos;
+  std::vector<unsigned int> card_pos;
 };
 
 class RWAudio {

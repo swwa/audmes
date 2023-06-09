@@ -74,12 +74,20 @@
  * AudioInterfaceDialog class declaration
  */
 
+struct AIStreamSettings {
+	unsigned int playDev;
+	unsigned int recordDev;
+	unsigned long int freq;
+};
+
+
 class AudioInterfaceDialog : public wxDialog {
   DECLARE_DYNAMIC_CLASS(AudioInterfaceDialog)
   DECLARE_EVENT_TABLE()
 
   RWAudioDevList m_DevRecList;
   RWAudioDevList m_DevPlayList;
+  AIStreamSettings m_StreamSettings;
   unsigned long int m_freq;
 
  public:
@@ -122,7 +130,7 @@ class AudioInterfaceDialog : public wxDialog {
 
   ////@begin AudioInterfaceDialog member variables
   ////@end AudioInterfaceDialog member variables
-  void SetDevices(RWAudioDevList devreclist, RWAudioDevList devpllist, unsigned long int freq);
+  void SetDevices(RWAudioDevList devreclist, RWAudioDevList devpllist, AIStreamSettings streamSettings);
   void GetSelectedDevs(unsigned int* recdev, unsigned int* playdev, unsigned long int* newfreq);
   void OnChoiceChanged(wxCommandEvent& event);
 };
