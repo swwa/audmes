@@ -383,7 +383,6 @@ int RWAudio::GetRWAudioDevices(RWAudioDevList *play, RWAudioDevList *record) {
     if (info.probed == true) {
       //      std::cout << "device = " << i << "; name: " << info.name << "\n";
 
-
       // add play card
       if ((info.outputChannels > 0) || (info.duplexChannels > 0)) {
         play->card_info.push_back(info);

@@ -198,7 +198,7 @@ wxIcon AudioInterfaceDialog::GetIconResource(const wxString& name) {
 }
 
 void AudioInterfaceDialog::SetDevices(RWAudioDevList devreclist, RWAudioDevList devpllist,
-                                      AIStreamSettings streamSettings ) {
+                                      AIStreamSettings streamSettings) {
   unsigned int pldev = 0, recdev = 0;
   unsigned int cfreq = 0;
   m_DevRecList = devreclist;

@@ -1097,8 +1097,8 @@ void MainFrame::OnSelectSndCard(wxCommandEvent& WXUNUSED(event)) {
     // send settings to RWAudio
     dlg.GetSelectedDevs(&recdev, &pldev, &newFrequency);
     m_RWAudio->SetSndDevices(recdev, pldev, newFrequency);
-	m_PlayDev = pldev;
-	m_RecordDev = recdev;
+    m_PlayDev = pldev;
+    m_RecordDev = recdev;
     m_SamplingFreq = newFrequency;
     window_1_spe->SetFsample(m_SamplingFreq);
     window_1_frm->SetFsample(m_SamplingFreq);
