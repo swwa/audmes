@@ -25,6 +25,8 @@
 #define RWAUDIO_IO_H
 
 #include <rtaudio/RtAudio.h>
+#include <atomic>
+#include <array>
 
 struct RWAudioDevList {
   std::vector<RtAudio::DeviceInfo> card_info;
@@ -38,7 +40,10 @@ class RWAudio {
 
   int InitSnd(long int oscbuflen, long int spebuflen, std::string& rtinfo, unsigned int srate);
 
-  void SetSndDevices(unsigned int irec, unsigned int iplay, unsigned int srate);
+  void calcwave();
+
+  void SetSndDevices(unsigned int irec = 1000, unsigned int iplay = 1000,
+                     unsigned long int freq = 44100);
 
   void ChangeBufLen(long int oscbuflen, long int spebuflen) {
     m_OscBufferLen = oscbuflen;
@@ -69,7 +74,12 @@ class RWAudio {
 
   long int m_OscBufferLen;
   long int m_SpeBufferLen;
-  bool m_Buflen_Changed;
+  std::atomic<bool> m_Buflen_Changed;
+
+  int rring = 0;
+  int wring = 0;
+  static const int ringsize = 1024 * 512;
+  std::array<float, ringsize> ringb;
 
  protected:
   RtAudio* m_AudioDriver;

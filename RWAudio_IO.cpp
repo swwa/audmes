@@ -68,7 +68,7 @@ void catcherr(RtAudioError::Type WXUNUSED(type), const std::string &errorText) {
 }
 
 /*
- * callback function to fetch audio input and generate tones
+ * callback function to fetch audio input and play tones
  */
 int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
           double WXUNUSED(streamTime), RtAudioStreamStatus status, void *data) {
@@ -78,7 +78,7 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
   if (status) std::cerr << "Audio stream over/underflow detected." << std::endl;
 
   // copy input buffer into two L/R channels
-  if (aRWAudioClass->m_Buflen_Changed) {
+  if (aRWAudioClass->m_Buflen_Changed.load()) {
     aRWAudioClass->m_Buflen_Changed = false;
     free(g_OscBuffer_Left);
     free(g_OscBuffer_Right);
@@ -137,107 +137,111 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
 
   // fill output buffer
   float *outBuf = (float *)outputBuffer;
-
-#ifdef _DEBUG
-  // fprintf(ddbg, "\n Frames: %d\n ", nBufferFrames);
-#endif
-
-  /* calculate the wave form according to the selected shape */
-  for (unsigned i = 0; i < nBufferFrames; i++) {
-    double y = 0;
-    double y2 = 0;
-    bool noise = lfsr16();
-
-    /* left channel */
-    switch (aRWAudioClass->m_genShape_l) {
-      case 1:
-        if (aRWAudioClass->m_genPhase_l < M_PI) {
-          y = 1.0;
-        } else {
-          y = -1.0;
-        }
-        break;
-      case 2:
-        y = (aRWAudioClass->m_genPhase_l - M_PI) / M_PI;
-        break;
-      case 3:
-        if (aRWAudioClass->m_genPhase_l < M_PI) {
-          y = 2 * (aRWAudioClass->m_genPhase_l - M_PI / 2) / M_PI;
-        } else {
-          y = 2 * (3 * M_PI / 2 - aRWAudioClass->m_genPhase_l) / M_PI;
-        }
-        break;
-      case 4:
-        if (noise) {
-          y = 1.0;
-        } else {
-          y = -1.0;
-        }
-        break;
-      default: /* sine wave */
-        y = sin(aRWAudioClass->m_genPhase_l);
-        break;
-    }
-    /* right channel */
-    switch (aRWAudioClass->m_genShape_r) {
-      case 1:
-        if ((aRWAudioClass->m_genPhase_r - aRWAudioClass->m_genPhaseDif) < M_PI) {
-          y2 = 1;
-        } else {
-          y2 = -1;
-        }
-        break;
-      case 2:
-        y2 = ((aRWAudioClass->m_genPhase_r - aRWAudioClass->m_genPhaseDif) - M_PI) / M_PI;
-        break;
-      case 3:
-        if (aRWAudioClass->m_genPhase_r < M_PI) {
-          y2 = 2 * (aRWAudioClass->m_genPhase_r - aRWAudioClass->m_genPhaseDif - M_PI / 2) / M_PI;
-        } else {
-          y2 = 2 * (3 * M_PI / 2 - aRWAudioClass->m_genPhase_r + aRWAudioClass->m_genPhaseDif) /
-               M_PI;
-        }
-        break;
-      case 4:
-        if (noise) {
-          y2 = 1.0;
-        } else {
-          y2 = -1.0;
-        }
-        break;
-      default: /* sine wave */
-        y2 = sin(aRWAudioClass->m_genPhase_r - aRWAudioClass->m_genPhaseDif);
-        break;
-    }
-
-    if (aRWAudioClass->m_genGain_l == 0.0)
-      aRWAudioClass->m_genPhase_l = 0.0;
-    else
-      aRWAudioClass->m_genPhase_l +=
-          (float)2.0 * M_PI * aRWAudioClass->m_genFR_l / aRWAudioClass->m_sampleRate;
-
-    if (aRWAudioClass->m_genGain_r == 0.0)
-      aRWAudioClass->m_genPhase_r = 0.0;
-    else
-      aRWAudioClass->m_genPhase_r +=
-          (float)2.0 * M_PI * aRWAudioClass->m_genFR_r / aRWAudioClass->m_sampleRate;
-
-    if ((2.0 * M_PI) < aRWAudioClass->m_genPhase_l) aRWAudioClass->m_genPhase_l -= 2.0 * M_PI;
-    if ((2.0 * M_PI) < aRWAudioClass->m_genPhase_r) aRWAudioClass->m_genPhase_r -= 2.0 * M_PI;
-
-    *outBuf++ = (float)(aRWAudioClass->m_genGain_l * y);
-    if (aRWAudioClass->m_channels_out > 1) *outBuf++ = (float)(aRWAudioClass->m_genGain_r * y2);
-
-#ifdef _DEBUG
-      // fprintf(ddbg,"%04X %04X ",(float)(32768.f * y), (float)(32768.f * y2));
-#endif
+  for (unsigned long i = 0; i < nBufferFrames; i++) {
+    *outBuf++ = (float)(aRWAudioClass->m_genGain_l * aRWAudioClass->ringb[aRWAudioClass->rring++]);
+    if (aRWAudioClass->m_channels_out > 1)
+      *outBuf++ =
+          (float)(aRWAudioClass->m_genGain_r * aRWAudioClass->ringb[aRWAudioClass->rring++]);
+    aRWAudioClass->rring %= aRWAudioClass->ringsize;
   }
   return 0;
+}
+
+void RWAudio::calcwave() {
+  const int Frames = 2048 * 6;
+  std::cerr << wring << "," << rring << std::endl;
+  if (wring-Frames*2 < rring) {
+    /* calculate the wave form according to the selected shape */
+    for (unsigned i = 0; i < nBufferFrames; i++) {
+      double y = 0;
+      double y2 = 0;
+      bool noise = lfsr16();
+
+      /* left channel */
+      switch (m_genShape_l) {
+        case 1:
+          if (m_genPhase_l < M_PI) {
+            y = 1.0;
+          } else {
+            y = -1.0;
+          }
+          break;
+        case 2:
+          y = (m_genPhase_l - M_PI) / M_PI;
+          break;
+        case 3:
+          if (m_genPhase_l < M_PI) {
+            y = 2 * (m_genPhase_l - M_PI / 2) / M_PI;
+          } else {
+            y = 2 * (3 * M_PI / 2 - m_genPhase_l) / M_PI;
+          }
+          break;
+        case 4:
+          if (noise) {
+            y = 1.0;
+          } else {
+            y = -1.0;
+          }
+          break;
+        default: /* sine wave */
+          y = sin(m_genPhase_l);
+          break;
+      }
+      /* right channel */
+      switch (m_genShape_r) {
+        case 1:
+          if ((m_genPhase_r - m_genPhaseDif) < M_PI) {
+            y2 = 1;
+          } else {
+            y2 = -1;
+          }
+          break;
+        case 2:
+          y2 = ((m_genPhase_r - m_genPhaseDif) - M_PI) / M_PI;
+          break;
+        case 3:
+          if (m_genPhase_r < M_PI) {
+            y2 = 2 * (m_genPhase_r - m_genPhaseDif - M_PI / 2) / M_PI;
+          } else {
+            y2 = 2 * (3 * M_PI / 2 - m_genPhase_r + m_genPhaseDif) / M_PI;
+          }
+          break;
+        case 4:
+          if (noise) {
+            y2 = 1.0;
+          } else {
+            y2 = -1.0;
+          }
+          break;
+        default: /* sine wave */
+          y2 = sin(m_genPhase_r - m_genPhaseDif);
+          break;
+      }
+
+      if (m_genGain_l == 0.0)
+        m_genPhase_l = 0.0;
+      else
+        m_genPhase_l += (float)2.0 * M_PI * m_genFR_l / m_sampleRate;
+
+      if (m_genGain_r == 0.0)
+        m_genPhase_r = 0.0;
+      else
+        m_genPhase_r += (float)2.0 * M_PI * m_genFR_r / m_sampleRate;
+
+      if ((2.0 * M_PI) < m_genPhase_l) m_genPhase_l -= 2.0 * M_PI;
+      if ((2.0 * M_PI) < m_genPhase_r) m_genPhase_r -= 2.0 * M_PI;
+
+      ringb[wring++] = (float)(m_genGain_l * y);
+      if (m_channels_out > 1) ringb[wring++] = (float)(m_genGain_r * y2);
+      wring %= ringsize;
+    }
+  }
 }
 
 RWAudio::RWAudio() {
   m_Buflen_Changed = false;
   m_sampleRate = 0;
+  ringb.empty();
 }
 
 RWAudio::~RWAudio() {
@@ -348,6 +352,8 @@ int RWAudio::RestartAudio(int recDevId, int playDevId) {
     // std::cerr << '\n' << e.getMessage() << '\n' << std::endl;
     return 1;
   }
+
+  calcwave();
 
   try {
     m_AudioDriver->startStream();
