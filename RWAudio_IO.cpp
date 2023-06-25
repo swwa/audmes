@@ -147,12 +147,19 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
   return 0;
 }
 
+int RWAudio::bsize() {
+  if (wring - rring < 0)
+    return wring + ringsize - rring;
+  else
+    return wring - rring;
+}
+
 void RWAudio::calcwave() {
-  const int Frames = 2048 * 6;
+  int Frames = m_sampleRate / 5;
   std::cerr << wring << "," << rring << std::endl;
-  if (wring-Frames*2 < rring) {
+  if (bsize() <= Frames * 3) {
     /* calculate the wave form according to the selected shape */
-    for (unsigned i = 0; i < nBufferFrames; i++) {
+    for (int i = 0; i < Frames; i++) {
       double y = 0;
       double y2 = 0;
       bool noise = lfsr16();
@@ -241,7 +248,6 @@ void RWAudio::calcwave() {
 RWAudio::RWAudio() {
   m_Buflen_Changed = false;
   m_sampleRate = 0;
-  ringb.empty();
 }
 
 RWAudio::~RWAudio() {
@@ -353,6 +359,10 @@ int RWAudio::RestartAudio(int recDevId, int playDevId) {
     return 1;
   }
 
+  wring = 0;
+  rring = 0;
+  calcwave();
+  calcwave();
   calcwave();
 
   try {

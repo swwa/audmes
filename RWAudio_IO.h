@@ -42,8 +42,10 @@ class RWAudio {
 
   void calcwave();
 
+  int bsize();
+
   void SetSndDevices(unsigned int irec = 1000, unsigned int iplay = 1000,
-                     unsigned long int freq = 44100);
+                     unsigned int freq = 44100);
 
   void ChangeBufLen(long int oscbuflen, long int spebuflen) {
     m_OscBufferLen = oscbuflen;
@@ -78,7 +80,7 @@ class RWAudio {
 
   int rring = 0;
   int wring = 0;
-  static const int ringsize = 1024 * 512;
+  static const int ringsize = 1024 * 1024;
   std::array<float, ringsize> ringb;
 
  protected:
