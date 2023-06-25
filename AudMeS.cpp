@@ -1057,6 +1057,7 @@ void MainFrame::DrawSpectrum(void) {
 
 void MainFrame::OnTimer(wxTimerEvent& WXUNUSED(event)) {
   bool refresh = false;
+  m_RWAudio->calcwave();
   if (g_OscBufferChanged.load() && button_osc_start->GetValue()) {
     DrawOscilloscope();
     g_OscBufferChanged = false;
