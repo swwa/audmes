@@ -40,6 +40,10 @@ class RWAudio {
 
   int InitSnd(long int oscbuflen, long int spebuflen, std::string& rtinfo, unsigned int srate);
 
+  void calcwave();
+
+  int bsize();
+
   void SetSndDevices(unsigned int irec = 1000, unsigned int iplay = 1000,
                      unsigned int freq = 44100);
 
@@ -50,8 +54,6 @@ class RWAudio {
   };
 
   int GetRWAudioDevices(RWAudioDevList* play, RWAudioDevList* record);
-
-  void calcwave();
 
   /* parameter settings */
   enum Waveform { SINE, RECT, SAW, TRI, NOISE, WOBBLE };
@@ -79,7 +81,7 @@ class RWAudio {
 
   int rring = 0;
   int wring = 0;
-  static const int ringsize = 2048 * 32;
+  static const int ringsize = 2048 * 64;
   std::array<float, ringsize> ringb;
 
  protected:

@@ -146,22 +146,21 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
           (float)(aRWAudioClass->m_genGain_r * aRWAudioClass->ringb[aRWAudioClass->rring++]);
     aRWAudioClass->rring %= aRWAudioClass->ringsize;
   }
-  //if (aRWAudioClass->rring > aRWAudioClass->wring)
-  //  std::cerr << "underrun " << aRWAudioClass->wring << "," <<aRWAudioClass->rring << std::endl;
+  // if (aRWAudioClass->rring > aRWAudioClass->wring)
+  //   std::cerr << "underrun " << aRWAudioClass->wring << "," <<aRWAudioClass->rring << std::endl;
   return 0;
 }
 
-void RWAudio::calcwave() {
-  const int Frames = 2048*10;
-  while (true) {
-    if (rring > wring) {
-      if (ringsize+wring-Frames >= rring)
-        break;
-    } else {
-      if (wring-Frames >= rring)
-        break;
-    }
+int RWAudio::bsize() {
+  if (wring - rring < 0)
+    return wring + ringsize;
+  else
+    return wring;
+}
 
+void RWAudio::calcwave() {
+  const int Frames = m_sampleRate * m_channels_out / 4;
+  while (bsize() - Frames < rring) {
     /* calculate the wave form according to the selected shape */
     float y = 0;
     float y2 = 0;
@@ -216,8 +215,7 @@ void RWAudio::calcwave() {
         if (m_genPhase_r < M_PI) {
           y2 = 2 * (m_genPhase_r - m_genPhaseDif - M_PI / 2) / M_PI;
         } else {
-          y2 = 2 * (3 * M_PI / 2 - m_genPhase_r + m_genPhaseDif) /
-               M_PI;
+          y2 = 2 * (3 * M_PI / 2 - m_genPhase_r + m_genPhaseDif) / M_PI;
         }
         break;
       case RWAudio::NOISE:
@@ -235,15 +233,15 @@ void RWAudio::calcwave() {
         break;
     }
 
-      if (m_genGain_l == 0.0)
-        m_genPhase_l = 0.0;
-      else
-        m_genPhase_l += (float)2.0 * M_PI * m_genFR_l / m_sampleRate;
+    if (m_genGain_l == 0.0)
+      m_genPhase_l = 0.0;
+    else
+      m_genPhase_l += (float)2.0 * M_PI * m_genFR_l / m_sampleRate;
 
-      if (m_genGain_r == 0.0)
-        m_genPhase_r = 0.0;
-      else
-        m_genPhase_r += (float)2.0 * M_PI * m_genFR_r / m_sampleRate;
+    if (m_genGain_r == 0.0)
+      m_genPhase_r = 0.0;
+    else
+      m_genPhase_r += (float)2.0 * M_PI * m_genFR_r / m_sampleRate;
 
     if ((2.0 * M_PI) < m_genPhase_l) m_genPhase_l -= 2.0 * M_PI;
     if ((2.0 * M_PI) < m_genPhase_r) m_genPhase_r -= 2.0 * M_PI;
@@ -376,6 +374,10 @@ int RWAudio::RestartAudio(int recDevId, int playDevId) {
     return 1;
   }
 
+  wring = 0;
+  rring = 0;
+  calcwave();
+  calcwave();
   calcwave();
 
   try {
