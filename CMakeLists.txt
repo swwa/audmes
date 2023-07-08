@@ -18,7 +18,11 @@ set(AM_SOURCES
 	RWAudio_IO.h
 	rtaudio/RtAudio.cpp
 	rtaudio/RtAudio.h
+	sma_2d.cpp
+	sma_2d.h
 )
+
+add_subdirectory (tests)
 
 include_directories(.) # for local libfccp
 

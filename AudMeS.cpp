@@ -69,6 +69,9 @@ EVT_MENU(ID_SAVE_FRM, MainFrame::OnSaveFRM)
 EVT_BUTTON(ID_AUTOCAL, MainFrame::OnAutoCalClick)
 EVT_CHOICE(ID_OSCXSCALE, MainFrame::OnOscXScaleChanged)
 EVT_CHOICE(ID_FFTLENGTH, MainFrame::OnOscXScaleChanged)
+EVT_CHOICE(ID_FFTAVG, MainFrame::OnFFTAvgChanged)
+EVT_CHOICE(ID_FFTREF, MainFrame::OnFFTScaleChanged)
+EVT_CHOICE(ID_FFTDBDIV, MainFrame::OnFFTScaleChanged)
 END_EVENT_TABLE()
 
 float* g_OscBuffer_Left;
@@ -96,6 +99,9 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
   sizer_12_staticbox = new wxStaticBox(notebook_1_osc, -1, wxT("Left channel (Red)"));
   sizer_12_copy_staticbox = new wxStaticBox(notebook_1_osc, -1, wxT("Right channel (Green)"));
   sizer_4_staticbox = new wxStaticBox(notebook_1_gen, -1, wxT("Left channel"));
+  sizer_spe_fft_staticbox = new wxStaticBox(notebook_1_spe, -1, wxT("FFT"));
+  sizer_spe_disp_staticbox = new wxStaticBox(notebook_1_spe, -1, wxT("Display"));
+  sizer_spe_scale_staticbox = new wxStaticBox(notebook_1_spe, -1, wxT("Scale"));
   frame_1_menubar = new wxMenuBar();
   wxMenu* wxglade_tmp_menu_1 = new wxMenu();
   wxglade_tmp_menu_1->Append(wxID_OPEN, wxT("&Open config...\tAlt+O"), wxT(""), wxITEM_NORMAL);
@@ -218,9 +224,25 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
                                   10, choice_fftlength_choices, 0);
 
   label_rx = new wxStaticText(notebook_1_spe, -1, wxT("Freq:"));
-  const wxString choice_fftry_choices[] = {wxT("20-20k"), wxT("10-100k")};
-  choice_fftrx = new wxChoice(notebook_1_spe, ID_FFTWINDOW, wxDefaultPosition, wxDefaultSize, 2,
+  const wxString choice_fftry_choices[] = {wxT("20-2000"), wxT("20-20k"), wxT("10-100k")};
+  choice_fftrx = new wxChoice(notebook_1_spe, ID_FFTWINDOW, wxDefaultPosition, wxDefaultSize, 3,
                               choice_fftry_choices, 0);
+
+  label_avg = new wxStaticText(notebook_1_spe, -1, wxT("Averaging (N):"));
+  const wxString choice_fftavg_choices[] = {wxT("1"), wxT("5"), wxT("10"), wxT("20")};
+  choice_fftavg = new wxChoice(notebook_1_spe, ID_FFTAVG, wxDefaultPosition, wxDefaultSize, 4,
+                               choice_fftavg_choices, 0);
+
+  label_spe_ref = new wxStaticText(notebook_1_spe, -1, wxT("Ref Level [dB]"));
+  const wxString choice_spe_ref_choices[] = {wxT("0"),   wxT("-10"), wxT("-20"),
+                                             wxT("-30"), wxT("-40"), wxT("-50")};
+  choice_spe_ref = new wxChoice(notebook_1_spe, ID_FFTREF, wxDefaultPosition, wxDefaultSize, 6,
+                                choice_spe_ref_choices, 0);
+
+  label_spe_dbdiv = new wxStaticText(notebook_1_spe, -1, wxT("Amplitude [dB/div]"));
+  const wxString choice_spe_dbdiv_choices[] = {wxT("3"), wxT("5"), wxT("10")};
+  choice_spe_dbdiv = new wxChoice(notebook_1_spe, ID_FFTDBDIV, wxDefaultPosition, wxDefaultSize, 3,
+                                  choice_spe_dbdiv_choices, 0);
 
   window_1_spe = new CtrlOScope(notebook_1_spe, _T("Hz"), _T("dB"));
   button_spe_start = new wxToggleButton(notebook_1_spe, ID_SPANSTART, wxT("Start"));
@@ -257,6 +279,9 @@ void MainFrame::set_properties() {
   choice_fft->SetSelection(1);
   choice_fftlength->SetSelection(4);
   choice_fftrx->SetSelection(1);
+  choice_fftavg->SetSelection(0);
+  choice_spe_ref->SetSelection(0);
+  choice_spe_dbdiv->SetSelection(2);
   // end wxGlade
 }
 
@@ -264,8 +289,8 @@ void MainFrame::do_layout() {
   // begin wxGlade: MainFrame::do_layout
   wxBoxSizer* sizer_1 = new wxBoxSizer(wxVERTICAL);
   wxBoxSizer* sizer_9_copy = new wxBoxSizer(wxVERTICAL);
-  wxBoxSizer* sizer_10_copy = new wxBoxSizer(wxVERTICAL);
-  wxBoxSizer* sizer_17 = new wxBoxSizer(wxHORIZONTAL);
+  wxBoxSizer* sizer_10_copy = new wxBoxSizer(wxHORIZONTAL);
+  // wxBoxSizer* sizer_17 = new wxBoxSizer(wxHORIZONTAL);
   wxBoxSizer* sizer_9 = new wxBoxSizer(wxVERTICAL);
   wxBoxSizer* sizer_10 = new wxBoxSizer(wxHORIZONTAL);
   wxBoxSizer* sizer_11 = new wxBoxSizer(wxVERTICAL);
@@ -294,6 +319,17 @@ void MainFrame::do_layout() {
 
   wxFlexGridSizer* sizer_GenL = new wxFlexGridSizer(3, 2, 5, 5);
   wxFlexGridSizer* sizer_GenR = new wxFlexGridSizer(3, 2, 5, 5);
+
+  wxBoxSizer* sizer_spe_ctrl = new wxBoxSizer(wxVERTICAL);
+  wxBoxSizer* sizer_spe_window = new wxBoxSizer(wxHORIZONTAL);
+  wxBoxSizer* sizer_spe_samples = new wxBoxSizer(wxHORIZONTAL);
+  wxBoxSizer* sizer_spe_span = new wxBoxSizer(wxHORIZONTAL);
+  wxBoxSizer* sizer_spe_avg = new wxBoxSizer(wxHORIZONTAL);
+  wxBoxSizer* sizer_spe_ref = new wxBoxSizer(wxHORIZONTAL);
+  wxBoxSizer* sizer_spe_dbdiv = new wxBoxSizer(wxHORIZONTAL);
+  wxStaticBoxSizer* sizer_spe_fft = new wxStaticBoxSizer(sizer_spe_fft_staticbox, wxVERTICAL);
+  wxStaticBoxSizer* sizer_spe_disp = new wxStaticBoxSizer(sizer_spe_disp_staticbox, wxVERTICAL);
+  wxStaticBoxSizer* sizer_spe_scale = new wxStaticBoxSizer(sizer_spe_scale_staticbox, wxVERTICAL);
 
   // generator
   sizer_4->Add(checkbox_l_en, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
@@ -337,19 +373,25 @@ void MainFrame::do_layout() {
   sizer_2->SetSizeHints(notebook_1_gen);
 
   // oscilloscope
-  sizer_10->Add(window_1, 1, wxEXPAND, 0);
-  sizer_13->Add(label_5_copy, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
-  sizer_13->Add(choice_osc_l_swp_copy, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
+  sizer_10->Add(window_1, 1, wxEXPAND, 0);  // CtrlOScope
+  // sizer_13: wxHORIZONTAL
+  sizer_13->Add(label_5_copy, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);  // X Scale [samples/div]
+  sizer_13->Add(choice_osc_l_swp_copy, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);  // 20, 50....50000
+  // sizer_11: wxVERTICAL
   sizer_11->Add(sizer_13, 0, wxALIGN_CENTER_HORIZONTAL, 0);
 
-  sizer_14->Add(label_6, 0, wxLEFT | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
-  sizer_14->Add(5, 5, 1, 0, 0);
-  sizer_14->Add(choice_osc_l_res, 0, wxALL, 5);
+  // sizer_14: wxHorizontal
+  sizer_14->Add(label_6, 0, wxLEFT | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
+                5);                              // Res[V/Div]
+  sizer_14->Add(5, 5, 1, 0, 0);                  // spacer
+  sizer_14->Add(choice_osc_l_res, 0, wxALL, 5);  // 2, 4, 8......32768
+  // sizer_12: StaticBox Left Channel (Red)
   sizer_12->Add(sizer_14, 1, wxEXPAND, 0);
   sizer_15->Add(label_7, 0, wxLEFT | wxRIGHT | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
-                5);
-  sizer_15->Add(5, 5, 1, 0, 0);
-  sizer_15->Add(choice_osc_l_off, 0, wxLEFT | wxRIGHT | wxALIGN_CENTER_VERTICAL, 5);
+                5);              // Offset [V/div]
+  sizer_15->Add(5, 5, 1, 0, 0);  // spacer
+  sizer_15->Add(choice_osc_l_off, 0, wxLEFT | wxRIGHT | wxALIGN_CENTER_VERTICAL,
+                5);  // 100, 80, ... -100
   sizer_12->Add(sizer_15, 1, wxEXPAND, 0);
   sizer_11->Add(sizer_12, 0, wxALL | wxEXPAND, 5);
 
@@ -358,25 +400,30 @@ void MainFrame::do_layout() {
                 5);  // autocalibrate
 
   sizer_14_copy->Add(label_6_copy, 0, wxLEFT | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
-                     5);
-  sizer_14_copy->Add(5, 5, 1, 0, 0);
-  sizer_14_copy->Add(choice_osc_l_res_copy, 0, wxALL, 5);
+                     5);                                   // Res[V/div]
+  sizer_14_copy->Add(5, 5, 1, 0, 0);                       // spacer
+  sizer_14_copy->Add(choice_osc_l_res_copy, 0, wxALL, 5);  // 2, 4, ... 32768
+  // sizer_12_copy: StaticBox Right Channel (Green)
   sizer_12_copy->Add(sizer_14_copy, 1, wxEXPAND, 0);
   sizer_15_copy->Add(label_7_copy, 0,
-                     wxLEFT | wxRIGHT | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
-  sizer_15_copy->Add(5, 5, 1, 0, 0);
-  sizer_15_copy->Add(choice_osc_l_off_copy, 0, wxLEFT | wxRIGHT | wxALIGN_CENTER_VERTICAL, 5);
+                     wxLEFT | wxRIGHT | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
+                     5);              // Offset [V/div]
+  sizer_15_copy->Add(5, 5, 1, 0, 0);  // spacer
+  sizer_15_copy->Add(choice_osc_l_off_copy, 0, wxLEFT | wxRIGHT | wxALIGN_CENTER_VERTICAL,
+                     5);  // 100, 80, ... -100
   sizer_12_copy->Add(sizer_15_copy, 1, wxEXPAND, 0);
   sizer_11->Add(sizer_12_copy, 0, wxALL | wxEXPAND, 5);
 
-  sizer_16->Add(label_8, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
-  sizer_16->Add(5, 5, 1, 0, 0);
-  sizer_16->Add(choice_osc_trig_source, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
+  sizer_16->Add(label_8, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);  // Trigger
+  sizer_16->Add(5, 5, 1, 0, 0);                                   // spacer
+  sizer_16->Add(choice_osc_trig_source, 0, wxALL | wxALIGN_CENTER_VERTICAL,
+                5);  // Off, Lefft, ... Channel
   sizer_11->Add(sizer_16, 1, wxEXPAND, 0);
 
-  sizer_16_copy->Add(label_8_copy, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
-  sizer_16_copy->Add(5, 5, 1, 0, 0);
-  sizer_16_copy->Add(choice_osc_trig_edge, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
+  sizer_16_copy->Add(label_8_copy, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);  // Trigger Edge
+  sizer_16_copy->Add(5, 5, 1, 0, 0);                                        // spacer
+  sizer_16_copy->Add(choice_osc_trig_edge, 0, wxALL | wxALIGN_CENTER_VERTICAL,
+                     5);  // Rising, ... edge
   sizer_11->Add(sizer_16_copy, 1, wxEXPAND, 0);
 
   sizer_10->Add(sizer_11, 0, 0, 0);
@@ -388,18 +435,47 @@ void MainFrame::do_layout() {
   sizer_9->SetSizeHints(notebook_1_osc);
 
   // analyzer
-  sizer_17->Add(label_5, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
-  sizer_17->Add(choice_fft, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
-  sizer_17->Add(20, 20, 0, 0, 0);
-  sizer_17->Add(label_9, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
-  sizer_17->Add(choice_fftlength, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
-                5);
-  sizer_17->Add(20, 20, 0, 0, 0);
-  sizer_17->Add(label_rx, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
-  sizer_17->Add(choice_fftrx, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
-  sizer_17->Add(20, 20, 0, 0, 0);
-  sizer_10_copy->Add(sizer_17, 0, wxEXPAND, 0);
   sizer_10_copy->Add(window_1_spe, 1, wxEXPAND, 0);
+  wxSize window_1_spe_size = window_1_spe->GetSize();
+  sizer_10_copy->SetMinSize(4 * window_1_spe_size.GetHeight(), window_1_spe_size.GetHeight());
+  sizer_spe_window->Add(label_5, 0, wxLEFT | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
+                        5);
+  sizer_spe_window->Add(5, 5, 1, 0, 0);
+  sizer_spe_window->Add(choice_fft, 0, wxALL, 5);
+  sizer_spe_fft->Add(sizer_spe_window, 1, wxEXPAND, 0);
+
+  sizer_spe_samples->Add(label_9, 0, wxLEFT | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
+                         5);
+  sizer_spe_samples->Add(5, 5, 1, 0, 0);
+  sizer_spe_samples->Add(choice_fftlength, 0, wxALL, 5);
+  sizer_spe_fft->Add(sizer_spe_samples, 1, wxEXPAND, 0);
+  sizer_spe_ctrl->Add(sizer_spe_fft, 0, wxALL | wxEXPAND, 5);
+
+  sizer_spe_span->Add(label_rx, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
+  sizer_spe_span->Add(5, 5, 1, 0, 0);
+  sizer_spe_span->Add(choice_fftrx, 0, wxALL, 5);
+  sizer_spe_disp->Add(sizer_spe_span, 1, wxEXPAND, 0);
+
+  sizer_spe_avg->Add(label_avg, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
+  sizer_spe_avg->Add(5, 5, 1, 0, 0);
+  sizer_spe_avg->Add(choice_fftavg, 0, wxALL, 5);
+  sizer_spe_disp->Add(sizer_spe_avg, 1, wxEXPAND, 0);
+  sizer_spe_ctrl->Add(sizer_spe_disp, 0, wxALL | wxEXPAND, 5);
+
+  sizer_spe_ref->Add(label_spe_ref, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
+                     5);
+  sizer_spe_ref->Add(5, 5, 1, 0, 0);
+  sizer_spe_ref->Add(choice_spe_ref, 0, wxALL, 5);
+  sizer_spe_scale->Add(sizer_spe_ref, 1, wxEXPAND, 0);
+
+  sizer_spe_dbdiv->Add(label_spe_dbdiv, 0,
+                       wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
+  sizer_spe_dbdiv->Add(5, 5, 1, 0, 0);
+  sizer_spe_dbdiv->Add(choice_spe_dbdiv, 0, wxALL, 5);
+  sizer_spe_scale->Add(sizer_spe_dbdiv, 1, wxEXPAND, 0);
+  sizer_spe_ctrl->Add(sizer_spe_scale, 0, wxALL | wxEXPAND, 5);
+
+  sizer_10_copy->Add(sizer_spe_ctrl, 0, wxEXPAND, 0);
   sizer_9_copy->Add(sizer_10_copy, 1, wxEXPAND, 0);
   sizer_9_copy->Add(button_spe_start, 0,
                     wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
@@ -493,6 +569,8 @@ void MainFrame::set_custom_props() {
   m_SpeBufferLength = (long)(sweep_div);
 
   m_RWAudio = new RWAudio();
+  m_SMASpeLeft = new SMA_2D(m_SpeBufferLength >> 1, 1);
+  m_SMASpeRight = new SMA_2D(m_SpeBufferLength >> 1, 1);
 
   int ret = 0;
 
@@ -811,6 +889,7 @@ void MainFrame::DrawSpectrum(void) {
 
   double dval = 0.0;
   double dmax = 0.0;
+  double dval_db = 0.0;
   int imax = 0;
 
   // left channel
@@ -828,7 +907,20 @@ void MainFrame::DrawSpectrum(void) {
         dmax = dval;
         imax = i;
       }
-      ardbl.Add(20.0 * log10(sqrt(dval)) + dbscaler);
+      // Sometimes when the FFT size is changed right after program
+      // start, dval returns zero. The log function cannot handle
+      // and returns -INF. Which is a problem for the SMA function.
+      // This is probably caused by changing and filling the audio buffers
+      // is not synchronized.
+      if (dval > 10E-18) {  // sqrt(dval) > -160 dB
+        dval_db = 20.0 * log10(sqrt(dval)) + dbscaler;
+      } else {
+        dval_db = -150;
+      }
+      // ardbl.Add(20.0 * log10(sqrt(dval)) + dbscaler);
+      // std::cerr << "dval_db: " << std::to_string(dval_db) << "\n";
+      m_SMASpeLeft->AddVal(i, dval_db);
+      ardbl.Add(m_SMASpeLeft->GetSMA(i));
     }
   } else {
     /* wrong computation */
@@ -852,8 +944,9 @@ void MainFrame::DrawSpectrum(void) {
                   thdval[7] + thdval[8] + thdval[9]) /
                  thdval[0];
     wxString freqency;
-    freqency.Printf(wxT("Frequency : %.1lf Hz, Magnitude: %.1lf dB, THD : %lf%%"), freq,
-                    20.0 * log10(thdval[0]) + dbscaler, thd);
+    freqency.Printf(wxT("Frequency : %.1lf Hz, Magnitude: %.1lf dB, THD : %lf%%, Avg: %d/%d"), freq,
+                    20.0 * log10(thdval[0]) + dbscaler, thd, m_SMASpeLeft->GetNumSummed(1),
+                    m_SMASpeLeft->GetNumAverage());
     frame_1_statusbar->SetStatusText(freqency);
   }
 
@@ -867,7 +960,14 @@ void MainFrame::DrawSpectrum(void) {
     realout[0] = imagout[0] = 0;  // remove DC
     /* show only half FFT */
     for (int i = 0; i < nsampl / 2; i++) {
-      ardbl2.Add(20.0 * log10(sqrt(realout[i] * realout[i] + imagout[i] * imagout[i])) + dbscaler);
+      dval = realout[i] * realout[i] + imagout[i] * imagout[i];
+      if (dval > 10E-18) {  // sqrt(dval) > -160 dB
+        dval_db = 20.0 * log10(sqrt(dval)) + dbscaler;
+      } else {
+        dval_db = -150;
+      }
+      m_SMASpeRight->AddVal(i, dval_db);
+      ardbl2.Add(m_SMASpeRight->GetSMA(i));
     }
   } else {
     /* wrong computation */
@@ -880,10 +980,13 @@ void MainFrame::DrawSpectrum(void) {
   window_1_spe->SetTrack2(ardbl2);
   switch (choice_fftrx->GetCurrentSelection()) {
     case 1:
+      window_1_spe->SetXRange(20, 20000, 1);
+      break;
+    case 2:
       window_1_spe->SetXRange(10, 100000, 1);
       break;
     default:
-      window_1_spe->SetXRange(20, 20000, 1);
+      window_1_spe->SetXRange(20, 2000, 1);
       break;
   }
   free(realin);
@@ -929,10 +1032,30 @@ void MainFrame::OnOscXScaleChanged(wxCommandEvent& WXUNUSED(event)) {
 
   m_RWAudio->ChangeBufLen((unsigned long)(2.0 * m_OscBufferLength),
                           m_SpeBufferLength);  // we need bigger buffer because of synchronization
+  m_SMASpeLeft->SetNumRecords(m_SpeBufferLength >> 1);
+  m_SMASpeRight->SetNumRecords(m_SpeBufferLength >> 1);
+}
+
+void MainFrame::OnFFTAvgChanged(wxCommandEvent& WXUNUSED(event)) {
+  long numAverage;
+  choice_fftavg->GetString(choice_fftavg->GetCurrentSelection()).ToLong(&numAverage);
+  m_SMASpeLeft->SetNumAverage((int)numAverage);
+  m_SMASpeRight->SetNumAverage((int)numAverage);
+}
+
+void MainFrame::OnFFTScaleChanged(wxCommandEvent& WXUNUSED(event)) {
+  double ref;
+  double dbDiv;
+  choice_spe_ref->GetString(choice_spe_ref->GetCurrentSelection()).ToDouble(&ref);
+  choice_spe_dbdiv->GetString(choice_spe_dbdiv->GetCurrentSelection()).ToDouble(&dbDiv);
+  double lo = ref - 10 * dbDiv;
+  window_1_spe->SetYRange(lo, ref, 0, 1);
 }
 
 void MainFrame::OnSpanStart(wxCommandEvent& WXUNUSED(event)) {
   if (button_spe_start->GetValue()) {
+    m_SMASpeLeft->SetNumRecords(m_SpeBufferLength >> 1);
+    m_SMASpeRight->SetNumRecords(m_SpeBufferLength >> 1);
     button_spe_start->SetLabel(_T("Stop"));
   } else {
     button_spe_start->SetLabel(_T("Start"));
@@ -1100,6 +1223,8 @@ void MainFrame::OnSelectSndCard(wxCommandEvent& WXUNUSED(event)) {
     m_PlayDev = pldev;
     m_RecordDev = recdev;
     m_SamplingFreq = newFrequency;
+    m_SMASpeLeft->SetNumRecords(m_SpeBufferLength >> 1);
+    m_SMASpeRight->SetNumRecords(m_SpeBufferLength >> 1);
     window_1_spe->SetFsample(m_SamplingFreq);
     window_1_frm->SetFsample(m_SamplingFreq);
   }
