@@ -224,7 +224,7 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
                                   10, choice_fftlength_choices, 0);
 
   label_rx = new wxStaticText(notebook_1_spe, -1, wxT("Freq:"));
-  const wxString choice_fftry_choices[] = {wxT("20-2000"), wxT("20-20k"), wxT("10-100k")};
+  const wxString choice_fftry_choices[] = {wxT("2-2000"), wxT("20-20k"), wxT("10-100k")};
   choice_fftrx = new wxChoice(notebook_1_spe, ID_FFTWINDOW, wxDefaultPosition, wxDefaultSize, 3,
                               choice_fftry_choices, 0);
 
@@ -278,7 +278,7 @@ void MainFrame::set_properties() {
   choice_osc_trig_edge->SetSelection(0);
   choice_fft->SetSelection(1);
   choice_fftlength->SetSelection(4);
-  choice_fftrx->SetSelection(1);
+  choice_fftrx->SetSelection(2);
   choice_fftavg->SetSelection(0);
   choice_spe_ref->SetSelection(0);
   choice_spe_dbdiv->SetSelection(2);
@@ -563,7 +563,7 @@ void MainFrame::set_custom_props() {
   m_configfilename = wxT("");
 
   m_timer = new wxTimer(this, ID_TIMERID);
-  m_timer->Start(200);
+  m_timer->Start(100);
 
   choice_fftlength->GetString(choice_fftlength->GetCurrentSelection()).ToDouble(&sweep_div);
   m_SpeBufferLength = (long)(sweep_div);
@@ -986,7 +986,7 @@ void MainFrame::DrawSpectrum(void) {
       window_1_spe->SetXRange(10, 100000, 1);
       break;
     default:
-      window_1_spe->SetXRange(20, 2000, 1);
+      window_1_spe->SetXRange(2, 2000, 1);
       break;
   }
   free(realin);
@@ -1004,8 +1004,6 @@ void MainFrame::OnTimer(wxTimerEvent& WXUNUSED(event)) {
   }
   if (frm_running) {
     CalcFreqResponse();
-  }
-  if (button_frm_start->GetValue()) {
     DrawFreqResponse();
     refresh = true;
   }
