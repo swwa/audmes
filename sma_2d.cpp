@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
-// RWAudio_IO.cpp: impementation of audio interface
-//
+// Name:        sma-2d
+// Purpose:     Simple Moving average over N values for R rows
 //////////////////////////////////////////////////////////////////////
 /*
  * Copyright (C) 2023 Johannes Linkels <jlinkels@linxtech.net>
@@ -58,12 +58,11 @@ int SMA_2D::AddVal(int recordNum, double val) {
 
 double SMA_2D::GetSMA(int recordNum) {
   // Calculate the average only over the values which are
-  // added. If not, it would take until all values are added.
+  // added. If not, it would take until all values are added
   // until the average shows the final value.
-  // If no samples at all have been added prevent division by
-  // zero and return whatever is in the sum.
+  // If no samples have been added yet, prevent division by zero.
   if (numSummed[recordNum] == 0) {
-    numSummed[recordNum] = 1;
+    return 0.0;
   }
   double sma = sum[recordNum] / numSummed[recordNum];
   return sma;
