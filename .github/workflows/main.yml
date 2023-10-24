@@ -11,10 +11,10 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get -y install libwxgtk3.0-gtk3-dev cmake libfccp-dev libpulse-dev libasound2-dev
+          sudo apt-get -y install libwxgtk3.2-dev cmake libfccp-dev libpulse-dev libasound2-dev
 
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Compile and package
         run: |
@@ -25,7 +25,7 @@ jobs:
           cmake --build . --target package
 
       - name: Archive build result
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: linux-binary
           path: |
@@ -33,7 +33,7 @@ jobs:
             build/AudMeS-*.deb
 
   MacOS:
-    runs-on: macos-10.15
+    runs-on: macos-13
     env:
       CC: cc
       CXX: c++
@@ -42,11 +42,10 @@ jobs:
     steps:
       - name: Install dependencies
         run: |
-          brew install git
           brew install wxwidgets
 
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Compile and package
         run: |
@@ -58,7 +57,7 @@ jobs:
           cmake --build . --target package
 
       - name: Archive build result
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: macos-binary
           path: |
@@ -86,10 +85,10 @@ jobs:
             mingw-w64-i686-gcc
             mingw-w64-i686-cmake
             mingw-w64-i686-make
-            mingw-w64-i686-wxwidgets3.0-msw
+            mingw-w64-i686-wxwidgets3.2-msw
 
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Compile and package
         run: |
@@ -100,7 +99,7 @@ jobs:
           cmake --build .
 
       - name: Archive build result
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: win-binary
           path: |
