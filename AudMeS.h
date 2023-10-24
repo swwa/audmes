@@ -32,7 +32,7 @@
 #ifndef AUDMES_H
 #define AUDMES_H
 
-#define AUDMES_VERSION_STRING "2023-04-09"
+#define AUDMES_VERSION_STRING "2023-10-24"
 
 class MainFrame : public wxFrame {
   DECLARE_CLASS(MainFrame)

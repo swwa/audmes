@@ -1,6 +1,14 @@
 News
 ====
 
+2023-10-24
+----------
+
+- Add simple moving average in spectrum view.
+- Rearrange spectrum view and increase refresh rate.
+- Remember selected device in configuration window.
+Code was contributed by user Johannes.
+
 2023-04-09
 ----------
 
