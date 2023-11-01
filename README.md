@@ -2,7 +2,7 @@
 
 ## About
 
-Multi-platfrom system for audio measurement through sound card in the
+Multi-platform system for audio measurement through sound card in the
 PC.  Incorporates Generator, Oscilloscope, Fast Fourier Transform,
 Sweep frequency characteristic.
 
@@ -32,13 +32,13 @@ Dependencies:
 
 ## Installation
 
-You can download precompiled binaries from SourceForge. You find them unter `Files`.
+You can download compiled binaries from SourceForge. You find them under `Files`.
 You need a stereo input and output on your sound card.
 
 ### Windows
 
 Download the binary from SourceForge. It comes a a ZIP archive.
-Uncompress the archive into a directory of your choise.
+Extract the archive into a directory of your choice.
 Create a shortcut for AudMeS.exe to your desktop.
 To run, double-click on the shortcut icon.
 
@@ -51,9 +51,29 @@ To run, use LaunchPad and click on the AudMeS icon.
 
 ### Linux
 
-Download the binary from SourceForge. It comes as a Debian package (deb).
-Install the package with `dpkg -i`.
+Go to FlatHub <https://flathub.org>, search for `audmes` and install it.
+
+Download the binary from SourceForge.
+It comes as a Flatpak or a Debian package (deb).
+Install the Debian package with `dpkg -i`.
+The flatpak can be installed with `flatpak install`.
+
 To run, click on the AudMeS icon when you select "Show Applications".
+
+## Troubleshooting
+
+If a popup appears about sound card issues,
+make sure you have stereo input and output available.
+You may need to plug in a cable.
+
+If you see messages like
+`WARNING **: invalid source position for vertical gradient`
+then your Gnome Theme has a bug. It is annoying but harmless.
+On Debian the issue disappears when using e.g. `materia-gtk-theme`.
+
+If you get an error like `wxbase30ud_gcc810.dll not found` (note the "d_")
+when running AudMeS.exe, you compiled in Debug mode. Run cmake again with
+"-DCMAKE_BUILD_TYPE=Release".
 
 ## Compiling on Linux
 
@@ -61,14 +81,15 @@ The following instructions are for Debian, Ubuntu and similar.
 
 Install the basic development tools and dependencies
 
-    sudo apt install build-essential git
-
-    # Debian 10
-    sudo apt install libwxgtk3.0-dev
+    sudo apt install build-essential git cmake
 
     # Debian 11
     sudo apt install libwxgtk3.0-gtk3-dev
-    sudo apt install cmake libfccp-dev libpulse-dev libasound2-dev
+    sudo apt install libfccp-dev libpulse-dev libasound2-dev
+
+    # Debian 12
+    sudo apt install libwxgtk3.2-dev
+    sudo apt install libfccp-dev libpulse-dev libasound2-dev
 
 Fetch the source
 
@@ -295,18 +316,28 @@ To prepare the project for Xcode and debugging you can use Cmake.
 Then open the project in XCode. You may need to remove all in the `build` directory
 first before running cmake.
 
-## Troubleshooting
+## Flatpak
 
-If a popup appears about sound card issues,
-make sure you have stereo input and output available.
-You may need to plug in a cable.
-Mono channels on sound cards are not yet supported, sorry.
+Check the flatpak data in audmes repository.
 
-If you see messages like
-`WARNING **: invalid source position for vertical gradient`
-then your Gnome Theme has a bug. It is annoying but harmless.
-On Debian the issue disappears when using e.g. `materia-gtk-theme`.
+    vi net.sourceforge.audmes.audmes.appdata.xml
 
-If you get an error like `wxbase30ud_gcc810.dll not found` (note the "d_")
-when running AudMeS.exe, you compiled in Debug mode. Run cmake again with
-"-DCMAKE_BUILD_TYPE=Release".
+Fork the project for Flathub.
+
+    git checkout https://github.com/swwa/net.sourceforge.audmes.audmes.git
+    cd net.sourceforge.audmes.audmes
+
+Edit commit hash in the manifest.
+
+    vi net.sourceforge.audmes.audmes.json
+
+Build the flatpak and test it.
+
+    flatpak-builder --repo=repo --force-clean build net.sourceforge.audmes.audmes.json
+    flatpak build-bundle repo audmes.flatpak net.sourceforge.audmes.audmes
+    flatpak --user install audmes.flatpak
+    flatpak run net.sourceforge.audmes.audmes
+
+Now make a pull request on github. Test the build from the build-bot.
+
+As Flatpak administrator merge pull request and test the build.
