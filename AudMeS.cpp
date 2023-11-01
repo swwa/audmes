@@ -1032,6 +1032,9 @@ void MainFrame::OnOscXScaleChanged(wxCommandEvent& WXUNUSED(event)) {
                           m_SpeBufferLength);  // we need bigger buffer because of synchronization
   m_SMASpeLeft->SetNumRecords(m_SpeBufferLength >> 1);
   m_SMASpeRight->SetNumRecords(m_SpeBufferLength >> 1);
+
+  g_SpeBufferChanged = false;
+  g_OscBufferChanged = false;
 }
 
 void MainFrame::OnFFTAvgChanged(wxCommandEvent& WXUNUSED(event)) {
