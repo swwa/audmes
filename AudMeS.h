@@ -60,7 +60,6 @@ class MainFrame : public wxFrame {
   void OnAboutClick(wxCommandEvent& event);
   void OnExitClick(wxCommandEvent& event);
   void OnClose(wxCloseEvent& event);
-  void OnSoundInput(wxEvent& event);
   void OnTimer(wxTimerEvent& event);
   void OnGeneratorChanged(wxCommandEvent& event);
   void OnGenScrollChanged(wxScrollEvent& event);
@@ -84,8 +83,6 @@ class MainFrame : public wxFrame {
   void CalcFreqResponse(void);
   void DrawOscilloscope(void);
   void DrawSpectrum(void);
-
-  void sleep(int ms);
 
  protected:
   // begin wxGlade: MainFrame::attributes
