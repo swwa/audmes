@@ -73,7 +73,7 @@ void catcherr(RtAudioError::Type WXUNUSED(type), const std::string &errorText) {
 int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
           double WXUNUSED(streamTime), RtAudioStreamStatus status, void *data) {
   RWAudio *aRWAudioClass = (RWAudio *)data;
-  unsigned long i;
+  unsigned i;
 
   if (status) std::cerr << "Audio stream over/underflow detected." << std::endl;
 
@@ -143,7 +143,7 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
 #endif
 
   /* calculate the wave form according to the selected shape */
-  for (unsigned long i = 0; i < nBufferFrames; i++) {
+  for (unsigned i = 0; i < nBufferFrames; i++) {
     double y = 0;
     double y2 = 0;
     bool noise = lfsr16();
@@ -237,7 +237,7 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
 
 RWAudio::RWAudio() {
   m_Buflen_Changed = false;
-  m_sampleRate = 44100;
+  m_sampleRate = 0;
 }
 
 RWAudio::~RWAudio() {
@@ -246,9 +246,11 @@ RWAudio::~RWAudio() {
 }
 
 // Initialize RtAudio and start audio stream
-int RWAudio::InitSnd(long int oscbuflen, long int spebuflen, std::string &rtinfo) {
+int RWAudio::InitSnd(long int oscbuflen, long int spebuflen, std::string &rtinfo,
+                     unsigned int srate) {
   m_OscBufferLen = oscbuflen;
   m_SpeBufferLen = spebuflen;
+  m_sampleRate = srate;
 
   m_genFR_l = m_genFR_r = 0.0;
   m_genShape_l = m_genShape_r = 0;
@@ -430,20 +432,12 @@ int RWAudio::PlaySetGenerator(float f1, float f2, int s1, int s2, float g1, floa
   return 1;
 }
 
-void RWAudio::SetSndDevices(unsigned int irec, unsigned int iplay, unsigned long int freq) {
+void RWAudio::SetSndDevices(unsigned int irec, unsigned int iplay, unsigned int srate) {
   unsigned int cardrec, cardplay;
 
-  if (1000 == irec) {
-    cardrec = m_AudioDriver->getDefaultInputDevice();
-  } else {
-    cardrec = irec;
-  }
-  if (1000 == iplay) {
-    cardplay = m_AudioDriver->getDefaultOutputDevice();
-  } else {
-    cardplay = iplay;
-  }
-  m_sampleRate = freq;
+  cardrec = irec;
+  cardplay = iplay;
+  m_sampleRate = srate;
 
   // redefine audio streams
   RestartAudio(cardrec, cardplay);

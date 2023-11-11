@@ -77,7 +77,7 @@
 struct AIStreamSettings {
   unsigned int playDev;
   unsigned int recordDev;
-  unsigned long int freq;
+  unsigned int freq;
 };
 
 class AudioInterfaceDialog : public wxDialog {
@@ -87,7 +87,7 @@ class AudioInterfaceDialog : public wxDialog {
   RWAudioDevList m_DevRecList;
   RWAudioDevList m_DevPlayList;
   AIStreamSettings m_StreamSettings;
-  unsigned long int m_freq;
+  unsigned int m_freq;
 
  public:
   /// Constructors
@@ -131,7 +131,7 @@ class AudioInterfaceDialog : public wxDialog {
   ////@end AudioInterfaceDialog member variables
   void SetDevices(RWAudioDevList devreclist, RWAudioDevList devpllist,
                   AIStreamSettings streamSettings);
-  void GetSelectedDevs(unsigned int* recdev, unsigned int* playdev, unsigned long int* newfreq);
+  void GetSelectedDevs(unsigned int* recdev, unsigned int* playdev, unsigned int* newfreq);
   void OnChoiceChanged(wxCommandEvent& event);
 };
 

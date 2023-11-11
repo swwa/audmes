@@ -555,6 +555,7 @@ void MainFrame::set_custom_props() {
   /* freq response */
   window_1_frm->SetXRange(20, 20000, 1);
   window_1_frm->SetYRange(-80, 0, 0, 1);
+  window_1_frm->SetFsample(m_SamplingFreq);
 
   frm_running = 0;
   frm_measure = 0;
@@ -574,7 +575,8 @@ void MainFrame::set_custom_props() {
 
   int ret = 0;
 
-  ret = m_RWAudio->InitSnd((long int)(2.0 * m_OscBufferLength), m_SpeBufferLength, m_rtinfo);
+  ret = m_RWAudio->InitSnd((long int)(2.0 * m_OscBufferLength), m_SpeBufferLength, m_rtinfo,
+                           m_SamplingFreq);
 
   if (ret)
     wxMessageBox(_T("Sound card issue:\n\nPlease check\nTools -> Audio interface Configuration\n"),
@@ -746,9 +748,9 @@ void MainFrame::DrawFreqResponse(void) {
   double botfreq = 0;
   double lbotgain = 0.00000001;
   double rbotgain = 0.00000001;
-  unsigned long int arrpointer = 0;
-  for (unsigned long int i = 0; i < m_SamplingFreq / 2; i++) {
-    if (i > (unsigned long int)upfreq) {
+  unsigned int arrpointer = 0;
+  for (unsigned int i = 0; i < m_SamplingFreq / 2; i++) {
+    if (i > (unsigned int)upfreq) {
       /* next value from arrays */
       if ((arrpointer) >= m_frm_freqs.GetCount()) {
         lbotgain = lupgain;
@@ -1206,7 +1208,7 @@ void MainFrame::OnSelectSndCard(wxCommandEvent& WXUNUSED(event)) {
   unsigned int recdev, pldev;
   RWAudioDevList playDevList;
   RWAudioDevList recordDevList;
-  unsigned long int newFrequency = m_SamplingFreq;
+  unsigned int newFrequency = m_SamplingFreq;
   AIStreamSettings m_StreamSettings;
 
   m_RWAudio->GetRWAudioDevices(&playDevList, &recordDevList);

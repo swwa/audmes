@@ -40,7 +40,7 @@
 // CtrlOScope
 CtrlOScope::CtrlOScope(wxWindow* parent, wxString xname, wxString yname)
     : wxControl(parent, -1, wxDefaultPosition, wxSize(300, 200)) {
-  m_fsampling = 44100;
+  m_fsampling = 0;
 
   m_bgColor.Set(0, 0, 0);
   m_plColor.Set(0, 128, 0);

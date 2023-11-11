@@ -183,7 +183,7 @@ class MainFrame : public wxFrame {
 
   unsigned int m_PlayDev;
   unsigned int m_RecordDev;
-  unsigned long int m_SamplingFreq;
+  unsigned int m_SamplingFreq;
 };
 
 #endif  // AUDMES_H

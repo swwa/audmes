@@ -36,10 +36,9 @@ class RWAudio {
   RWAudio();
   ~RWAudio();
 
-  int InitSnd(long int oscbuflen, long int spebuflen, std::string& rtinfo);
+  int InitSnd(long int oscbuflen, long int spebuflen, std::string& rtinfo, unsigned int srate);
 
-  void SetSndDevices(unsigned int irec = 1000, unsigned int iplay = 1000,
-                     unsigned long int freq = 44100);
+  void SetSndDevices(unsigned int irec, unsigned int iplay, unsigned int srate);
 
   void ChangeBufLen(long int oscbuflen, long int spebuflen) {
     m_OscBufferLen = oscbuflen;
