@@ -882,17 +882,9 @@ void MainFrame::DrawSpectrum(void) {
       break;
   }
 
-  /*
-   * Scale max. amplitude to 1 which is 0 db.
-   * We only use use nsampl/2 of the FFT.
-   * Compensate with multiplying by 2 = 6dB.
-   */
-  const double dbscaler = 6;
-
   double dval = 0.0;
   double dmax = 0.0;
   double dval_db = 0.0;
-  int imax = 0;
 
   // left channel
   for (int i = 0; i < nsampl; i++) {
@@ -902,27 +894,13 @@ void MainFrame::DrawSpectrum(void) {
 
   if (fft_double(nsampl, 0, realin, NULL, realout, imagout)) {
     realout[0] = imagout[0] = 0;  // remove DC
-    /* show only half FFT */
+    // use only up to nsampl/2
     for (int i = 0; i < nsampl / 2; i++) {
-      dval = realout[i] * realout[i] + imagout[i] * imagout[i];
-      if (dval > dmax) {
-        dmax = dval;
-        imax = i;
-      }
-      // Sometimes when the FFT size is changed right after program
-      // start, dval returns zero. The log function cannot handle
-      // and returns -INF. Which is a problem for the SMA function.
-      // This is probably caused by changing and filling the audio buffers
-      // is not synchronized.
-      if (dval > 10E-18) {  // sqrt(dval) > -160 dB
-        dval_db = 20.0 * log10(sqrt(dval)) + dbscaler;
-      } else {
-        dval_db = -150;
-      }
-      // ardbl.Add(20.0 * log10(sqrt(dval)) + dbscaler);
-      // std::cerr << "dval_db: " << std::to_string(dval_db) << "\n";
-      m_SMASpeLeft->AddVal(i, dval_db);
-      ardbl.Add(m_SMASpeLeft->GetSMA(i));
+      // multiply amplitude by 2 to compensate
+      dval = 2 * sqrt(realout[i] * realout[i] + imagout[i] * imagout[i]);
+      m_SMASpeLeft->AddVal(i, dval);
+      dval_db = 20.0 * log10(m_SMASpeLeft->GetSMA(i));
+      ardbl.Add(dval_db);
     }
   } else {
     /* wrong computation */
@@ -931,26 +909,42 @@ void MainFrame::DrawSpectrum(void) {
     }
   }
 
-  if (imax > 0) {
-    double freq = (double)imax * m_SamplingFreq / nsampl;
-    double thdval[10];
+  /* find frequency index with highest amplitude */
+  int fmax = 0;
+  for (int i = 0; i < nsampl / 2; i++) {
+    if (m_SMASpeLeft->GetSMA(i) > dmax) {
+      dmax = m_SMASpeLeft->GetSMA(i);
+      fmax = i;
+    }
+  }
+
+  /* use that frequency as base and calculate distortion
+   * but only if the magnitude is above -90 db
+   */
+  double freq = 0.0;
+  double thd = 0.0;
+  double thdval[10] = {1.0E-6};
+  if (fmax > 0 && dmax > 0.00003) {
+    freq = (double)fmax * m_SamplingFreq / nsampl;
     for (int i = 0; i < 10; i++) {
-      int j = imax * (i + 1);
+      int j = fmax * (i + 1);
       if (j < nsampl / 2)
-        thdval[i] = sqrt(realout[j] * realout[j] + imagout[j] * imagout[j]);
+        thdval[i] = m_SMASpeLeft->GetSMA(j);
       else
         thdval[i] = 0.0;
     }
-    double thd = 100 *
-                 (thdval[1] + thdval[2] + thdval[3] + thdval[4] + thdval[5] + thdval[6] +
-                  thdval[7] + thdval[8] + thdval[9]) /
-                 thdval[0];
-    wxString freqency;
-    freqency.Printf(wxT("Frequency : %.1lf Hz, Magnitude: %.1lf dB, THD : %lf%%, Avg: %d/%d"), freq,
-                    20.0 * log10(thdval[0]) + dbscaler, thd, m_SMASpeLeft->GetNumSummed(1),
-                    m_SMASpeLeft->GetNumAverage());
-    frame_1_statusbar->SetStatusText(freqency);
+    thd = 100 *
+          (thdval[1] + thdval[2] + thdval[3] + thdval[4] + thdval[5] + thdval[6] + thdval[7] +
+           thdval[8] + thdval[9]) /
+          thdval[0];
   }
+
+  /* display base frequency, magnitude and distortion */
+  wxString freqency;
+  freqency.Printf(wxT("Frequency : %.1lf Hz, Magnitude: %.1lf dB, THD : %lf%%, Avg: %d/%d"), freq,
+                  20.0 * log10(thdval[0]), thd, m_SMASpeLeft->GetNumSummed(1),
+                  m_SMASpeLeft->GetNumAverage());
+  frame_1_statusbar->SetStatusText(freqency);
 
   // right channel
   for (int i = 0; i < nsampl; i++) {
@@ -962,14 +956,10 @@ void MainFrame::DrawSpectrum(void) {
     realout[0] = imagout[0] = 0;  // remove DC
     /* show only half FFT */
     for (int i = 0; i < nsampl / 2; i++) {
-      dval = realout[i] * realout[i] + imagout[i] * imagout[i];
-      if (dval > 10E-18) {  // sqrt(dval) > -160 dB
-        dval_db = 20.0 * log10(sqrt(dval)) + dbscaler;
-      } else {
-        dval_db = -150;
-      }
-      m_SMASpeRight->AddVal(i, dval_db);
-      ardbl2.Add(m_SMASpeRight->GetSMA(i));
+      dval = 2 * sqrt(realout[i] * realout[i] + imagout[i] * imagout[i]);
+      m_SMASpeRight->AddVal(i, dval);
+      dval_db = (20.0 * log10(m_SMASpeRight->GetSMA(i)));
+      ardbl2.Add(dval_db);
     }
   } else {
     /* wrong computation */
