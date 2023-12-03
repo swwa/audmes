@@ -74,7 +74,7 @@ CtrlOScope::CtrlOScope(wxWindow* parent, wxString xname, wxString yname)
 /////////////////////////////////////////////////////////////////////////////
 CtrlOScope::~CtrlOScope() {}  // ~CtrlOScope
 
-void CtrlOScope::SetTrack(wxArrayDouble ardbl) { m_points = ardbl; }
+void CtrlOScope::SetTrack1(wxArrayDouble ardbl) { m_points1 = ardbl; }
 
 void CtrlOScope::SetTrack2(wxArrayDouble ardbl) { m_points2 = ardbl; }
 
@@ -85,7 +85,7 @@ void CtrlOScope::SetXRange(double dLower, double dUpper, int logrange) {
   m_LogX = logrange;
 }  // SetRange
 
-void CtrlOScope::SetYRange(double dLower, double dUpper, int logrange, int WXUNUSED(itrack)) {
+void CtrlOScope::SetYRange(double dLower, double dUpper, int logrange) {
   m_MinYValue = dLower;
   m_MaxYValue = dUpper;
   m_LogY = logrange;
@@ -99,20 +99,6 @@ void CtrlOScope::SetXUnits(wxString WXUNUSED(string), wxString WXUNUSED(XMin),
 void CtrlOScope::SetYUnits(wxString WXUNUSED(string), wxString WXUNUSED(YMin),
                            wxString WXUNUSED(YMax)) {}  // SetYUnits
 
-/////////////////////////////////////////////////////////////////////////////
-void CtrlOScope::SetGridColor(wxColour WXUNUSED(color)) {}  // SetGridColor
-
-/////////////////////////////////////////////////////////////////////////////
-void CtrlOScope::SetPlotColor(wxColour WXUNUSED(color), int WXUNUSED(iTrack)) {}  // SetPlotColor
-
-/////////////////////////////////////////////////////////////////////////////
-void CtrlOScope::SetBackgroundColor(wxColour WXUNUSED(color)) {}  // SetBackgroundColor
-
-/////////////////////////////////////////////////////////////////////////////
-void CtrlOScope::AppendPoints(double WXUNUSED(dNewPoint)[], int WXUNUSED(iTrack)) {
-}  // AppendPoints
-
-////////////////////////////////////////////////////////////////////////////
 void CtrlOScope::OnPaint(wxPaintEvent& WXUNUSED(event)) {
   wxPaintDC dc(this);  // device context for painting
   PaintAll(dc);
@@ -227,31 +213,31 @@ void CtrlOScope::PaintAllFunction(wxDC& dc) {
     }
 
     /* zobrazit body - draw data */
-    float binsize = 0.5 * m_fsampling / m_points.GetCount();
+    float binsize = 0.5 * m_fsampling / m_points1.GetCount();
 
     // left channel
     dc.SetPen(wxPen(m_trColor, 1, wxPENSTYLE_SOLID));
     int lastx = 0, lasty = 0;
     float lastxfreq = 0.0;
     // new plot function - walking through X points and select values from the table
-    if (m_points.GetCount() > 0) {
+    if (m_points1.GetCount() > 0) {
       for (long int i = 0; i < rec.width - ldist - rdist; i++) {
         // find the frequency
         float xfreq = m_MinXValue * pow(10, i / xstep);
         if ((binsize > xfreq - lastxfreq) && i > 0) continue;
-        // find the position in the m_points[] array
+        // find the position in the m_points1[] array
         unsigned long int xposit = (unsigned long int)(xfreq / binsize);
 
-        if (xposit < m_points.GetCount()) {
+        if (xposit < m_points1.GetCount()) {
           /* iterate though all fft bins between x and the next x position in the graph */
           float nxfreq = m_MinXValue * pow(10, (i + 1) / xstep);
           unsigned long int nxposit = (unsigned long int)(nxfreq / binsize);
-          if (nxposit >= m_points.GetCount()) {
-            nxposit = m_points.GetCount() - 1;
+          if (nxposit >= m_points1.GetCount()) {
+            nxposit = m_points1.GetCount() - 1;
           }
           float ydatapoint = -150.0;
           for (unsigned long int j = xposit; j <= nxposit; j++) {
-            if ((float)m_points[j] > ydatapoint) ydatapoint = m_points[j];
+            if ((float)m_points1[j] > ydatapoint) ydatapoint = m_points1[j];
           }
 
           if (ydatapoint > m_MaxYValue) ydatapoint = m_MaxYValue;
@@ -348,20 +334,20 @@ void CtrlOScope::PaintAllFunction(wxDC& dc) {
     dc.SetPen(wxPen(m_trColor, 1, wxPENSTYLE_SOLID));
     int lastx = 0, lasty = 0;
     float xpoint;
-    for (unsigned int i = 0; i < m_points.GetCount(); i++) {
+    for (unsigned int i = 0; i < m_points1.GetCount(); i++) {
       /* prepocitat vstupni bod na X osu */
       // float xpoint = i+ldist; // linearni zavislost
       xpoint = ldist + i * (rec.width - ldist - rdist) / (m_MaxXValue - m_MinXValue);
       /* prepocitat Y hodnotu na Y osu - orezat hodnoty */
-      if (m_points[i] > m_MaxYValue) {
-        m_points[i] = m_MaxYValue;
+      if (m_points1[i] > m_MaxYValue) {
+        m_points1[i] = m_MaxYValue;
       }
-      if (m_points[i] < m_MinYValue) {
-        m_points[i] = m_MinYValue;
+      if (m_points1[i] < m_MinYValue) {
+        m_points1[i] = m_MinYValue;
       }
       float ypoint =
           rec.height - bdist -
-          (rec.height - bdist - tdist) * (m_points[i] - m_MinYValue) / (m_MaxYValue - m_MinYValue);
+          (rec.height - bdist - tdist) * (m_points1[i] - m_MinYValue) / (m_MaxYValue - m_MinYValue);
       if (0 == i) {
         dc.DrawLine((int)(xpoint), (int)(ypoint), (int)(xpoint), (int)(ypoint));
       } else {

@@ -544,17 +544,17 @@ void MainFrame::set_custom_props() {
 
   /* oscilloscope */
   window_1->SetXRange(0, sweep_div * 10, 0);
-  window_1->SetYRange(-1, 1, 0, 1);
+  window_1->SetYRange(-1, 1, 0);
   window_1->SetNumOfVerticals(10);
 
   /* analyzer */
   window_1_spe->SetXRange(10, 100000, 1);
-  window_1_spe->SetYRange(-100, 0, 0, 1);
+  window_1_spe->SetYRange(-100, 0, 0);
   window_1_spe->SetFsample(m_SamplingFreq);
 
   /* freq response */
   window_1_frm->SetXRange(20, 20000, 1);
-  window_1_frm->SetYRange(-80, 0, 0, 1);
+  window_1_frm->SetYRange(-80, 0, 0);
   window_1_frm->SetFsample(m_SamplingFreq);
 
   frm_running = 0;
@@ -772,7 +772,7 @@ void MainFrame::DrawFreqResponse(void) {
     tmpval = rbotgain + (rupgain - rbotgain) / (upfreq - botfreq) * (1.0 * i - botfreq);
     right.Add(20.0 * log10(tmpval));
   }
-  window_1_frm->SetTrack(left);
+  window_1_frm->SetTrack1(left);
   window_1_frm->SetTrack2(right);
 }
 
@@ -840,7 +840,7 @@ void MainFrame::DrawOscilloscope(void) {
     }
   }
 
-  window_1->SetTrack(ardbl);
+  window_1->SetTrack1(ardbl);
   window_1->SetTrack2(ardbl2);
 }
 
@@ -969,7 +969,7 @@ void MainFrame::DrawSpectrum(void) {
     }
   }
 
-  window_1_spe->SetTrack(ardbl);
+  window_1_spe->SetTrack1(ardbl);
   window_1_spe->SetTrack2(ardbl2);
   switch (choice_fftrx->GetCurrentSelection()) {
     case 1:
@@ -1043,7 +1043,7 @@ void MainFrame::OnFFTScaleChanged(wxCommandEvent& WXUNUSED(event)) {
   choice_spe_ref->GetString(choice_spe_ref->GetCurrentSelection()).ToDouble(&ref);
   choice_spe_dbdiv->GetString(choice_spe_dbdiv->GetCurrentSelection()).ToDouble(&dbDiv);
   double lo = ref - 10 * dbDiv;
-  window_1_spe->SetYRange(lo, ref, 0, 1);
+  window_1_spe->SetYRange(lo, ref, 0);
 }
 
 void MainFrame::OnSpanStart(wxCommandEvent& WXUNUSED(event)) {

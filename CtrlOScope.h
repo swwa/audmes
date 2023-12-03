@@ -35,19 +35,13 @@ class CtrlOScope : public wxControl {
   void PaintAllFunction(wxDC& dc);
   void OnEraseBackground(wxEraseEvent& WXUNUSED(event)){};
 
-  void AppendPoints(double dNewPoint[], int iTrack = 0);
-  void SetTrack(double dTrack[], int iTrack = 0);
   void SetXRange(double dLower, double dUpper, int logrange);
-  void SetYRange(double dLower, double dUpper, int logrange, int itrack);
+  void SetYRange(double dLower, double dUpper, int logrange);
   void SetFsample(int fsampling);
 
   void SetXUnits(wxString string, wxString XMin = "", wxString XMax = "");
   void SetYUnits(wxString string, wxString YMin = "", wxString YMax = "");
-  void SetGridColor(wxColour color);
-  void SetPlotColor(wxColour color, int iTrack = 0);
-  void SetBackgroundColor(wxColour color);
-  void Reset(int iTrack = 0);
-  void SetTrack(wxArrayDouble ardbl);
+  void SetTrack1(wxArrayDouble ardbl);
   void SetTrack2(wxArrayDouble ardbl);
   void SetNumOfVerticals(int num) { m_NumberOfVerticals = num; };
 
@@ -60,7 +54,7 @@ class CtrlOScope : public wxControl {
  protected:
   int m_fsampling;
 
-  wxArrayDouble m_points;
+  wxArrayDouble m_points1;
   wxArrayDouble m_points2;
   double m_MaxXValue;
   double m_MinXValue;
