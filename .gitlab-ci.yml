@@ -8,14 +8,14 @@
 # can use verions as well, like gcc:5.2
 # see https://hub.docker.com/_/gcc/
 
-image: gcc
+image: gcc:12
 
 build:
   stage: build
   # instead of calling g++ directly you can also use some build toolkit like make
   # install the necessary build tools when needed
   before_script:
-  - apt update && apt -y install libwxgtk3.0-gtk3-dev cmake libfccp-dev libpulse-dev libasound2-dev
+  - apt update && apt -y install libwxgtk3.2-dev cmake libfccp-dev libpulse-dev libasound2-dev
   script:
     - mkdir build && cd build && cmake .. && cmake --build .
   artifacts:
