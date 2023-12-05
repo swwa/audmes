@@ -78,7 +78,7 @@ void CtrlOScope::SetTrack1(wxArrayDouble ardbl) { m_points1 = ardbl; }
 
 void CtrlOScope::SetTrack2(wxArrayDouble ardbl) { m_points2 = ardbl; }
 
-void CtrlOScope::SetTrackX(wxArrayDouble ardbl) { m_points2 = ardbl; }
+void CtrlOScope::SetTrackX(wxArrayDouble ardbl) { m_pointsX = ardbl; }
 
 /////////////////////////////////////////////////////////////////////////////
 void CtrlOScope::SetXRange(double dLower, double dUpper, int logrange) {
@@ -215,30 +215,32 @@ void CtrlOScope::PaintAllFunction(wxDC& dc) {
     }
 
     /* zobrazit body - draw data */
-    float binsize = 0.5 * m_fsampling / m_points1.GetCount();
 
     // left channel
     dc.SetPen(wxPen(m_trColor, 1, wxPENSTYLE_SOLID));
     int lastx = 0, lasty = 0;
     float lastxfreq = 0.0;
     // new plot function - walking through X points and select values from the table
-    if (m_points1.GetCount() > 0) {
+    if (m_pointsX.GetCount() > 0) {
       for (long int i = 0; i < rec.width - ldist - rdist; i++) {
         // find the frequency
-        float xfreq = m_MinXValue * pow(10, i / xstep);
-        if ((binsize > xfreq - lastxfreq) && i > 0) continue;
-        // find the position in the m_points1[] array
-        unsigned long int xposit = (unsigned long int)(xfreq / binsize);
+        double xfreq = m_MinXValue * pow(10, i / xstep);
+        if ((xfreq < lastxfreq) && i > 0) continue;
+        // find the position in the m_pointsX[] array
+        size_t xposit = 0;
+        for (size_t j = 0; j < m_pointsX.GetCount(); j++) {
+          if (m_pointsX[j] < xfreq) xposit = j;
+        }
 
         if (xposit < m_points1.GetCount()) {
           /* iterate though all fft bins between x and the next x position in the graph */
           float nxfreq = m_MinXValue * pow(10, (i + 1) / xstep);
-          unsigned long int nxposit = (unsigned long int)(nxfreq / binsize);
-          if (nxposit >= m_points1.GetCount()) {
-            nxposit = m_points1.GetCount() - 1;
+          size_t nxposit = 0;
+          for (size_t j = 0; j < m_pointsX.GetCount(); j++) {
+            if (m_pointsX[j] < nxfreq) nxposit = j;
           }
           float ydatapoint = -150.0;
-          for (unsigned long int j = xposit; j <= nxposit; j++) {
+          for (size_t j = xposit; j <= nxposit; j++) {
             if ((float)m_points1[j] > ydatapoint) ydatapoint = m_points1[j];
           }
 
@@ -254,12 +256,13 @@ void CtrlOScope::PaintAllFunction(wxDC& dc) {
           }
           lastx = (int)(i + ldist);
           lasty = (int)(ypoint);
-          if (i > 0) lastxfreq = xposit * binsize;
+          if (i > 0 && (xposit< m_pointsX.GetCount()-1)) lastxfreq = m_pointsX[xposit+1];
         }
       }
     }
 
     // right channel
+    float binsize = 0.5 * m_fsampling / m_points1.GetCount();
     dc.SetPen(wxPen(m_tr2Color, 1, wxPENSTYLE_SOLID));
     lastx = 0, lasty = 0;
     lastxfreq = 0.0;

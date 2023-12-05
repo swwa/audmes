@@ -949,6 +949,10 @@ void MainFrame::DrawSpectrum(void) {
     }
   }
 
+  double fbase = (double)m_SamplingFreq / nsampl;
+  for (int i = 0; i < nsampl / 2; i++) {
+    freqs.Add(fbase * i);
+  }
   window_1_spe->SetTrack1(ardbl);
   window_1_spe->SetTrack2(ardbl2);
   window_1_spe->SetTrackX(freqs);
