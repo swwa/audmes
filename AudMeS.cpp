@@ -66,6 +66,8 @@ EVT_MENU(wxID_SAVE, MainFrame::OnSaveClick)
 EVT_MENU(wxID_SAVEAS, MainFrame::OnSaveAsClick)
 EVT_MENU(ID_LOAD_FRM, MainFrame::OnLoadFRM)
 EVT_MENU(ID_SAVE_FRM, MainFrame::OnSaveFRM)
+EVT_MENU(ID_SAVE_SPE, MainFrame::OnSaveSPE)
+EVT_MENU(ID_SAVE_OSC, MainFrame::OnSaveOSC)
 EVT_BUTTON(ID_AUTOCAL, MainFrame::OnAutoCalClick)
 EVT_CHOICE(ID_OSCXSCALE, MainFrame::OnOscXScaleChanged)
 EVT_CHOICE(ID_FFTLENGTH, MainFrame::OnOscXScaleChanged)
@@ -109,6 +111,8 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
   wxglade_tmp_menu_1->Append(wxID_SAVEAS, wxT("Save &As"), wxT(""), wxITEM_NORMAL);
   wxglade_tmp_menu_1->Append(ID_LOAD_FRM, wxT("Load freq.resp."), wxT(""), wxITEM_NORMAL);
   wxglade_tmp_menu_1->Append(ID_SAVE_FRM, wxT("Save freq.resp."), wxT(""), wxITEM_NORMAL);
+  wxglade_tmp_menu_1->Append(ID_SAVE_SPE, wxT("Save spectrum"), wxT(""), wxITEM_NORMAL);
+  wxglade_tmp_menu_1->Append(ID_SAVE_OSC, wxT("Save oscillogram"), wxT(""), wxITEM_NORMAL);
   wxglade_tmp_menu_1->AppendSeparator();
   wxglade_tmp_menu_1->Append(wxID_EXIT, wxT("&Close\tAlt+F4"), wxT(""), wxITEM_NORMAL);
   frame_1_menubar->Append(wxglade_tmp_menu_1, wxT("&File"));
@@ -627,10 +631,54 @@ void MainFrame::OnSaveFRM(wxCommandEvent& WXUNUSED(event)) {
       << "GainL"
       << ","
       << "GainR" << std::endl;
-  for (unsigned int i = 0; i < m_frm_freqs.GetCount(); i++) {
-    frm << m_frm_freqs[i] << "," << m_frm_lgains[i] << "," << m_frm_rgains[i] << std::endl;
+  for (unsigned int i = 0; i < frm_freqs.GetCount(); i++) {
+    frm << frm_freqs[i] << "," << frm_lgains[i] << "," << frm_rgains[i] << std::endl;
   }
   frm.close();
+}
+
+void MainFrame::OnSaveSPE(wxCommandEvent& WXUNUSED(event)) {
+  wxFileDialog saveFileDialog(this, _("Save frequency spectrum file"), "", "",
+                              "CSV files (*.csv)|*.csv", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+  if (saveFileDialog.ShowModal() == wxID_CANCEL) return;
+
+  std::ofstream spe;
+  spe.open(saveFileDialog.GetPath().mb_str(), std::ios::trunc);
+  if (!spe.is_open()) {
+    wxLogError("Cannot save current contents in file '%s'.", saveFileDialog.GetPath());
+    return;
+  }
+  spe << "Hz"
+      << ","
+      << "MagL"
+      << ","
+      << "MagR" << std::endl;
+  for (unsigned int i = 0; i < spe_freqs.GetCount(); i++) {
+    spe << spe_freqs[i] << "," << spe_lmagns[i] << "," << spe_rmagns[i] << std::endl;
+  }
+  spe.close();
+}
+
+void MainFrame::OnSaveOSC(wxCommandEvent& WXUNUSED(event)) {
+  wxFileDialog saveFileDialog(this, _("Save oscillogram file"), "", "", "CSV files (*.csv)|*.csv",
+                              wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+  if (saveFileDialog.ShowModal() == wxID_CANCEL) return;
+
+  std::ofstream osc;
+  osc.open(saveFileDialog.GetPath().mb_str(), std::ios::trunc);
+  if (!osc.is_open()) {
+    wxLogError("Cannot save current contents in file '%s'.", saveFileDialog.GetPath());
+    return;
+  }
+  osc << "time"
+      << ","
+      << "MagL"
+      << ","
+      << "MagR" << std::endl;
+  for (unsigned int i = 0; i < osc_times.GetCount(); i++) {
+    osc << osc_times[i] << "," << osc_lmagns[i] << "," << osc_rmagns[i] << std::endl;
+  }
+  osc.close();
 }
 
 void MainFrame::OnLoadFRM(wxCommandEvent& WXUNUSED(event)) {
@@ -647,15 +695,15 @@ void MainFrame::OnLoadFRM(wxCommandEvent& WXUNUSED(event)) {
   io::CSVReader<3> in(openFileDialog.GetPath());
   in.read_header(io::ignore_extra_column, "Hz", "GainL", "GainR");
 
-  m_frm_freqs.Clear();
-  m_frm_lgains.Clear();
-  m_frm_rgains.Clear();
+  frm_freqs.Clear();
+  frm_lgains.Clear();
+  frm_rgains.Clear();
   double hz;
   double gainl, gainr;
   while (in.read_row(hz, gainl, gainr)) {
-    m_frm_freqs.Add(hz);
-    m_frm_lgains.Add(gainl);
-    m_frm_rgains.Add(gainr);
+    frm_freqs.Add(hz);
+    frm_lgains.Add(gainl);
+    frm_rgains.Add(gainr);
   }
   DrawFreqResponse();
   Refresh();
@@ -720,9 +768,9 @@ void MainFrame::CalcFreqResponse() {
         l_rms += g_SpeBuffer_Left[ii] * g_SpeBuffer_Left[ii];
         r_rms += g_SpeBuffer_Right[ii] * g_SpeBuffer_Right[ii];
       }
-      m_frm_freqs.Add(freq);
-      m_frm_lgains.Add(sqrt(l_rms / m_SpeBufferLength));
-      m_frm_rgains.Add(sqrt(r_rms / m_SpeBufferLength));
+      frm_freqs.Add(freq);
+      frm_lgains.Add(sqrt(l_rms / m_SpeBufferLength));
+      frm_rgains.Add(sqrt(r_rms / m_SpeBufferLength));
       frm_measure = -1;  // zero after increment
       frm_istep++;
     }
@@ -741,21 +789,21 @@ void MainFrame::DrawFreqResponse(void) {
   double tmpval;
   left.Clear();
   right.Clear();
-  for (unsigned int i = 0; i < m_frm_freqs.size(); i++) {
-    tmpval = m_frm_lgains[i];
+  for (unsigned int i = 0; i < frm_freqs.size(); i++) {
+    tmpval = frm_lgains[i];
     left.Add(20.0 * log10(tmpval));
-    tmpval = m_frm_rgains[i];
+    tmpval = frm_rgains[i];
     right.Add(20.0 * log10(tmpval));
   }
   window_1_frm->SetTrack1(left);
   window_1_frm->SetTrack2(right);
-  window_1_frm->SetTrackX(m_frm_freqs);
+  window_1_frm->SetTrackX(frm_freqs);
 }
 
 void MainFrame::DrawOscilloscope(void) {
-  wxArrayDouble ardbl;
-  wxArrayDouble ardbl2;
-  wxArrayDouble times;
+  osc_lmagns.Clear();
+  osc_rmagns.Clear();
+  osc_times.Clear();
   double trigger_edge;
   double trigger_level = 0.0;
   unsigned long int xtrig = 0;  // point where the trigger occures
@@ -812,15 +860,16 @@ void MainFrame::DrawOscilloscope(void) {
     }
 
     while (xtrig < finalBufferPoint) {
-      ardbl.Add(g_OscBuffer_Left[xtrig] / range_div - shft_val);
-      ardbl2.Add(g_OscBuffer_Right[xtrig] / range_div2 - shft_val2);
+      osc_lmagns.Add(g_OscBuffer_Left[xtrig] / range_div - shft_val);
+      osc_rmagns.Add(g_OscBuffer_Right[xtrig] / range_div2 - shft_val2);
+      osc_times.Add((double)xtrig / m_SamplingFreq);
       xtrig++;
     }
   }
 
-  window_1->SetTrack1(ardbl);
-  window_1->SetTrack2(ardbl2);
-  window_1->SetTrackX(times);
+  window_1->SetTrack1(osc_lmagns);
+  window_1->SetTrack2(osc_rmagns);
+  window_1->SetTrackX(osc_times);
 }
 
 void MainFrame::DrawSpectrum(void) {
@@ -830,9 +879,9 @@ void MainFrame::DrawSpectrum(void) {
   realout = (double*)malloc(nsampl * sizeof(double));
   imagout = (double*)malloc(nsampl * sizeof(double));
   windowf = (double*)malloc(nsampl * sizeof(double));
-  wxArrayDouble ardbl;
-  wxArrayDouble ardbl2;
-  wxArrayDouble freqs;
+  spe_freqs.Clear();
+  spe_lmagns.Clear();
+  spe_rmagns.Clear();
 
   // calculate window
   const double multiplier = 2 * M_PI / nsampl;
@@ -874,19 +923,19 @@ void MainFrame::DrawSpectrum(void) {
   }
 
   if (fft_double(nsampl, 0, realin, NULL, realout, imagout)) {
-    realout[0] = imagout[0] = 0;  // remove DC
+    realout[0] = imagout[0] = 0.00000001;  // remove DC
     // use only up to nsampl/2
     for (int i = 0; i < nsampl / 2; i++) {
       // multiply amplitude by 2 to compensate
       dval = 2 * sqrt(realout[i] * realout[i] + imagout[i] * imagout[i]);
       m_SMASpeLeft->AddVal(i, dval);
       dval_db = 20.0 * log10(m_SMASpeLeft->GetSMA(i));
-      ardbl.Add(dval_db);
+      spe_lmagns.Add(dval_db);
     }
   } else {
     /* wrong computation */
     for (int i = 0; i < nsampl / 2; i++) {
-      ardbl.Add(-150);
+      spe_lmagns.Add(-150);
     }
   }
 
@@ -940,22 +989,22 @@ void MainFrame::DrawSpectrum(void) {
       dval = 2 * sqrt(realout[i] * realout[i] + imagout[i] * imagout[i]);
       m_SMASpeRight->AddVal(i, dval);
       dval_db = (20.0 * log10(m_SMASpeRight->GetSMA(i)));
-      ardbl2.Add(dval_db);
+      spe_rmagns.Add(dval_db);
     }
   } else {
     /* wrong computation */
     for (int i = 0; i < nsampl / 2; i++) {
-      ardbl2.Add(-150);
+      spe_rmagns.Add(-150);
     }
   }
 
   double fbase = (double)m_SamplingFreq / nsampl;
   for (int i = 0; i < nsampl / 2; i++) {
-    freqs.Add(fbase * i);
+    spe_freqs.Add(fbase * i);
   }
-  window_1_spe->SetTrack1(ardbl);
-  window_1_spe->SetTrack2(ardbl2);
-  window_1_spe->SetTrackX(freqs);
+  window_1_spe->SetTrack1(spe_lmagns);
+  window_1_spe->SetTrack2(spe_rmagns);
+  window_1_spe->SetTrackX(spe_freqs);
   switch (choice_fftrx->GetCurrentSelection()) {
     case 1:
       window_1_spe->SetXRange(20, 20000, 1);
@@ -1068,9 +1117,9 @@ void MainFrame::OnFrmStart(wxCommandEvent& WXUNUSED(event)) {
     frm_ipoints = (int)ip;
     frm_istep = 0;
 
-    m_frm_freqs.Clear();
-    m_frm_lgains.Clear();
-    m_frm_rgains.Clear();
+    frm_freqs.Clear();
+    frm_lgains.Clear();
+    frm_rgains.Clear();
 
     frm_measure = 0;
     frm_running = true;

@@ -75,6 +75,8 @@ class MainFrame : public wxFrame {
   void OnSaveAsClick(wxCommandEvent& event);
   void OnLoadFRM(wxCommandEvent& event);
   void OnSaveFRM(wxCommandEvent& event);
+  void OnSaveSPE(wxCommandEvent& event);
+  void OnSaveOSC(wxCommandEvent& event);
   void OnAutoCalClick(wxCommandEvent& event);
   void OnOscXScaleChanged(wxCommandEvent& event);
   void OnFFTAvgChanged(wxCommandEvent& event);
@@ -170,9 +172,15 @@ class MainFrame : public wxFrame {
   int frm_istep;
   int frm_measure;
 
-  wxArrayDouble m_frm_freqs;
-  wxArrayDouble m_frm_lgains;
-  wxArrayDouble m_frm_rgains;
+  wxArrayDouble osc_times;
+  wxArrayDouble osc_lmagns;
+  wxArrayDouble osc_rmagns;
+  wxArrayDouble spe_freqs;
+  wxArrayDouble spe_lmagns;
+  wxArrayDouble spe_rmagns;
+  wxArrayDouble frm_freqs;
+  wxArrayDouble frm_lgains;
+  wxArrayDouble frm_rgains;
 
   wxButton* button_autocalibrate;
   wxString m_configfilename;
