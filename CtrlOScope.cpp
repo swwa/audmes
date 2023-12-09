@@ -219,107 +219,57 @@ void CtrlOScope::PaintAllFunction(wxDC& dc) {
     // left channel
     dc.SetPen(wxPen(m_trColor, 1, wxPENSTYLE_SOLID));
     int lastx = 0, lasty = 0;
-    float lastxfreq = 0.0;
-    // new plot function - walking through X points and select values from the table
-    if (m_pointsX.GetCount() > 0) {
-      for (long int i = 0; i < rec.width - ldist - rdist; i++) {
-        // find the frequency
-        double xfreq = m_MinXValue * pow(10, i / xstep);
-        if ((xfreq < lastxfreq) && i > 0) continue;
-        // find the position in the m_pointsX[] array
-        size_t xposit = 0;
-        for (size_t j = 0; j < m_pointsX.GetCount(); j++) {
-          if (m_pointsX[j] < xfreq) xposit = j;
-        }
-
-        if (xposit < m_points1.GetCount()) {
-          /* iterate though all fft bins between x and the next x position in the graph */
-          float nxfreq = m_MinXValue * pow(10, (i + 1) / xstep);
-          size_t nxposit = 0;
-          for (size_t j = 0; j < m_pointsX.GetCount(); j++) {
-            if (m_pointsX[j] < nxfreq) nxposit = j;
-          }
-          float ydatapoint = -150.0;
-          for (size_t j = xposit; j <= nxposit; j++) {
-            if ((float)m_points1[j] > ydatapoint) ydatapoint = m_points1[j];
-          }
-
-          if (ydatapoint > m_MaxYValue) ydatapoint = m_MaxYValue;
-          if (ydatapoint < m_MinYValue) ydatapoint = m_MinYValue;
-          float ypoint = rec.height - bdist -
-                         (rec.height - bdist - tdist) * (ydatapoint - m_MinYValue) /
-                             (m_MaxYValue - m_MinYValue);
-          if (0 == i) {
-            dc.DrawPoint((int)(i + ldist), (int)(ypoint));
-          } else {
-            dc.DrawLine(lastx, lasty, (int)(i + ldist), (int)(ypoint));
-          }
-          lastx = (int)(i + ldist);
-          lasty = (int)(ypoint);
-          if (i > 0 && (xposit< m_pointsX.GetCount()-1)) lastxfreq = m_pointsX[xposit+1];
-        }
+    int xpos;
+    // iterate though all X points in the data
+    for (size_t i = 0; i < m_pointsX.GetCount(); i++) {
+      if (m_pointsX.Item(i) < m_MinXValue) continue;
+      if (m_pointsX.Item(i) > m_MaxXValue) continue;
+      xpos = (int)ldist + xstep * log10(m_pointsX.Item(i) / m_MinXValue);
+      // find the point in the graph and limit to the graph area
+      double ydatapoint = m_points1.Item(i);
+      if (ydatapoint > m_MaxYValue) ydatapoint = m_MaxYValue;
+      if (ydatapoint < m_MinYValue) ydatapoint = m_MinYValue;
+      double ypoint =
+          rec.height - bdist -
+          (rec.height - bdist - tdist) * (ydatapoint - m_MinYValue) / (m_MaxYValue - m_MinYValue);
+      if (lastx == 0) {
+        dc.DrawPoint((int)(xpos), (int)(ypoint));
+      } else {
+        dc.DrawLine(lastx, lasty, (int)(xpos), (int)(ypoint));
       }
+      lastx = (int)(xpos);
+      lasty = (int)(ypoint);
     }
 
     // right channel
-    float binsize = 0.5 * m_fsampling / m_points1.GetCount();
     dc.SetPen(wxPen(m_tr2Color, 1, wxPENSTYLE_SOLID));
     lastx = 0, lasty = 0;
-    lastxfreq = 0.0;
-    if (m_points2.GetCount() > 0) {
-      for (long int i = 0; i < rec.width - ldist - rdist; i++) {
-        // find the frequency
-        float xfreq = m_MinXValue * pow(10, i / xstep);
-        if ((binsize > xfreq - lastxfreq) && i > 0) continue;
-        // find the position in the m_points2[] array
-        unsigned long int xposit = (unsigned long int)(xfreq / binsize);
-
-        if (xposit < m_points2.GetCount()) {
-          /* iterate though all fft bins between x and the next x position in the graph */
-          float nxfreq = m_MinXValue * pow(10, (i + 1) / xstep);
-          unsigned long int nxposit = (unsigned long int)(nxfreq / binsize);
-          if (nxposit >= m_points2.GetCount()) {
-            nxposit = m_points2.GetCount() - 1;
-          }
-          float ydatapoint = -150.0;
-          for (unsigned long int j = xposit; j <= nxposit; j++) {
-            if ((float)m_points2[j] > ydatapoint) ydatapoint = m_points2[j];
-          }
-
-          if (ydatapoint > m_MaxYValue) ydatapoint = m_MaxYValue;
-          if (ydatapoint < m_MinYValue) ydatapoint = m_MinYValue;
-          float ypoint = rec.height - bdist -
-                         (rec.height - bdist - tdist) * (ydatapoint - m_MinYValue) /
-                             (m_MaxYValue - m_MinYValue);
-          if (0 == i) {
-            dc.DrawPoint((int)(i + ldist), (int)(ypoint));
-          } else {
-            dc.DrawLine(lastx, lasty, (int)(i + ldist), (int)(ypoint));
-          }
-          lastx = (int)(i + ldist);
-          lasty = (int)(ypoint);
-          if (i > 0) lastxfreq = xposit * binsize;
-        }
+    // iterate though all X points in the data
+    for (size_t i = 0; i < m_pointsX.GetCount(); i++) {
+      if (m_pointsX.Item(i) < m_MinXValue) continue;
+      if (m_pointsX.Item(i) > m_MaxXValue) continue;
+      xpos = (int)ldist + xstep * log10(m_pointsX.Item(i) / m_MinXValue);
+      // find the point in the graph and limit to the graph area
+      double ydatapoint = m_points2.Item(i);
+      if (ydatapoint > m_MaxYValue) ydatapoint = m_MaxYValue;
+      if (ydatapoint < m_MinYValue) ydatapoint = m_MinYValue;
+      double ypoint =
+          rec.height - bdist -
+          (rec.height - bdist - tdist) * (ydatapoint - m_MinYValue) / (m_MaxYValue - m_MinYValue);
+      if (lastx == 0) {
+        dc.DrawPoint((int)(xpos), (int)(ypoint));
+      } else {
+        dc.DrawLine(lastx, lasty, (int)(xpos), (int)(ypoint));
       }
+      lastx = (int)(xpos);
+      lasty = (int)(ypoint);
     }
 
     /*  **************** linearni meritko *********************** */
   } else {
     /* cara bude minimalne kazdych 30 pixelu; pocet 2,5,10,20,50 atd. */
     // if we have m_NumberOfVerticals == 0, let's compute steps. But otherwise not
-    int nline = 100;
     int xdiv = m_NumberOfVerticals;
-    int nstrt = nline;
-    while (xdiv == 0) {
-      if (rec.width < nline) {
-        xdiv = 1 * nline / nstrt;
-      } else if (rec.width < 2 * nline) {
-        xdiv = 2 * nline / nstrt;
-      } else if (rec.width < 5 * nline) {
-        xdiv = 5 * nline / nstrt;
-      }
-      nline *= 10;
-    }
 
     float xstep = 1.0 * (rec.width - ldist - rdist) / xdiv;
     for (int i = 0; i <= xdiv; i++) {
