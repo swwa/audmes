@@ -163,7 +163,7 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
                               wxDefaultSize, wxTE_PROCESS_ENTER);
 
   /* oscilloscope panel */
-  window_1 = new CtrlOScope(notebook_1_osc, _T(""), _T(""));
+  window_osc = new CtrlOScope(notebook_1_osc, _T(""), _T(""));
   label_5_copy = new wxStaticText(notebook_1_osc, -1, wxT("X Scale [samples/div]: "));
   const wxString choice_osc_l_swp_copy_choices[] = {
       wxT("10"),   wxT("20"),   wxT("50"),   wxT("100"),   wxT("200"),   wxT("500"),
@@ -377,7 +377,7 @@ void MainFrame::do_layout() {
   sizer_2->SetSizeHints(notebook_1_gen);
 
   // oscilloscope
-  sizer_10->Add(window_1, 1, wxEXPAND, 0);  // CtrlOScope
+  sizer_10->Add(window_osc, 1, wxEXPAND, 0);  // CtrlOScope
   // sizer_13: wxHORIZONTAL
   sizer_13->Add(label_5_copy, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);  // X Scale [samples/div]
   sizer_13->Add(choice_osc_l_swp_copy, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);  // 20, 50....50000
@@ -547,9 +547,9 @@ void MainFrame::set_custom_props() {
   m_OscBufferLength = (long)(10 * sweep_div);
 
   /* oscilloscope */
-  window_1->SetXRange(0, sweep_div * 10, 0);
-  window_1->SetYRange(-1, 1, 0);
-  window_1->SetNumOfVerticals(10);
+  window_osc->SetXRange(0, sweep_div * 10, 0);
+  window_osc->SetYRange(-1, 1, 0);
+  window_osc->SetNumOfVerticals(10);
 
   /* analyzer */
   window_1_spe->SetXRange(10, 100000, 1);
@@ -867,9 +867,9 @@ void MainFrame::DrawOscilloscope(void) {
     }
   }
 
-  window_1->SetTrack1(osc_lmagns);
-  window_1->SetTrack2(osc_rmagns);
-  window_1->SetTrackX(osc_times);
+  window_osc->SetTrack1(osc_lmagns);
+  window_osc->SetTrack2(osc_rmagns);
+  window_osc->SetTrackX(osc_times);
 }
 
 void MainFrame::DrawSpectrum(void) {
@@ -1050,7 +1050,7 @@ void MainFrame::OnOscXScaleChanged(wxCommandEvent& WXUNUSED(event)) {
   choice_osc_l_swp_copy->GetString(choice_osc_l_swp_copy->GetCurrentSelection())
       .ToDouble(&sweep_div);
   m_OscBufferLength = (long)(10 * sweep_div);
-  window_1->SetXRange(0, sweep_div * 10, 0);
+  window_osc->SetXRange(0, sweep_div * 10, 0);
 
   choice_fftlength->GetString(choice_fftlength->GetCurrentSelection()).ToDouble(&sweep_div);
   m_SpeBufferLength = (long)(sweep_div);

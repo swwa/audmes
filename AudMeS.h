@@ -114,7 +114,7 @@ class MainFrame : public wxFrame {
   wxToggleButton* button_gen_start;
 
   wxPanel* notebook_1_gen;
-  CtrlOScope* window_1;
+  CtrlOScope* window_osc;
   wxStaticText* label_5_copy;
   wxChoice* choice_osc_l_swp_copy;
   wxStaticText* label_6;
