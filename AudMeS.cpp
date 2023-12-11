@@ -658,6 +658,7 @@ void MainFrame::OnLoadFRM(wxCommandEvent& WXUNUSED(event)) {
     m_frm_rgains.Add(gainr);
   }
   DrawFreqResponse();
+  Refresh();
 }
 
 void MainFrame::OnAutoCalClick(wxCommandEvent& WXUNUSED(event)) {
