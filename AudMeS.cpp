@@ -164,13 +164,13 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
 
   /* oscilloscope panel */
   window_osc = new CtrlOScope(notebook_1_osc, _T(""), _T(""));
-  label_5_copy = new wxStaticText(notebook_1_osc, -1, wxT("X Scale [samples/div]: "));
-  const wxString choice_osc_l_swp_copy_choices[] = {
+  label_5_copy = new wxStaticText(notebook_1_osc, -1, wxT("X Scale [us/div]: "));
+  const wxString choice_osc_swp_choices[] = {
       wxT("10"),   wxT("20"),   wxT("50"),   wxT("100"),   wxT("200"),   wxT("500"),
       wxT("1000"), wxT("2000"), wxT("5000"), wxT("10000"), wxT("20000"), wxT("50000"),
   };
-  choice_osc_l_swp_copy = new wxChoice(notebook_1_osc, ID_OSCXSCALE, wxDefaultPosition,
-                                       wxDefaultSize, 12, choice_osc_l_swp_copy_choices, 0);
+  choice_osc_swp = new wxChoice(notebook_1_osc, ID_OSCXSCALE, wxDefaultPosition, wxDefaultSize, 12,
+                                choice_osc_swp_choices, 0);
   label_6 = new wxStaticText(notebook_1_osc, -1, wxT("Res [V/div]: "));
   const wxString choice_osc_l_res_choices[] = {
       wxT("1"),    wxT("2"),    wxT("4"),     wxT("8"),    wxT("16"),   wxT("32"),
@@ -273,7 +273,7 @@ void MainFrame::set_properties() {
   frame_1_statusbar->SetStatusText("AUDio MEasurement System - version " AUDMES_VERSION_STRING);
   choice_l_wav->SetSelection(0);
   choice_r_wav->SetSelection(0);
-  choice_osc_l_swp_copy->SetSelection(0);
+  choice_osc_swp->SetSelection(0);
   choice_osc_l_res->SetSelection(0);
   choice_osc_l_off->SetSelection(0);
   choice_osc_trig_source->SetSelection(0);
@@ -379,8 +379,8 @@ void MainFrame::do_layout() {
   // oscilloscope
   sizer_10->Add(window_osc, 1, wxEXPAND, 0);  // CtrlOScope
   // sizer_13: wxHORIZONTAL
-  sizer_13->Add(label_5_copy, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);  // X Scale [samples/div]
-  sizer_13->Add(choice_osc_l_swp_copy, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);  // 20, 50....50000
+  sizer_13->Add(label_5_copy, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);    // X Scale [samples/div]
+  sizer_13->Add(choice_osc_swp, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);  // 20, 50....50000
   // sizer_11: wxVERTICAL
   sizer_11->Add(sizer_13, 0, wxALIGN_CENTER_HORIZONTAL, 0);
 
@@ -542,12 +542,11 @@ void MainFrame::set_custom_props() {
   choice_osc_l_off->SetSelection(5);
   choice_osc_l_off_copy->SetSelection(5);
 
-  choice_osc_l_swp_copy->GetString(choice_osc_l_swp_copy->GetCurrentSelection())
-      .ToDouble(&sweep_div);
+  choice_osc_swp->GetString(choice_osc_swp->GetCurrentSelection()).ToDouble(&sweep_div);
   m_OscBufferLength = (long)(10 * sweep_div);
 
   /* oscilloscope */
-  window_osc->SetXRange(0, sweep_div * 10, 0);
+  window_osc->SetXRange(0, sweep_div * 10E-6, 0);
   window_osc->SetYRange(-1, 1, 0);
   window_osc->SetNumOfVerticals(10);
 
@@ -859,11 +858,10 @@ void MainFrame::DrawOscilloscope(void) {
       finalBufferPoint = (unsigned long)(2.0 * m_OscBufferLength);
     }
 
-    while (xtrig < finalBufferPoint) {
-      osc_lmagns.Add(g_OscBuffer_Left[xtrig] / range_div - shft_val);
-      osc_rmagns.Add(g_OscBuffer_Right[xtrig] / range_div2 - shft_val2);
-      osc_times.Add((double)xtrig / m_SamplingFreq);
-      xtrig++;
+    for (int i = 0; i + xtrig < finalBufferPoint; i++) {
+      osc_lmagns.Add(g_OscBuffer_Left[i + xtrig] / range_div - shft_val);
+      osc_rmagns.Add(g_OscBuffer_Right[i + xtrig] / range_div2 - shft_val2);
+      osc_times.Add((double)i / m_SamplingFreq);
     }
   }
 
@@ -1047,10 +1045,9 @@ void MainFrame::OnTimer(wxTimerEvent& WXUNUSED(event)) {
 
 void MainFrame::OnOscXScaleChanged(wxCommandEvent& WXUNUSED(event)) {
   double sweep_div;
-  choice_osc_l_swp_copy->GetString(choice_osc_l_swp_copy->GetCurrentSelection())
-      .ToDouble(&sweep_div);
+  choice_osc_swp->GetString(choice_osc_swp->GetCurrentSelection()).ToDouble(&sweep_div);
   m_OscBufferLength = (long)(10 * sweep_div);
-  window_osc->SetXRange(0, sweep_div * 10, 0);
+  window_osc->SetXRange(0, sweep_div * 10E-6, 0);
 
   choice_fftlength->GetString(choice_fftlength->GetCurrentSelection()).ToDouble(&sweep_div);
   m_SpeBufferLength = (long)(sweep_div);

@@ -116,7 +116,7 @@ class MainFrame : public wxFrame {
   wxPanel* notebook_1_gen;
   CtrlOScope* window_osc;
   wxStaticText* label_5_copy;
-  wxChoice* choice_osc_l_swp_copy;
+  wxChoice* choice_osc_swp;
   wxStaticText* label_6;
   wxChoice* choice_osc_l_res;
   wxStaticText* label_7;

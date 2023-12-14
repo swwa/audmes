@@ -133,6 +133,7 @@ void CtrlOScope::PaintAllFunction(wxDC& dc) {
   int tdist = 10;  // space on top
   int bdist = 0;   // legend space on bottom
   int udist = 0;   // unit text space
+  double xstep = 0;
   static const int fSize = 10;
 
   /* kresli pozadi - draw background */
@@ -176,7 +177,7 @@ void CtrlOScope::PaintAllFunction(wxDC& dc) {
 
   for (int i = 0; i <= ydiv; i++) {
     /* kresli vsechny cary - draw the lines*/
-    float ystep = 1.0 * (rec.height - bdist - tdist) / ydiv;
+    double ystep = 1.0 * (rec.height - bdist - tdist) / ydiv;
     dc.DrawLine(ldist, (int)(rec.height - ystep * i - bdist), rec.width - rdist,
                 (int)(rec.height - ystep * i - bdist));
     bla.Printf(wxT("%.1f"), m_MinYValue + (m_MaxYValue - m_MinYValue) * i / ydiv);
@@ -185,13 +186,10 @@ void CtrlOScope::PaintAllFunction(wxDC& dc) {
   }
 
   /* spocitat jak casto se budou kreslit vertikalni cary */
-  /* ******************************************************************* */
-  /* ******************************************************************* */
   /* vertical lines depending on linear or log scale  */
-  if (1 == m_LogX) {
-    /* draw vertical lines */
-    float ndecs = log10(m_MaxXValue / m_MinXValue);
-    float xstep = (rec.width - ldist - rdist) / ndecs;
+  if (m_LogX) {
+    /* draw vertical lines with log distance */
+    xstep = (rec.width - ldist - rdist) / log10(m_MaxXValue / m_MinXValue);
     int decade = log10(m_MinXValue);
     double freq = m_MinXValue;
     while (freq <= m_MaxXValue) {
@@ -213,69 +211,13 @@ void CtrlOScope::PaintAllFunction(wxDC& dc) {
         decade++;
       }
     }
-
-    /* zobrazit body - draw data */
-
-    // left channel
-    dc.SetPen(wxPen(m_trColor, 1, wxPENSTYLE_SOLID));
-    int lastx = 0, lasty = 0;
-    int xpos;
-    // iterate though all X points in the data
-    for (size_t i = 0; i < m_pointsX.GetCount(); i++) {
-      if (m_pointsX.Item(i) < m_MinXValue) continue;
-      if (m_pointsX.Item(i) > m_MaxXValue) continue;
-      xpos = (int)ldist + xstep * log10(m_pointsX.Item(i) / m_MinXValue);
-      // find the point in the graph and limit to the graph area
-      double ydatapoint = m_points1.Item(i);
-      if (ydatapoint > m_MaxYValue) ydatapoint = m_MaxYValue;
-      if (ydatapoint < m_MinYValue) ydatapoint = m_MinYValue;
-      double ypoint =
-          rec.height - bdist -
-          (rec.height - bdist - tdist) * (ydatapoint - m_MinYValue) / (m_MaxYValue - m_MinYValue);
-      if (lastx == 0) {
-        dc.DrawPoint((int)(xpos), (int)(ypoint));
-      } else {
-        dc.DrawLine(lastx, lasty, (int)(xpos), (int)(ypoint));
-      }
-      lastx = (int)(xpos);
-      lasty = (int)(ypoint);
-    }
-
-    // right channel
-    dc.SetPen(wxPen(m_tr2Color, 1, wxPENSTYLE_SOLID));
-    lastx = 0, lasty = 0;
-    // iterate though all X points in the data
-    for (size_t i = 0; i < m_pointsX.GetCount(); i++) {
-      if (m_pointsX.Item(i) < m_MinXValue) continue;
-      if (m_pointsX.Item(i) > m_MaxXValue) continue;
-      xpos = (int)ldist + xstep * log10(m_pointsX.Item(i) / m_MinXValue);
-      // find the point in the graph and limit to the graph area
-      double ydatapoint = m_points2.Item(i);
-      if (ydatapoint > m_MaxYValue) ydatapoint = m_MaxYValue;
-      if (ydatapoint < m_MinYValue) ydatapoint = m_MinYValue;
-      double ypoint =
-          rec.height - bdist -
-          (rec.height - bdist - tdist) * (ydatapoint - m_MinYValue) / (m_MaxYValue - m_MinYValue);
-      if (lastx == 0) {
-        dc.DrawPoint((int)(xpos), (int)(ypoint));
-      } else {
-        dc.DrawLine(lastx, lasty, (int)(xpos), (int)(ypoint));
-      }
-      lastx = (int)(xpos);
-      lasty = (int)(ypoint);
-    }
-
-    /*  **************** linearni meritko *********************** */
   } else {
-    /* cara bude minimalne kazdych 30 pixelu; pocet 2,5,10,20,50 atd. */
-    // if we have m_NumberOfVerticals == 0, let's compute steps. But otherwise not
-    int xdiv = m_NumberOfVerticals;
-
-    float xstep = 1.0 * (rec.width - ldist - rdist) / xdiv;
-    for (int i = 0; i <= xdiv; i++) {
+    /* draw vertical lines with linear distance */
+    xstep = (double)(rec.width - ldist - rdist) / m_NumberOfVerticals;
+    for (int i = 0; i <= m_NumberOfVerticals; i++) {
       /* kresli vsechny cary */
       dc.DrawLine((int)(ldist + xstep * i), tdist, (int)(ldist + xstep * i), rec.height - bdist);
-      bla.Printf(wxT("%.0f"), m_MinXValue + (m_MaxXValue - m_MinXValue) * i / xdiv);
+      bla.Printf(wxT("%.0f"), m_MinXValue + (m_MaxXValue - m_MinXValue) * i / m_NumberOfVerticals);
       dc.GetTextExtent(bla, &tw, &th);
       if ((xstep * i + ldist) < (tw / 2)) {
         dc.DrawText(bla, (int)(ldist + xstep * i), rec.height - bdist + 8);
@@ -285,56 +227,65 @@ void CtrlOScope::PaintAllFunction(wxDC& dc) {
         dc.DrawText(bla, (int)(ldist + xstep * i - tw), rec.height - bdist + 8);
       }
     }
-    /* kresli body v SetTracks */
-    dc.SetPen(wxPen(m_trColor, 1, wxPENSTYLE_SOLID));
-    int lastx = 0, lasty = 0;
-    float xpoint;
-    for (unsigned int i = 0; i < m_points1.GetCount(); i++) {
-      /* prepocitat vstupni bod na X osu */
-      // float xpoint = i+ldist; // linearni zavislost
-      xpoint = ldist + i * (rec.width - ldist - rdist) / (m_MaxXValue - m_MinXValue);
-      /* prepocitat Y hodnotu na Y osu - orezat hodnoty */
-      if (m_points1[i] > m_MaxYValue) {
-        m_points1[i] = m_MaxYValue;
-      }
-      if (m_points1[i] < m_MinYValue) {
-        m_points1[i] = m_MinYValue;
-      }
-      float ypoint =
-          rec.height - bdist -
-          (rec.height - bdist - tdist) * (m_points1[i] - m_MinYValue) / (m_MaxYValue - m_MinYValue);
-      if (0 == i) {
-        dc.DrawLine((int)(xpoint), (int)(ypoint), (int)(xpoint), (int)(ypoint));
-      } else {
-        dc.DrawLine(lastx, lasty, (int)(xpoint), (int)(ypoint));
-      }
-      lastx = (int)(xpoint);
-      lasty = (int)(ypoint);
-    }
-    dc.SetPen(wxPen(m_tr2Color, 1, wxPENSTYLE_SOLID));
-    for (unsigned int i = 0; i < m_points2.GetCount(); i++) {
-      /* prepocitat vstupni bod na X osu */
-      // float xpoint = i+ldist; // linearni zavislost
-      xpoint = ldist + i * (rec.width - ldist - rdist) / (m_MaxXValue - m_MinXValue);
-      /* prepocitat Y hodnotu na Y osu - orezat hodnoty */
-      if (m_points2[i] > m_MaxYValue) {
-        m_points2[i] = m_MaxYValue;
-      }
-      if (m_points2[i] < m_MinYValue) {
-        m_points2[i] = m_MinYValue;
-      }
-      float ypoint =
-          rec.height - bdist -
-          (rec.height - bdist - tdist) * (m_points2[i] - m_MinYValue) / (m_MaxYValue - m_MinYValue);
-      if (0 == i) {
-        dc.DrawLine((int)(xpoint), (int)(ypoint), (int)(xpoint), (int)(ypoint));
-      } else {
-        dc.DrawLine(lastx, lasty, (int)(xpoint), (int)(ypoint));
-      }
-      lastx = (int)(xpoint);
-      lasty = (int)(ypoint);
-    }
   }
+
+  /* zobrazit body - draw data */
+
+  // left channel
+  dc.SetPen(wxPen(m_trColor, 1, wxPENSTYLE_SOLID));
+  int lastx = 0, lasty = 0;
+  int xpos;
+  // iterate though all X points in the data
+  for (size_t i = 0; i < m_pointsX.GetCount(); i++) {
+    if (m_pointsX.Item(i) < m_MinXValue) continue;
+    if (m_pointsX.Item(i) > m_MaxXValue) continue;
+    if (m_LogX)
+      xpos = (int)ldist + xstep * log10(m_pointsX.Item(i) / m_MinXValue);
+    else
+      xpos = ldist + m_pointsX.Item(i) * xstep * m_NumberOfVerticals / (m_MaxXValue - m_MinXValue);
+    // find the point in the graph and limit to the graph area
+    double ydatapoint = m_points1.Item(i);
+    if (ydatapoint > m_MaxYValue) ydatapoint = m_MaxYValue;
+    if (ydatapoint < m_MinYValue) ydatapoint = m_MinYValue;
+    double ypoint =
+        rec.height - bdist -
+        (rec.height - bdist - tdist) * (ydatapoint - m_MinYValue) / (m_MaxYValue - m_MinYValue);
+    if (lastx == 0) {
+      dc.DrawPoint((int)(xpos), (int)(ypoint));
+    } else {
+      dc.DrawLine(lastx, lasty, (int)(xpos), (int)(ypoint));
+    }
+    lastx = (int)(xpos);
+    lasty = (int)(ypoint);
+  }
+
+  // right channel
+  dc.SetPen(wxPen(m_tr2Color, 1, wxPENSTYLE_SOLID));
+  lastx = 0, lasty = 0;
+  // iterate though all X points in the data
+  for (size_t i = 0; i < m_pointsX.GetCount(); i++) {
+    if (m_pointsX.Item(i) < m_MinXValue) continue;
+    if (m_pointsX.Item(i) > m_MaxXValue) continue;
+    if (m_LogX)
+      xpos = (int)ldist + xstep * log10(m_pointsX.Item(i) / m_MinXValue);
+    else
+      xpos = ldist + m_pointsX.Item(i) * xstep * m_NumberOfVerticals / (m_MaxXValue - m_MinXValue);
+    // find the point in the graph and limit to the graph area
+    double ydatapoint = m_points2.Item(i);
+    if (ydatapoint > m_MaxYValue) ydatapoint = m_MaxYValue;
+    if (ydatapoint < m_MinYValue) ydatapoint = m_MinYValue;
+    double ypoint =
+        rec.height - bdist -
+        (rec.height - bdist - tdist) * (ydatapoint - m_MinYValue) / (m_MaxYValue - m_MinYValue);
+    if (lastx == 0) {
+      dc.DrawPoint((int)(xpos), (int)(ypoint));
+    } else {
+      dc.DrawLine(lastx, lasty, (int)(xpos), (int)(ypoint));
+    }
+    lastx = (int)(xpos);
+    lasty = (int)(ypoint);
+  }
+
   if (wxT("") != m_UserText) {
     dc.SetTextForeground(m_whColor);
     dc.DrawText(m_UserText, m_UserTextPosX, m_UserTextPosY);
