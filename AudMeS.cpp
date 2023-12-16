@@ -522,8 +522,6 @@ void MainFrame::do_layout() {
 }
 
 void MainFrame::set_custom_props() {
-  double sweep_div;
-
 #ifdef __WXMSW__
   SetIcon(wxICON(AudMeSIcon));
 #endif
@@ -542,8 +540,8 @@ void MainFrame::set_custom_props() {
   choice_osc_l_off->SetSelection(5);
   choice_osc_l_off_copy->SetSelection(5);
 
-  choice_osc_swp->GetString(choice_osc_swp->GetCurrentSelection()).ToDouble(&sweep_div);
-  m_OscBufferLength = (long)(10 * sweep_div);
+  sweep_div = wxAtoi(choice_osc_swp->GetString(choice_osc_swp->GetCurrentSelection()));
+  m_OscBufferLength = (long)(1 + sweep_div * 10E-6 * m_SamplingFreq);
 
   /* oscilloscope */
   window_osc->SetXRange(0, sweep_div * 10E-6, 0);
@@ -569,8 +567,7 @@ void MainFrame::set_custom_props() {
   m_timer = new wxTimer(this, ID_TIMERID);
   m_timer->Start(100);
 
-  choice_fftlength->GetString(choice_fftlength->GetCurrentSelection()).ToDouble(&sweep_div);
-  m_SpeBufferLength = (long)(sweep_div);
+  m_SpeBufferLength = wxAtoi(choice_fftlength->GetString(choice_fftlength->GetCurrentSelection()));
 
   m_RWAudio = new RWAudio();
   m_SMASpeLeft = new SMA_2D(m_SpeBufferLength >> 1, 1);
@@ -811,7 +808,7 @@ void MainFrame::DrawOscilloscope(void) {
   double shft_val = 20.0 * (choice_osc_l_off->GetCurrentSelection() - 5) / 128.0;
   double range_div2 = pow(2, choice_osc_l_res_copy->GetCurrentSelection() - 15);
   double shft_val2 = 20.0 * (choice_osc_l_off_copy->GetCurrentSelection() - 5) / 128.0;
-  double hysteresis_level = range_div / 10.0;
+  double hysteresis_level = range_div / 20.0;
 
   // triggering - re-done a little bit, more or less ...
   trigger_edge = (0 == choice_osc_trig_edge->GetCurrentSelection()) ? 1.0 : -1.0;
@@ -1044,15 +1041,13 @@ void MainFrame::OnTimer(wxTimerEvent& WXUNUSED(event)) {
 }
 
 void MainFrame::OnOscXScaleChanged(wxCommandEvent& WXUNUSED(event)) {
-  double sweep_div;
-  choice_osc_swp->GetString(choice_osc_swp->GetCurrentSelection()).ToDouble(&sweep_div);
-  m_OscBufferLength = (long)(10 * sweep_div);
+  sweep_div = wxAtoi(choice_osc_swp->GetString(choice_osc_swp->GetCurrentSelection()));
+  m_OscBufferLength = (long)(1 + sweep_div * 10E-6 * m_SamplingFreq);
   window_osc->SetXRange(0, sweep_div * 10E-6, 0);
 
-  choice_fftlength->GetString(choice_fftlength->GetCurrentSelection()).ToDouble(&sweep_div);
-  m_SpeBufferLength = (long)(sweep_div);
+  m_SpeBufferLength = wxAtoi(choice_fftlength->GetString(choice_fftlength->GetCurrentSelection()));
 
-  m_RWAudio->ChangeBufLen((unsigned long)(2.0 * m_OscBufferLength),
+  m_RWAudio->ChangeBufLen((unsigned long)(4.0 * m_OscBufferLength),
                           m_SpeBufferLength);  // we need bigger buffer because of synchronization
   m_SMASpeLeft->SetNumRecords(m_SpeBufferLength >> 1);
   m_SMASpeRight->SetNumRecords(m_SpeBufferLength >> 1);
@@ -1251,6 +1246,10 @@ void MainFrame::OnSelectSndCard(wxCommandEvent& WXUNUSED(event)) {
     m_SMASpeRight->SetNumRecords(m_SpeBufferLength >> 1);
     window_1_spe->SetFsample(m_SamplingFreq);
     window_1_frm->SetFsample(m_SamplingFreq);
+    m_OscBufferLength = (long)(1 + sweep_div * 10E-6 * m_SamplingFreq);
+    m_RWAudio->ChangeBufLen((unsigned long)(4.0 * m_OscBufferLength),
+                            m_SpeBufferLength);  // we need bigger buffer because of synchronization
+    g_OscBufferChanged = false;
   }
 }
 

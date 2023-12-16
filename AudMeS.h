@@ -171,6 +171,7 @@ class MainFrame : public wxFrame {
   int frm_ipoints;
   int frm_istep;
   int frm_measure;
+  double sweep_div;
 
   wxArrayDouble osc_times;
   wxArrayDouble osc_lmagns;
