@@ -217,7 +217,18 @@ void CtrlOScope::PaintAllFunction(wxDC& dc) {
     for (int i = 0; i <= m_NumberOfVerticals; i++) {
       /* kresli vsechny cary */
       dc.DrawLine((int)(ldist + xstep * i), tdist, (int)(ldist + xstep * i), rec.height - bdist);
-      bla.Printf(wxT("%.0f"), m_MinXValue + (m_MaxXValue - m_MinXValue) * i / m_NumberOfVerticals);
+      double cl = m_MinXValue + (m_MaxXValue - m_MinXValue) * i / m_NumberOfVerticals;
+      int clk = cl / 1000;
+      int clm = cl * 1000;
+      int clu = cl * 1000000;
+      if (clk >= 1)
+        bla.Printf(wxT("%dk"), clk);
+      else if (cl >= 1)
+        bla.Printf(wxT("%d"), (int)cl);
+      else if (clm >= 1)
+        bla.Printf(wxT("%dm"), clm);
+      else
+        bla.Printf(wxT("%du"), clu);
       dc.GetTextExtent(bla, &tw, &th);
       if ((xstep * i + ldist) < (tw / 2)) {
         dc.DrawText(bla, (int)(ldist + xstep * i), rec.height - bdist + 8);
