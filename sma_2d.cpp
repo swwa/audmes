@@ -57,10 +57,13 @@ int SMA_2D::AddVal(int recordNum, double val) {
 }
 
 double SMA_2D::GetSMA(int recordNum) {
-  // Calculate the average only over the values which are
-  // added. If not, it would take until all values are added
-  // until the average shows the final value.
-  // If no samples have been added yet, prevent division by zero.
+// Calculate the average only over the values which are
+// added. If not, it would take until all values are added
+// until the average shows the final value.
+// If no samples have been added yet, prevent division by zero.
+#ifdef _DEBUG
+  if (recordNum >= m_NumRecords) abort();
+#endif
   if (numSummed[recordNum] == 0) {
     return 0.0;
   }

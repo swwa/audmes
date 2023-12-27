@@ -32,6 +32,10 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 message("Build type is ${CMAKE_BUILD_TYPE}")
 
+if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+	add_definitions(-D_DEBUG)
+endif()
+
 if (WIN32)
 	set(AM_SOURCES ${AM_SOURCES} audmes.rc)
 	string(REPLACE "\\" "/" HDIR "$ENV{HOMEDRIVE}$ENV{HOMEPATH}")
