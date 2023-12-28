@@ -116,7 +116,7 @@ void CtrlOScope::PaintAll(wxDC& dc) {
   memDC->SelectObject(*bmpBlit);
   memDC->Clear();
 
-  PaintAllFunction(*memDC);
+  PaintGraph(*memDC);
 
   dc.Blit(rec.x, rec.y, rec.width, rec.height, memDC, 0, 0, wxCOPY);
 
@@ -124,15 +124,10 @@ void CtrlOScope::PaintAll(wxDC& dc) {
   delete memDC;
 }
 
-void CtrlOScope::PaintAllFunction(wxDC& dc) {
+void CtrlOScope::PaintGraph(wxDC& dc) {
   wxRect rec = GetClientRect();
   wxString bla;
   int tw, th;
-  int ldist = 0;   // legend space on the left
-  int rdist = 20;  // space on the right
-  int tdist = 10;  // space on top
-  int bdist = 0;   // legend space on bottom
-  int udist = 0;   // unit text space
   double xstep = 0;
   static const int fSize = 10;
 
@@ -241,61 +236,44 @@ void CtrlOScope::PaintAllFunction(wxDC& dc) {
   }
 
   /* zobrazit body - draw data */
+  if (m_pointsX.GetCount() > 0) {
+    // limit drawing region to the graph
+    dc.SetClippingRegion(ldist, tdist, rec.width - ldist - rdist, rec.height - tdist - bdist);
 
-  // limit drawing region to the graph
-  dc.SetClippingRegion(ldist, tdist, rec.width - ldist - rdist, rec.height - tdist - bdist);
+    size_t ilow = 0, ihigh = 0;
+    // iterate though all X points in the data
+    for (size_t i = 0; i < m_pointsX.GetCount(); i++) {
+      if (m_pointsX.Item(i) < m_MinXValue) {
+        ilow = i;
+      }
+      if (m_pointsX.Item(i) <= m_MaxXValue) {
+        ihigh = i;
+      }
+    }
+    if (ilow > 0) ilow--;
+    if ((int)ihigh < ((int)m_pointsX.GetCount() - 1)) ihigh++;
 
-  size_t ilow = 0, ihigh = 0;
-  // iterate though all X points in the data
-  for (size_t i = 0; i < m_pointsX.GetCount(); i++) {
-    if (m_pointsX.Item(i) < m_MinXValue) {
-      ilow = i;
-    }
-    if (m_pointsX.Item(i) < m_MaxXValue) {
-      ihigh = i;
-    }
+    // left channel
+    PaintTrack(dc, ilow, ihigh, xstep, m_trColor, m_points1);
+
+    // right channel
+    PaintTrack(dc, ilow, ihigh, xstep, m_tr2Color, m_points2);
   }
-  if (ilow > 0) ilow--;
-  if ((int)ihigh < ((int)m_pointsX.GetCount() - 1)) ihigh++;
-  if ((int)ihigh < ((int)m_pointsX.GetCount() - 1)) ihigh++;
+}
 
-  // left channel
-  dc.SetPen(wxPen(m_trColor, 1, wxPENSTYLE_SOLID));
-  int lastx = 0, lasty = 0;
-  int xpos;
+void CtrlOScope::PaintTrack(wxDC& dc, size_t from, size_t to, double xstep, wxColor color,
+                            wxArrayDouble& points) {
+  dc.SetPen(wxPen(color, 1, wxPENSTYLE_SOLID));
+  int lastx = 0, lasty = 0, xpos = 0;
+  wxRect rec = GetClientRect();
   // iterate trough the data points in range
-  for (size_t i = ilow; i < ihigh; i++) {
+  for (size_t i = from; i <= to; i++) {
     if (m_LogX)
       xpos = (int)ldist + xstep * log10(m_pointsX.Item(i) / m_MinXValue);
     else
       xpos = ldist + m_pointsX.Item(i) * xstep * m_NumberOfVerticals / (m_MaxXValue - m_MinXValue);
     // find the point in the graph and limit to the graph area
-    double ydatapoint = m_points1.Item(i);
-    if (ydatapoint > m_MaxYValue) ydatapoint = m_MaxYValue;
-    if (ydatapoint < m_MinYValue) ydatapoint = m_MinYValue;
-    double ypoint =
-        rec.height - bdist -
-        (rec.height - bdist - tdist) * (ydatapoint - m_MinYValue) / (m_MaxYValue - m_MinYValue);
-    if (lastx == 0) {
-      dc.DrawPoint((int)(xpos), (int)(ypoint));
-    } else {
-      dc.DrawLine(lastx, lasty, (int)(xpos), (int)(ypoint));
-    }
-    lastx = (int)(xpos);
-    lasty = (int)(ypoint);
-  }
-
-  // right channel
-  dc.SetPen(wxPen(m_tr2Color, 1, wxPENSTYLE_SOLID));
-  lastx = 0, lasty = 0;
-  // iterate trough the data points in range
-  for (size_t i = ilow; i < ihigh; i++) {
-    if (m_LogX)
-      xpos = (int)ldist + xstep * log10(m_pointsX.Item(i) / m_MinXValue);
-    else
-      xpos = ldist + m_pointsX.Item(i) * xstep * m_NumberOfVerticals / (m_MaxXValue - m_MinXValue);
-    // find the point in the graph and limit to the graph area
-    double ydatapoint = m_points2.Item(i);
+    double ydatapoint = points.Item(i);
     if (ydatapoint > m_MaxYValue) ydatapoint = m_MaxYValue;
     if (ydatapoint < m_MinYValue) ydatapoint = m_MinYValue;
     double ypoint =
@@ -314,7 +292,7 @@ void CtrlOScope::PaintAllFunction(wxDC& dc) {
     dc.SetTextForeground(m_whColor);
     dc.DrawText(m_UserText, m_UserTextPosX, m_UserTextPosY);
   }
-}  // OnPaint
+}
 
 /////////////////////////////////////////////////////////////////////////////
 void CtrlOScope::OnSize(wxSizeEvent& event)  // UINT nType, int cx, int cy)

@@ -31,8 +31,6 @@ class CtrlOScope : public wxControl {
   virtual ~CtrlOScope();
   void OnPaint(wxPaintEvent& event);
   void OnSize(wxSizeEvent& event);
-  void PaintAll(wxDC& dc);
-  void PaintAllFunction(wxDC& dc);
   void OnEraseBackground(wxEraseEvent& WXUNUSED(event)){};
 
   void SetXRange(double dLower, double dUpper, int logrange);
@@ -78,5 +76,16 @@ class CtrlOScope : public wxControl {
   wxString m_UserText;
   int m_UserTextPosX;
   int m_UserTextPosY;
+
+ private:
+  void PaintAll(wxDC& dc);
+  void PaintGraph(wxDC& dc);
+  void PaintTrack(wxDC& dc, size_t from, size_t to, double xstep, wxColor color,
+                  wxArrayDouble& points);
+  int ldist = 0;   // legend space on the left
+  int rdist = 20;  // space on the right
+  int tdist = 10;  // space on top
+  int bdist = 0;   // legend space on bottom
+  int udist = 0;   // unit text space
 };
 #endif  // __CTRLOSCOPE_H__
