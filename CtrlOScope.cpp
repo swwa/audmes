@@ -241,16 +241,30 @@ void CtrlOScope::PaintAllFunction(wxDC& dc) {
   }
 
   /* zobrazit body - draw data */
-  dc.SetClippingRegion(ldist, tdist, rec.width - ldist - rdist, rec.height -tdist - bdist);
+
+  // limit drawing region to the graph
+  dc.SetClippingRegion(ldist, tdist, rec.width - ldist - rdist, rec.height - tdist - bdist);
+
+  size_t ilow = 0, ihigh = 0;
+  // iterate though all X points in the data
+  for (size_t i = 0; i < m_pointsX.GetCount(); i++) {
+    if (m_pointsX.Item(i) < m_MinXValue) {
+      ilow = i;
+    }
+    if (m_pointsX.Item(i) < m_MaxXValue) {
+      ihigh = i;
+    }
+  }
+  if (ilow > 0) ilow--;
+  if ((int)ihigh < ((int)m_pointsX.GetCount() - 1)) ihigh++;
+  if ((int)ihigh < ((int)m_pointsX.GetCount() - 1)) ihigh++;
 
   // left channel
   dc.SetPen(wxPen(m_trColor, 1, wxPENSTYLE_SOLID));
   int lastx = 0, lasty = 0;
   int xpos;
-  // iterate though all X points in the data
-  for (size_t i = 0; i < m_pointsX.GetCount(); i++) {
-    if (m_pointsX.Item(i) < m_MinXValue) continue;
-    if (m_pointsX.Item(i) > m_MaxXValue) continue;
+  // iterate trough the data points in range
+  for (size_t i = ilow; i < ihigh; i++) {
     if (m_LogX)
       xpos = (int)ldist + xstep * log10(m_pointsX.Item(i) / m_MinXValue);
     else
@@ -274,10 +288,8 @@ void CtrlOScope::PaintAllFunction(wxDC& dc) {
   // right channel
   dc.SetPen(wxPen(m_tr2Color, 1, wxPENSTYLE_SOLID));
   lastx = 0, lasty = 0;
-  // iterate though all X points in the data
-  for (size_t i = 0; i < m_pointsX.GetCount(); i++) {
-    if (m_pointsX.Item(i) < m_MinXValue) continue;
-    if (m_pointsX.Item(i) > m_MaxXValue) continue;
+  // iterate trough the data points in range
+  for (size_t i = ilow; i < ihigh; i++) {
     if (m_LogX)
       xpos = (int)ldist + xstep * log10(m_pointsX.Item(i) / m_MinXValue);
     else
