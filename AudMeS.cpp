@@ -87,6 +87,10 @@ long int g_SpeBufferPosition;
 std::atomic<bool> g_OscBufferChanged{false};
 std::atomic<bool> g_SpeBufferChanged{false};
 
+void MainFrame::setoscbuf() {
+  m_OscBufferLength = (unsigned long)(2 + sweep_div * 10E-6 * m_SamplingFreq);
+}
+
 ///////////////////////////////////////////////////////////////////////
 MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPoint& pos,
                      const wxSize& size, long WXUNUSED(style))
@@ -541,7 +545,7 @@ void MainFrame::set_custom_props() {
   choice_osc_l_off_copy->SetSelection(5);
 
   sweep_div = wxAtoi(choice_osc_swp->GetString(choice_osc_swp->GetCurrentSelection()));
-  m_OscBufferLength = (long)(2 * sweep_div * 10E-6 * m_SamplingFreq);
+  setoscbuf();
 
   /* oscilloscope */
   window_osc->SetXRange(0, sweep_div * 10E-6, 0);
@@ -1042,12 +1046,12 @@ void MainFrame::OnTimer(wxTimerEvent& WXUNUSED(event)) {
 
 void MainFrame::OnOscXScaleChanged(wxCommandEvent& WXUNUSED(event)) {
   sweep_div = wxAtoi(choice_osc_swp->GetString(choice_osc_swp->GetCurrentSelection()));
-  m_OscBufferLength = (long)(2 * (1.0 + sweep_div * 10E-6 * m_SamplingFreq));
+  setoscbuf();
   window_osc->SetXRange(0, sweep_div * 10E-6, 0);
 
   m_SpeBufferLength = wxAtoi(choice_fftlength->GetString(choice_fftlength->GetCurrentSelection()));
 
-  m_RWAudio->ChangeBufLen((unsigned long)(4.0 * m_OscBufferLength),
+  m_RWAudio->ChangeBufLen((unsigned long)(2.0 * m_OscBufferLength),
                           m_SpeBufferLength);  // we need bigger buffer because of synchronization
   m_SMASpeLeft->SetNumRecords(m_SpeBufferLength >> 1);
   m_SMASpeRight->SetNumRecords(m_SpeBufferLength >> 1);
@@ -1246,8 +1250,8 @@ void MainFrame::OnSelectSndCard(wxCommandEvent& WXUNUSED(event)) {
     m_SMASpeRight->SetNumRecords(m_SpeBufferLength >> 1);
     window_1_spe->SetFsample(m_SamplingFreq);
     window_1_frm->SetFsample(m_SamplingFreq);
-    m_OscBufferLength = (long)(2 * sweep_div * 10E-6 * m_SamplingFreq);
-    m_RWAudio->ChangeBufLen((unsigned long)(4.0 * m_OscBufferLength),
+    setoscbuf();
+    m_RWAudio->ChangeBufLen((unsigned long)(2.0 * m_OscBufferLength),
                             m_SpeBufferLength);  // we need bigger buffer because of synchronization
     g_OscBufferChanged = false;
   }
