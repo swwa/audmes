@@ -185,6 +185,7 @@ void CtrlOScope::PaintGraph(wxDC& dc) {
   if (m_LogX) {
     /* draw vertical lines with log distance */
     xstep = (rec.width - ldist - rdist) / log10(m_MaxXValue / m_MinXValue);
+    if (m_MinXValue < 1) m_MinXValue = 1; // avoid log10(0) and rounding errors
     int decade = log10(m_MinXValue);
     double freq = m_MinXValue;
     while (freq <= m_MaxXValue) {
