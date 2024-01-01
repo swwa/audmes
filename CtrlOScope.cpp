@@ -241,6 +241,7 @@ void CtrlOScope::PaintAllFunction(wxDC& dc) {
   }
 
   /* zobrazit body - draw data */
+  dc.SetClippingRegion(ldist, tdist, rec.width - ldist - rdist, rec.height -tdist - bdist);
 
   // left channel
   dc.SetPen(wxPen(m_trColor, 1, wxPENSTYLE_SOLID));

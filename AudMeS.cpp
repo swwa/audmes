@@ -273,7 +273,7 @@ void MainFrame::set_properties() {
   frame_1_statusbar->SetStatusText("AUDio MEasurement System - version " AUDMES_VERSION_STRING);
   choice_l_wav->SetSelection(0);
   choice_r_wav->SetSelection(0);
-  choice_osc_swp->SetSelection(0);
+  choice_osc_swp->SetSelection(6);
   choice_osc_l_res->SetSelection(0);
   choice_osc_l_off->SetSelection(0);
   choice_osc_trig_source->SetSelection(0);
@@ -541,7 +541,7 @@ void MainFrame::set_custom_props() {
   choice_osc_l_off_copy->SetSelection(5);
 
   sweep_div = wxAtoi(choice_osc_swp->GetString(choice_osc_swp->GetCurrentSelection()));
-  m_OscBufferLength = (long)(1 + sweep_div * 10E-6 * m_SamplingFreq);
+  m_OscBufferLength = (long)(2 * sweep_div * 10E-6 * m_SamplingFreq);
 
   /* oscilloscope */
   window_osc->SetXRange(0, sweep_div * 10E-6, 0);
@@ -1042,7 +1042,7 @@ void MainFrame::OnTimer(wxTimerEvent& WXUNUSED(event)) {
 
 void MainFrame::OnOscXScaleChanged(wxCommandEvent& WXUNUSED(event)) {
   sweep_div = wxAtoi(choice_osc_swp->GetString(choice_osc_swp->GetCurrentSelection()));
-  m_OscBufferLength = (long)(1 + sweep_div * 10E-6 * m_SamplingFreq);
+  m_OscBufferLength = (long)(2 * (1.0 + sweep_div * 10E-6 * m_SamplingFreq));
   window_osc->SetXRange(0, sweep_div * 10E-6, 0);
 
   m_SpeBufferLength = wxAtoi(choice_fftlength->GetString(choice_fftlength->GetCurrentSelection()));
@@ -1246,7 +1246,7 @@ void MainFrame::OnSelectSndCard(wxCommandEvent& WXUNUSED(event)) {
     m_SMASpeRight->SetNumRecords(m_SpeBufferLength >> 1);
     window_1_spe->SetFsample(m_SamplingFreq);
     window_1_frm->SetFsample(m_SamplingFreq);
-    m_OscBufferLength = (long)(1 + sweep_div * 10E-6 * m_SamplingFreq);
+    m_OscBufferLength = (long)(2 * sweep_div * 10E-6 * m_SamplingFreq);
     m_RWAudio->ChangeBufLen((unsigned long)(4.0 * m_OscBufferLength),
                             m_SpeBufferLength);  // we need bigger buffer because of synchronization
     g_OscBufferChanged = false;
