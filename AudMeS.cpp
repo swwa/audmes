@@ -922,9 +922,8 @@ void MainFrame::DrawSpectrum(void) {
   }
 
   if (fft_double(nsampl, 0, realin, NULL, realout, imagout)) {
-    realout[0] = imagout[0] = 0.00000001;  // remove DC
-    // use only up to nsampl/2
-    for (int i = 0; i < nsampl / 2; i++) {
+    // use only up to nsampl/2 and remove DC
+    for (int i = 1; i < nsampl / 2; i++) {
       // multiply amplitude by 2 to compensate
       dval = 2 * sqrt(realout[i] * realout[i] + imagout[i] * imagout[i]);
       m_SMASpeLeft->AddVal(i, dval);
@@ -982,9 +981,8 @@ void MainFrame::DrawSpectrum(void) {
   }
 
   if (fft_double(nsampl, 0, realin, NULL, realout, imagout)) {
-    realout[0] = imagout[0] = 0;  // remove DC
-    /* show only half FFT */
-    for (int i = 0; i < nsampl / 2; i++) {
+    // use only up to nsampl/2 and remove DC
+    for (int i = 1; i < nsampl / 2; i++) {
       dval = 2 * sqrt(realout[i] * realout[i] + imagout[i] * imagout[i]);
       m_SMASpeRight->AddVal(i, dval);
       dval_db = (20.0 * log10(m_SMASpeRight->GetSMA(i)));
@@ -998,7 +996,8 @@ void MainFrame::DrawSpectrum(void) {
   }
 
   double fbase = (double)m_SamplingFreq / nsampl;
-  for (int i = 0; i < nsampl / 2; i++) {
+  // frequencies without DC
+  for (int i = 1; i < nsampl / 2; i++) {
     spe_freqs.Add(fbase * i);
   }
   window_1_spe->SetTrack1(spe_lmagns);
