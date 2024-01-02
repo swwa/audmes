@@ -259,8 +259,10 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
   /* Frequency response */
   label_1_frm = new wxStaticText(notebook_1_frm, -1, wxT("Number of points (max 120):"));
   text_ctrl1_frm = new wxTextCtrl(notebook_1_frm, -1, wxT("24"));
-  label_2_frm = new wxStaticText(notebook_1_frm, -1, wxT("-"));
-  text_ctrl2_frm = new wxTextCtrl(notebook_1_frm, -1, wxT("-"));
+  label_2_frm = new wxStaticText(notebook_1_frm, -1, wxT("Freq. low"));
+  text_ctrl2_frm = new wxTextCtrl(notebook_1_frm, -1, wxT("20"));
+  label_3_frm = new wxStaticText(notebook_1_frm, -1, wxT("Freq. high"));
+  text_ctrl3_frm = new wxTextCtrl(notebook_1_frm, -1, wxT("20000"));
   button_frm_start = new wxToggleButton(notebook_1_frm, ID_FRMSTART, wxT("Start"));
   window_1_frm = new CtrlOScope(notebook_1_frm, _T("Hz"), _T("dB"));
 
@@ -507,6 +509,10 @@ void MainFrame::do_layout() {
   sizer_17_frm->Add(20, 20, 0, 0, 0);
   sizer_17_frm->Add(label_2_frm, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
   sizer_17_frm->Add(text_ctrl2_frm, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
+                    5);
+  sizer_17_frm->Add(20, 20, 0, 0, 0);
+  sizer_17_frm->Add(label_3_frm, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
+  sizer_17_frm->Add(text_ctrl3_frm, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
                     5);
   sizer_17_frm->Add(20, 20, 0, 0, 0);
   sizer_10_frm->Add(sizer_17_frm, 0, wxEXPAND, 0);
@@ -756,14 +762,13 @@ void MainFrame::OnAutoSincClick(wxCommandEvent& WXUNUSED(event)) {
   }
 }
 
-static const int frm_low = 20;
-
 void MainFrame::CalcFreqResponse() {
   /* periodically called by OnTimer
    * delays for measuring work by waiting for the next call
    */
+  double decades = log10(frm_high / frm_low);
   if (frm_istep <= (int)frm_ipoints) {
-    float freq = frm_low * pow(10.0, 3.0 * frm_istep / frm_ipoints);
+    float freq = frm_low * pow(10.0, decades * frm_istep / frm_ipoints);
 
     if (0 == frm_measure) {
       // play new frequency e.g. from 20Hz to 20kHz
@@ -1131,13 +1136,19 @@ void MainFrame::OnOscStart(wxCommandEvent& WXUNUSED(event)) {
 
 void MainFrame::OnFrmStart(wxCommandEvent& WXUNUSED(event)) {
   if (button_frm_start->GetValue()) {
-    long ip;
     button_frm_start->SetLabel(_T("Stop"));
-    wxString tpoints = text_ctrl1_frm->GetValue();
-    tpoints.ToLong(&ip, 10);
+    int ip = wxAtoi(text_ctrl1_frm->GetValue());
     if (ip > 120) ip = 120;
     if (ip < 1) ip = 1;
-    frm_ipoints = (int)ip;
+    frm_ipoints = ip;
+    int fl = wxAtoi(text_ctrl2_frm->GetValue());
+    if (fl > 10000) fl = 10000;
+    if (fl < 10) fl = 10;
+    frm_low = fl;
+    int fh = wxAtoi(text_ctrl3_frm->GetValue());
+    if (fh > (int)m_SamplingFreq / 2) fh = m_SamplingFreq / 2;
+    if (fh < fl) fh = fl;
+    frm_high = fh;
     frm_istep = 0;
 
     frm_freqs.Clear();
