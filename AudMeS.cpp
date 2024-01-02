@@ -1031,10 +1031,9 @@ void MainFrame::OnOscXScaleChanged(wxCommandEvent& WXUNUSED(event)) {
 }
 
 void MainFrame::OnFFTAvgChanged(wxCommandEvent& WXUNUSED(event)) {
-  long numAverage;
-  choice_fftavg->GetString(choice_fftavg->GetCurrentSelection()).ToLong(&numAverage);
-  m_SMASpeLeft->SetNumAverage((int)numAverage);
-  m_SMASpeRight->SetNumAverage((int)numAverage);
+  int numAverage = wxAtoi(choice_fftavg->GetString(choice_fftavg->GetCurrentSelection()));
+  m_SMASpeLeft->SetNumAverage(numAverage);
+  m_SMASpeRight->SetNumAverage(numAverage);
 }
 
 void MainFrame::OnFFTScaleChanged(wxCommandEvent& WXUNUSED(event)) {
