@@ -738,46 +738,24 @@ void MainFrame::CalcFreqResponse() {
 
 void MainFrame::DrawFreqResponse(void) {
   wxArrayDouble left, right;
-
+  double tmpval;
   left.Clear();
   right.Clear();
-  /* make the linear interpolation of points for each 1Hz */
-  /* initial values are the first step */
-  double upfreq = frm_low - 1;
-  double lupgain = 0.00000001;
-  double rupgain = 0.00000001;
-  double botfreq = 0;
-  double lbotgain = 0.00000001;
-  double rbotgain = 0.00000001;
-  unsigned int arrpointer = 0;
-  for (unsigned int i = 0; i < m_SamplingFreq / 2; i++) {
-    if (i > (unsigned int)upfreq) {
-      /* next value from arrays */
-      if ((arrpointer) >= m_frm_freqs.GetCount()) {
-        lbotgain = lupgain;
-        rbotgain = rupgain;
-        lupgain = rupgain = 0.00000001;
-      } else {
-        botfreq = upfreq;
-        lbotgain = lupgain;
-        rbotgain = rupgain;
-        upfreq = m_frm_freqs[arrpointer];
-        lupgain = m_frm_lgains[arrpointer];
-        rupgain = m_frm_rgains[arrpointer];
-        arrpointer++;
-      }
-    }
-    double tmpval = lbotgain + (lupgain - lbotgain) / (upfreq - botfreq) * (1.0 * i - botfreq);
+  for (unsigned int i = 0; i < m_frm_freqs.size(); i++) {
+    tmpval = m_frm_lgains[i];
     left.Add(20.0 * log10(tmpval));
-    tmpval = rbotgain + (rupgain - rbotgain) / (upfreq - botfreq) * (1.0 * i - botfreq);
+    tmpval = m_frm_rgains[i];
     right.Add(20.0 * log10(tmpval));
   }
   window_1_frm->SetTrack1(left);
   window_1_frm->SetTrack2(right);
+  window_1_frm->SetTrackX(m_frm_freqs);
 }
 
 void MainFrame::DrawOscilloscope(void) {
-  wxArrayDouble ardbl, ardbl2;
+  wxArrayDouble ardbl;
+  wxArrayDouble ardbl2;
+  wxArrayDouble times;
   double trigger_edge;
   double trigger_level = 0.0;
   unsigned long int xtrig = 0;  // point where the trigger occures
@@ -842,6 +820,7 @@ void MainFrame::DrawOscilloscope(void) {
 
   window_1->SetTrack1(ardbl);
   window_1->SetTrack2(ardbl2);
+  window_1->SetTrackX(times);
 }
 
 void MainFrame::DrawSpectrum(void) {
@@ -853,6 +832,7 @@ void MainFrame::DrawSpectrum(void) {
   windowf = (double*)malloc(nsampl * sizeof(double));
   wxArrayDouble ardbl;
   wxArrayDouble ardbl2;
+  wxArrayDouble freqs;
 
   // calculate window
   const double multiplier = 2 * M_PI / nsampl;
@@ -971,6 +951,7 @@ void MainFrame::DrawSpectrum(void) {
 
   window_1_spe->SetTrack1(ardbl);
   window_1_spe->SetTrack2(ardbl2);
+  window_1_spe->SetTrackX(freqs);
   switch (choice_fftrx->GetCurrentSelection()) {
     case 1:
       window_1_spe->SetXRange(20, 20000, 1);

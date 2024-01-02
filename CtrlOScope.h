@@ -43,6 +43,7 @@ class CtrlOScope : public wxControl {
   void SetYUnits(wxString string, wxString YMin = "", wxString YMax = "");
   void SetTrack1(wxArrayDouble ardbl);
   void SetTrack2(wxArrayDouble ardbl);
+  void SetTrackX(wxArrayDouble ardbl);
   void SetNumOfVerticals(int num) { m_NumberOfVerticals = num; };
 
   void ShowUserText(wxString text, int xpos, int ypos) {
@@ -56,6 +57,7 @@ class CtrlOScope : public wxControl {
 
   wxArrayDouble m_points1;
   wxArrayDouble m_points2;
+  wxArrayDouble m_pointsX;
   double m_MaxXValue;
   double m_MinXValue;
   double m_MaxYValue;

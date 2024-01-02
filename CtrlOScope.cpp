@@ -78,6 +78,8 @@ void CtrlOScope::SetTrack1(wxArrayDouble ardbl) { m_points1 = ardbl; }
 
 void CtrlOScope::SetTrack2(wxArrayDouble ardbl) { m_points2 = ardbl; }
 
+void CtrlOScope::SetTrackX(wxArrayDouble ardbl) { m_points2 = ardbl; }
+
 /////////////////////////////////////////////////////////////////////////////
 void CtrlOScope::SetXRange(double dLower, double dUpper, int logrange) {
   m_MinXValue = dLower;
