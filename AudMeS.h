@@ -162,8 +162,10 @@ class MainFrame : public wxFrame {
   wxPanel* notebook_1_frm;
   wxStaticText* label_1_frm;
   wxStaticText* label_2_frm;
+  wxStaticText* label_3_frm;
   wxTextCtrl* text_ctrl1_frm;
   wxTextCtrl* text_ctrl2_frm;
+  wxTextCtrl* text_ctrl3_frm;
   wxToggleButton* button_frm_start;
   CtrlOScope* window_1_frm;
 
@@ -174,6 +176,8 @@ class MainFrame : public wxFrame {
 
   bool frm_running;
   int frm_ipoints;
+  int frm_low;
+  int frm_high;
   int frm_istep;
   int frm_measure;
   double sweep_div;
