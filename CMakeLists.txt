@@ -124,7 +124,7 @@ if (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Linux")
 	set(CPACK_GENERATOR "DEB")
 	set(CPACK_DEBIAN_PACKAGE_MAINTAINER "swwa")
 	set(CPACK_DEBIAN_PACKAGE_SECTION "sound")
-	set(CPACK_DEBIAN_PACKAGE_DEPENDS "pulseaudio, libwxgtk3.0-0v5")
+	set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS YES)
 	set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://sourceforge.net/projects/audmes/")
 endif()
 
