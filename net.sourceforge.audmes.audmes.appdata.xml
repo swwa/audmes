@@ -10,7 +10,7 @@
     <ul>
       <li>Tone generator</li>
       <li>Oscilloscope</li>
-      <li>Spectrun analyzer</li>
+      <li>Spectrum analyzer</li>
       <li>Frequency response plot</li>
     </ul>
   </description>
@@ -26,7 +26,18 @@
   </kudos>
 
   <releases>
+    <release version="2024.02.18" date="2024-02-18">
+      <description>
+        <ul>
+          <li>Refactor interface between AudMeS and CtrlOscope: Pass time or frequency data (y axis) along with magnitude (x axis).</li>
+          <li>Rewrite graph code taking advantage of the y axis data.</li>
+          <li>Add save function to oscilloscope and spectrum.</li>
+          <li>Use time instead of samples in oscilloscope.</li>
+        </ul>
+      </description>
+    </release>
     <release version="2023.10.24" date="2023-10-24"/>
+    <release version="2023.04.09" date="2023-04-27"/>
   </releases>
 
   <developer_name>AudMeS Team</developer_name>
@@ -36,6 +47,5 @@
       <image type="source">https://a.fsdn.com/con/app/proj/audmes/screenshots/Audmes-spectrum.png/max/max/1</image>
     </screenshot>
   </screenshots>
-
 
 </component>
