@@ -1,6 +1,15 @@
 News
 ====
 
+2024-02-18
+----------
+
+- Refactor interface between AudMeS and CtrlOscope: Pass time or frequency
+  data (y axis) along with magnitude (x axis).
+- Rewrite graph code taking advantage of the y axis data.
+- Add save function to oscilloscope and spectrum.
+- Use time instead of samples in oscilloscope.
+
 2023-10-24
 ----------
 
