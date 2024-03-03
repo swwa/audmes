@@ -8,3 +8,4 @@ Icon=audmes
 Exec=AudMeS
 Actions=
 Categories=AudioVideo;
+Keywords=alsa;musicrealtime;standalone;
