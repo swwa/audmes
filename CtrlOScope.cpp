@@ -40,8 +40,6 @@
 // CtrlOScope
 CtrlOScope::CtrlOScope(wxWindow* parent, wxString xname, wxString yname)
     : wxControl(parent, -1, wxDefaultPosition, wxSize(300, 200)) {
-  m_fsampling = 0;
-
   m_bgColor.Set(0, 0, 0);
   m_plColor.Set(0, 128, 0);
   m_trColor.Set(192, 192, 0);
@@ -92,8 +90,6 @@ void CtrlOScope::SetYRange(double dLower, double dUpper, int logrange) {
   m_MaxYValue = dUpper;
   m_LogY = logrange;
 }  // SetRange
-
-void CtrlOScope::SetFsample(int fsampling) { m_fsampling = fsampling; }
 
 void CtrlOScope::SetXUnits(wxString WXUNUSED(string), wxString WXUNUSED(XMin),
                            wxString WXUNUSED(XMax)) {}  // SetXUnits
@@ -185,7 +181,7 @@ void CtrlOScope::PaintGraph(wxDC& dc) {
   if (m_LogX) {
     /* draw vertical lines with log distance */
     xstep = (rec.width - ldist - rdist) / log10(m_MaxXValue / m_MinXValue);
-    if (m_MinXValue < 1) m_MinXValue = 1; // avoid log10(0) and rounding errors
+    if (m_MinXValue < 1) m_MinXValue = 1;  // avoid log10(0) and rounding errors
     int decade = log10(m_MinXValue);
     double freq = m_MinXValue;
     while (freq <= m_MaxXValue) {

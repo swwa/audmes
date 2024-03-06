@@ -35,7 +35,6 @@ class CtrlOScope : public wxControl {
 
   void SetXRange(double dLower, double dUpper, int logrange);
   void SetYRange(double dLower, double dUpper, int logrange);
-  void SetFsample(int fsampling);
 
   void SetXUnits(wxString string, wxString XMin = "", wxString XMax = "");
   void SetYUnits(wxString string, wxString YMin = "", wxString YMax = "");
@@ -51,8 +50,6 @@ class CtrlOScope : public wxControl {
   };
 
  protected:
-  int m_fsampling;
-
   wxArrayDouble m_points1;
   wxArrayDouble m_points2;
   wxArrayDouble m_pointsX;

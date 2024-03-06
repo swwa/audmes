@@ -555,12 +555,10 @@ void MainFrame::set_custom_props() {
   /* analyzer */
   window_1_spe->SetXRange(10, 100000, 1);
   window_1_spe->SetYRange(-100, 0, 0);
-  window_1_spe->SetFsample(m_SamplingFreq);
 
   /* freq response */
   window_1_frm->SetXRange(20, 20000, 1);
   window_1_frm->SetYRange(-80, 0, 0);
-  window_1_frm->SetFsample(m_SamplingFreq);
 
   frm_running = 0;
   frm_measure = 0;
@@ -1247,8 +1245,6 @@ void MainFrame::OnSelectSndCard(wxCommandEvent& WXUNUSED(event)) {
     m_SamplingFreq = newFrequency;
     m_SMASpeLeft->SetNumRecords(m_SpeBufferLength >> 1);
     m_SMASpeRight->SetNumRecords(m_SpeBufferLength >> 1);
-    window_1_spe->SetFsample(m_SamplingFreq);
-    window_1_frm->SetFsample(m_SamplingFreq);
     setoscbuf();
     m_RWAudio->ChangeBufLen((unsigned long)(2.0 * m_OscBufferLength),
                             m_SpeBufferLength);  // we need bigger buffer because of synchronization
