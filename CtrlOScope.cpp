@@ -235,7 +235,8 @@ void CtrlOScope::PaintGraph(wxDC& dc) {
   /* zobrazit body - draw data */
   if (m_pointsX.GetCount() > 0) {
     // limit drawing region to the graph
-    dc.SetClippingRegion(ldist, tdist, rec.width - ldist - rdist, rec.height - tdist - bdist);
+    dc.SetClippingRegion(ldist, tdist, rec.width - ldist - rdist + 1,
+                         rec.height - tdist - bdist + 1);
 
     size_t ilow = 0, ihigh = 0;
     // iterate though all X points in the data
