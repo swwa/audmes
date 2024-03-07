@@ -48,11 +48,13 @@ class MainFrame : public wxFrame {
 
  private:
   // begin wxGlade: MainFrame::methods
-  void setoscbuf();
   void set_properties();
   void set_custom_props();
   void do_layout();
   // end wxGlade
+
+  void setoscbuf();
+  double calc_dc(float* data, int size);
 
   void OnSpanStart(wxCommandEvent& event);
   void OnGenStart(wxCommandEvent& event);

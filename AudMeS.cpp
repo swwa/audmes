@@ -87,10 +87,6 @@ long int g_SpeBufferPosition;
 std::atomic<bool> g_OscBufferChanged{false};
 std::atomic<bool> g_SpeBufferChanged{false};
 
-void MainFrame::setoscbuf() {
-  m_OscBufferLength = (unsigned long)(2 + sweep_div * 10E-6 * m_SamplingFreq);
-}
-
 ///////////////////////////////////////////////////////////////////////
 MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPoint& pos,
                      const wxSize& size, long WXUNUSED(style))
@@ -525,6 +521,10 @@ void MainFrame::do_layout() {
   // end wxGlade
 }
 
+void MainFrame::setoscbuf() {
+  m_OscBufferLength = (unsigned long)(2 + sweep_div * 10E-6 * m_SamplingFreq);
+}
+
 void MainFrame::set_custom_props() {
 #ifdef __WXMSW__
   SetIcon(wxICON(AudMeSIcon));
@@ -869,6 +869,14 @@ void MainFrame::DrawOscilloscope(void) {
   window_osc->SetTrackX(osc_times);
 }
 
+double MainFrame::calc_dc(float* data, int size) {
+  double dc = 0.0;
+  for (int i = 0; i < size; i++) {
+    dc += data[i];
+  }
+  return dc / size;
+}
+
 void MainFrame::DrawSpectrum(void) {
   double *realin, *realout, *imagout, *windowf;
   int nsampl = m_SpeBufferLength;
@@ -914,13 +922,14 @@ void MainFrame::DrawSpectrum(void) {
   double dval_db = 0.0;
 
   // left channel
+  double offsetL = calc_dc(g_SpeBuffer_Left, nsampl);
   for (int i = 0; i < nsampl; i++) {
     // copy and apply window
-    realin[i] = g_SpeBuffer_Left[i] * windowf[i];
+    realin[i] = (g_SpeBuffer_Left[i] - offsetL) * windowf[i];
   }
 
   if (fft_double(nsampl, 0, realin, NULL, realout, imagout)) {
-    // use only up to nsampl/2 and remove DC
+    // use only up to nsampl/2 and skip DC
     for (int i = 1; i < nsampl / 2; i++) {
       // multiply amplitude by 2 to compensate
       dval = 2 * sqrt(realout[i] * realout[i] + imagout[i] * imagout[i]);
@@ -973,13 +982,14 @@ void MainFrame::DrawSpectrum(void) {
   frame_1_statusbar->SetStatusText(freqency);
 
   // right channel
+  double offsetR = calc_dc(g_SpeBuffer_Right, nsampl);
   for (int i = 0; i < nsampl; i++) {
     // copy and apply window
-    realin[i] = g_SpeBuffer_Right[i] * windowf[i];
+    realin[i] = (g_SpeBuffer_Right[i] - offsetR) * windowf[i];
   }
 
   if (fft_double(nsampl, 0, realin, NULL, realout, imagout)) {
-    // use only up to nsampl/2 and remove DC
+    // use only up to nsampl/2 and skip DC
     for (int i = 1; i < nsampl / 2; i++) {
       dval = 2 * sqrt(realout[i] * realout[i] + imagout[i] * imagout[i]);
       m_SMASpeRight->AddVal(i, dval);
