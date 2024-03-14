@@ -61,13 +61,6 @@ bool lfsr16() {
 }
 
 /*
- * callback function to catch runtime errors
- */
-void catcherr(RtAudioError::Type WXUNUSED(type), const std::string &errorText) {
-  std::cerr << '\n' << errorText << '\n' << std::endl;
-}
-
-/*
  * callback function to fetch audio input and generate tones
  */
 int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
@@ -266,9 +259,6 @@ int RWAudio::InitSnd(long int oscbuflen, long int spebuflen, std::string &rtinfo
   g_SpeBuffer_Left = (float *)malloc(m_SpeBufferLen * sizeof(float));
   g_SpeBuffer_Right = (float *)malloc(m_SpeBufferLen * sizeof(float));
 
-  RtAudio::DeviceInfo info;
-  unsigned int devices;
-
   // Create an api map.
   std::map<int, std::string> apiMap;
   apiMap[RtAudio::MACOSX_CORE] = "OS-X Core Audio";
@@ -292,12 +282,8 @@ int RWAudio::InitSnd(long int oscbuflen, long int spebuflen, std::string &rtinfo
   m_AudioDriver = new RtAudio();
   rtinfo = rtinfo + "Current API: " + apiMap[m_AudioDriver->getCurrentApi()] + "\n";
 
-  devices = m_AudioDriver->getDeviceCount();
+  unsigned int devices = m_AudioDriver->getDeviceCount();
   if (devices < 1) return 1;
-
-  for (unsigned int i = 0; i < devices; i++) {
-    info = m_AudioDriver->getDeviceInfo(i);
-  }
 
   // start audio streams
   if (RestartAudio(m_AudioDriver->getDefaultInputDevice(),
@@ -341,17 +327,16 @@ int RWAudio::RestartAudio(int recDevId, int playDevId) {
 
   rtAOptions.flags = 0;
 
-  try {
-    m_AudioDriver->openStream(&oParams, &iParams, RTAUDIO_FLOAT32, m_sampleRate, &bufferFrames,
-                              &inout, (void *)this, &rtAOptions, &catcherr);
-  } catch (RtAudioError &e) {
+  RtAudioErrorType ret =
+      m_AudioDriver->openStream(&oParams, &iParams, RTAUDIO_FLOAT32, m_sampleRate, &bufferFrames,
+                                &inout, (void *)this, &rtAOptions);
+  if (ret != RTAUDIO_NO_ERROR) {
     // std::cerr << '\n' << e.getMessage() << '\n' << std::endl;
     return 1;
   }
 
-  try {
-    m_AudioDriver->startStream();
-  } catch (RtAudioError &e) {
+  ret = m_AudioDriver->startStream();
+  if (ret != RTAUDIO_NO_ERROR) {
     // std::cerr << '\n' << e.getMessage() << '\n' << std::endl;
     return 1;
   }
@@ -364,10 +349,13 @@ int RWAudio::RestartAudio(int recDevId, int playDevId) {
 /********************************************************************/
 int RWAudio::GetRWAudioDevices(RWAudioDevList *play, RWAudioDevList *record) {
   // Determine the number of devices available
-  unsigned int devices = m_AudioDriver->getDeviceCount();
+  RtAudio dac;
+  std::vector<unsigned int> deviceIds = dac.getDeviceIds();
+  if (deviceIds.size() < 1) {
+    std::cout << "\nNo audio devices found!\n";
+    return 1;
+  }
 
-  // Scan through devices for various capabilities
-  RtAudio::DeviceInfo info;
   // if stream is open (and running), stop it
   if (m_AudioDriver->isStreamOpen()) {
     m_AudioDriver->stopStream();
@@ -379,23 +367,20 @@ int RWAudio::GetRWAudioDevices(RWAudioDevList *play, RWAudioDevList *record) {
   play->card_pos.clear();
   record->card_pos.clear();
 
-  for (unsigned int i = 0; i < devices; i++) {
-    info = m_AudioDriver->getDeviceInfo(i);
+  RtAudio::DeviceInfo info;
+  for (unsigned int i = 0; i < deviceIds.size(); i++) {
+    info = dac.getDeviceInfo(deviceIds[i]);
 
-    if (info.probed == true) {
-      //      std::cout << "device = " << i << "; name: " << info.name << "\n";
+    // add play card
+    if ((info.outputChannels > 0) || (info.duplexChannels > 0)) {
+      play->card_info.push_back(info);
+      play->card_pos.push_back(deviceIds[i]);
+    }
 
-      // add play card
-      if ((info.outputChannels > 0) || (info.duplexChannels > 0)) {
-        play->card_info.push_back(info);
-        play->card_pos.push_back(i);
-      }
-
-      // add record card
-      if ((info.inputChannels > 0) || (info.duplexChannels > 0)) {
-        record->card_info.push_back(info);
-        record->card_pos.push_back(i);
-      }
+    // add record card
+    if ((info.inputChannels > 0) || (info.duplexChannels > 0)) {
+      record->card_info.push_back(info);
+      record->card_pos.push_back(deviceIds[i]);
     }
   }
 
