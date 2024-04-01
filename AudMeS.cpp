@@ -544,7 +544,7 @@ void MainFrame::set_custom_props() {
   choice_osc_l_off->SetSelection(5);
   choice_osc_l_off_copy->SetSelection(5);
 
-  sweep_div = wxAtoi(choice_osc_swp->GetString(choice_osc_swp->GetCurrentSelection()));
+  sweep_div = wxAtoi(choice_osc_swp->GetString(choice_osc_swp->GetSelection()));
   setoscbuf();
 
   /* oscilloscope */
@@ -569,7 +569,7 @@ void MainFrame::set_custom_props() {
   m_timer = new wxTimer(this, ID_TIMERID);
   m_timer->Start(100);
 
-  m_SpeBufferLength = wxAtoi(choice_fftlength->GetString(choice_fftlength->GetCurrentSelection()));
+  m_SpeBufferLength = wxAtoi(choice_fftlength->GetString(choice_fftlength->GetSelection()));
 
   m_RWAudio = new RWAudio();
   m_SMASpeLeft = new SMA_2D(m_SpeBufferLength >> 1, 1);
@@ -806,15 +806,15 @@ void MainFrame::DrawOscilloscope(void) {
   double trigger_level = 0.0;
   unsigned long int xtrig = 0;  // point where the trigger occures
 
-  double range_div = pow(2, choice_osc_l_res->GetCurrentSelection() - 15);
-  double shft_val = 20.0 * (choice_osc_l_off->GetCurrentSelection() - 5) / 128.0;
-  double range_div2 = pow(2, choice_osc_l_res_copy->GetCurrentSelection() - 15);
-  double shft_val2 = 20.0 * (choice_osc_l_off_copy->GetCurrentSelection() - 5) / 128.0;
+  double range_div = pow(2, choice_osc_l_res->GetSelection() - 15);
+  double shft_val = 20.0 * (choice_osc_l_off->GetSelection() - 5) / 128.0;
+  double range_div2 = pow(2, choice_osc_l_res_copy->GetSelection() - 15);
+  double shft_val2 = 20.0 * (choice_osc_l_off_copy->GetSelection() - 5) / 128.0;
   double hysteresis_level = range_div / 20.0;
 
   // triggering - re-done a little bit, more or less ...
-  trigger_edge = (0 == choice_osc_trig_edge->GetCurrentSelection()) ? 1.0 : -1.0;
-  switch (choice_osc_trig_source->GetCurrentSelection()) {
+  trigger_edge = (0 == choice_osc_trig_edge->GetSelection()) ? 1.0 : -1.0;
+  switch (choice_osc_trig_source->GetSelection()) {
     case 1:
       // left channel - look for the value under hysteresis point and then over 0
       while (xtrig < m_OscBufferLength) {
@@ -890,7 +890,7 @@ void MainFrame::DrawSpectrum(void) {
 
   // calculate window
   const double multiplier = 2 * M_PI / nsampl;
-  switch (choice_fft->GetCurrentSelection()) {
+  switch (choice_fft->GetSelection()) {
     case 1:  // Hanning
       for (int i = 0; i < nsampl; i++) {
         windowf[i] = 2 * (0.5 + -0.5 * cos(i * multiplier)) / (double)nsampl;
@@ -1011,7 +1011,7 @@ void MainFrame::DrawSpectrum(void) {
   window_1_spe->SetTrack1(spe_lmagns);
   window_1_spe->SetTrack2(spe_rmagns);
   window_1_spe->SetTrackX(spe_freqs);
-  switch (choice_fftrx->GetCurrentSelection()) {
+  switch (choice_fftrx->GetSelection()) {
     case 1:
       window_1_spe->SetXRange(20, 20000, 1);
       break;
@@ -1052,11 +1052,11 @@ void MainFrame::OnTimer(wxTimerEvent& WXUNUSED(event)) {
 }
 
 void MainFrame::OnOscXScaleChanged(wxCommandEvent& WXUNUSED(event)) {
-  sweep_div = wxAtoi(choice_osc_swp->GetString(choice_osc_swp->GetCurrentSelection()));
+  sweep_div = wxAtoi(choice_osc_swp->GetString(choice_osc_swp->GetSelection()));
   setoscbuf();
   window_osc->SetXRange(0, sweep_div * 10E-6, 0);
 
-  m_SpeBufferLength = wxAtoi(choice_fftlength->GetString(choice_fftlength->GetCurrentSelection()));
+  m_SpeBufferLength = wxAtoi(choice_fftlength->GetString(choice_fftlength->GetSelection()));
 
   m_RWAudio->ChangeBufLen((unsigned long)(2.0 * m_OscBufferLength),
                           m_SpeBufferLength);  // we need bigger buffer because of synchronization
@@ -1068,7 +1068,7 @@ void MainFrame::OnOscXScaleChanged(wxCommandEvent& WXUNUSED(event)) {
 }
 
 void MainFrame::OnFFTAvgChanged(wxCommandEvent& WXUNUSED(event)) {
-  int numAverage = wxAtoi(choice_fftavg->GetString(choice_fftavg->GetCurrentSelection()));
+  int numAverage = wxAtoi(choice_fftavg->GetString(choice_fftavg->GetSelection()));
   m_SMASpeLeft->SetNumAverage(numAverage);
   m_SMASpeRight->SetNumAverage(numAverage);
 }
@@ -1076,8 +1076,8 @@ void MainFrame::OnFFTAvgChanged(wxCommandEvent& WXUNUSED(event)) {
 void MainFrame::OnFFTScaleChanged(wxCommandEvent& WXUNUSED(event)) {
   double ref;
   double dbDiv;
-  choice_spe_ref->GetString(choice_spe_ref->GetCurrentSelection()).ToDouble(&ref);
-  choice_spe_dbdiv->GetString(choice_spe_dbdiv->GetCurrentSelection()).ToDouble(&dbDiv);
+  choice_spe_ref->GetString(choice_spe_ref->GetSelection()).ToDouble(&ref);
+  choice_spe_dbdiv->GetString(choice_spe_dbdiv->GetSelection()).ToDouble(&dbDiv);
   double lo = ref - 10 * dbDiv;
   window_1_spe->SetYRange(lo, ref, 0);
 }
@@ -1215,8 +1215,8 @@ void MainFrame::SendGenSettings() {
   txt_freq_r->GetValue().ToDouble(&doubleToFreq);
   freq_r = (float)doubleToFreq;
 
-  int shapeleft = choice_l_wav->GetCurrentSelection();
-  int shaperight = choice_r_wav->GetCurrentSelection();
+  int shapeleft = choice_l_wav->GetSelection();
+  int shaperight = choice_r_wav->GetSelection();
 
   if (checkbox_gen_sync->IsChecked()) {
     freq_r = freq_l;
