@@ -38,12 +38,12 @@ class CtrlOScope : public wxControl {
 
   void SetXUnits(wxString string, wxString XMin = "", wxString XMax = "");
   void SetYUnits(wxString string, wxString YMin = "", wxString YMax = "");
-  void SetTrack1(wxArrayDouble& ardbl);
-  void SetTrack2(wxArrayDouble& ardbl);
-  void SetTrackX(wxArrayDouble& ardbl);
+  void SetTrack1(wxArrayDouble const& ardbl);
+  void SetTrack2(wxArrayDouble const& ardbl);
+  void SetTrackX(wxArrayDouble const& ardbl);
   void SetNumOfVerticals(int num) { m_NumberOfVerticals = num; };
 
-  void ShowUserText(wxString text, int xpos, int ypos) {
+  void ShowUserText(wxString const& text, int xpos, int ypos) {
     m_UserText = text;
     m_UserTextPosX = xpos;
     m_UserTextPosY = ypos;
