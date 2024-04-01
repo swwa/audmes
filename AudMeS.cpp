@@ -35,9 +35,9 @@
 #include "event_ids.h"
 #include "fourier.h"
 
-IMPLEMENT_CLASS(MainFrame, wxFrame)
+wxIMPLEMENT_CLASS(MainFrame, wxFrame);
 
-BEGIN_EVENT_TABLE(MainFrame, wxFrame)
+wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
 EVT_TOGGLEBUTTON(ID_SPANSTART, MainFrame::OnSpanStart)
 EVT_TOGGLEBUTTON(ID_GENSTART, MainFrame::OnGenStart)
 EVT_TOGGLEBUTTON(ID_OSCSTART, MainFrame::OnOscStart)
@@ -74,7 +74,7 @@ EVT_CHOICE(ID_FFTLENGTH, MainFrame::OnOscXScaleChanged)
 EVT_CHOICE(ID_FFTAVG, MainFrame::OnFFTAvgChanged)
 EVT_CHOICE(ID_FFTREF, MainFrame::OnFFTScaleChanged)
 EVT_CHOICE(ID_FFTDBDIV, MainFrame::OnFFTScaleChanged)
-END_EVENT_TABLE()
+wxEND_EVENT_TABLE()
 
 float* g_OscBuffer_Left;
 float* g_OscBuffer_Right;
@@ -1276,10 +1276,10 @@ void MainFrame::OnTxtFreqRChanged(wxCommandEvent& WXUNUSED(event)) {
 
 class AudMeSApp : public wxApp {
  public:
-  bool OnInit();
+  virtual bool OnInit();
 };
 
-IMPLEMENT_APP(AudMeSApp)
+wxIMPLEMENT_APP(AudMeSApp);
 
 bool AudMeSApp::OnInit() {
   wxInitAllImageHandlers();

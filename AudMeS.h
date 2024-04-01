@@ -35,8 +35,8 @@
 #define AUDMES_VERSION_STRING "2024-02-18"
 
 class MainFrame : public wxFrame {
-  DECLARE_CLASS(MainFrame)
-  DECLARE_EVENT_TABLE()
+  wxDECLARE_CLASS(MainFrame);
+  wxDECLARE_EVENT_TABLE();
 
  public:
   // begin wxGlade: MainFrame::ids

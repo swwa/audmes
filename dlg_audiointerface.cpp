@@ -55,20 +55,20 @@
  * AudioInterfaceDialog type definition
  */
 
-IMPLEMENT_DYNAMIC_CLASS(AudioInterfaceDialog, wxDialog)
+wxIMPLEMENT_DYNAMIC_CLASS(AudioInterfaceDialog, wxDialog);
 
 /*!
  * AudioInterfaceDialog event table definition
  */
 
-BEGIN_EVENT_TABLE(AudioInterfaceDialog, wxDialog)
+wxBEGIN_EVENT_TABLE(AudioInterfaceDialog, wxDialog)
 
 ////@begin AudioInterfaceDialog event table entries
 ////@end AudioInterfaceDialog event table entries
 EVT_CHOICE(ID_OUTDEV_CHO, AudioInterfaceDialog::OnChoiceChanged)
 EVT_CHOICE(ID_INDEV_CHO, AudioInterfaceDialog::OnChoiceChanged)
 
-END_EVENT_TABLE()
+wxEND_EVENT_TABLE()
 
 /*!
  * AudioInterfaceDialog constructors

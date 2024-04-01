@@ -81,8 +81,8 @@ struct AIStreamSettings {
 };
 
 class AudioInterfaceDialog : public wxDialog {
-  DECLARE_DYNAMIC_CLASS(AudioInterfaceDialog)
-  DECLARE_EVENT_TABLE()
+  wxDECLARE_DYNAMIC_CLASS(AudioInterfaceDialog);
+  wxDECLARE_EVENT_TABLE();
 
   RWAudioDevList m_DevRecList;
   RWAudioDevList m_DevPlayList;
