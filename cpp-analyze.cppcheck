@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="1">
+    <builddir>cpp-analyze-cppcheck-build-dir</builddir>
+    <platform>unknown</platform>
+    <analyze-all-vs-configs>false</analyze-all-vs-configs>
+    <check-headers>true</check-headers>
+    <check-unused-templates>true</check-unused-templates>
+    <max-ctu-depth>2</max-ctu-depth>
+    <max-template-recursion>100</max-template-recursion>
+    <includedir>
+        <dir name="./"/>
+        <dir name="/usr/lib/x86_64-linux-gnu/wx/include/gtk3-unicode-3.2"/>
+        <dir name="/usr/include/wx-3.2"/>
+    </includedir>
+    <defines>
+        <define name="_FILE_OFFSET_BITS=64"/>
+        <define name="WXUSINGDLL"/>
+        <define name="__WXGTK__"/>
+    </defines>
+    <paths>
+        <dir name="."/>
+    </paths>
+    <exclude>
+        <path name="../../.."/>
+        <path name="rtaudio/"/>
+        <path name="build/"/>
+    </exclude>
+</project>

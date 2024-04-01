@@ -4,3 +4,4 @@ xcode
 .vscode
 .vs
 libfccp
+cpp-analyze-cppcheck-build-dir
