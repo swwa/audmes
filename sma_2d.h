@@ -24,10 +24,6 @@
 #ifndef _SMA_2D_
 #define _SMA_2D_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-#pragma interface "sma_2d.h"
-#endif
-
 #include <iostream>
 #include <vector>
 
