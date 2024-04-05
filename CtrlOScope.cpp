@@ -91,12 +91,6 @@ void CtrlOScope::SetYRange(double dLower, double dUpper, int logrange) {
   m_LogY = logrange;
 }  // SetRange
 
-void CtrlOScope::SetXUnits(wxString WXUNUSED(string), wxString WXUNUSED(XMin),
-                           wxString WXUNUSED(XMax)) {}  // SetXUnits
-
-void CtrlOScope::SetYUnits(wxString WXUNUSED(string), wxString WXUNUSED(YMin),
-                           wxString WXUNUSED(YMax)) {}  // SetYUnits
-
 void CtrlOScope::OnPaint(wxPaintEvent& WXUNUSED(event)) {
   wxPaintDC dc(this);  // device context for painting
   PaintAll(dc);

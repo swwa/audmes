@@ -36,8 +36,6 @@ class CtrlOScope : public wxControl {
   void SetXRange(double dLower, double dUpper, int logrange);
   void SetYRange(double dLower, double dUpper, int logrange);
 
-  void SetXUnits(wxString string, wxString XMin = "", wxString XMax = "");
-  void SetYUnits(wxString string, wxString YMin = "", wxString YMax = "");
   void SetTrack1(wxArrayDouble const& ardbl);
   void SetTrack2(wxArrayDouble const& ardbl);
   void SetTrackX(wxArrayDouble const& ardbl);
