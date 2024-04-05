@@ -54,12 +54,8 @@ wxIMPLEMENT_DYNAMIC_CLASS(AudioInterfaceDialog, wxDialog);
  */
 
 wxBEGIN_EVENT_TABLE(AudioInterfaceDialog, wxDialog)
-
-////@begin AudioInterfaceDialog event table entries
-////@end AudioInterfaceDialog event table entries
-EVT_CHOICE(ID_OUTDEV_CHO, AudioInterfaceDialog::OnChoiceChanged)
-EVT_CHOICE(ID_INDEV_CHO, AudioInterfaceDialog::OnChoiceChanged)
-
+  EVT_CHOICE(ID_OUTDEV_CHO, AudioInterfaceDialog::OnChoiceChanged)
+  EVT_CHOICE(ID_INDEV_CHO, AudioInterfaceDialog::OnChoiceChanged)
 wxEND_EVENT_TABLE()
 
 /*!
