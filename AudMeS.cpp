@@ -869,7 +869,7 @@ void MainFrame::DrawOscilloscope(void) {
   window_osc->SetTrackX(osc_times);
 }
 
-double MainFrame::calc_dc(float* data, int size) {
+double MainFrame::calc_dc(const float* data, int size) {
   double dc = 0.0;
   for (int i = 0; i < size; i++) {
     dc += data[i];
@@ -1230,8 +1230,6 @@ void MainFrame::SendGenSettings() {
 }
 
 void MainFrame::OnSelectSndCard(wxCommandEvent& WXUNUSED(event)) {
-  wxArrayString arrplstr, arrrecstr, freqsstr;
-  wxString bla;
   unsigned int recdev, pldev;
   RWAudioDevList playDevList;
   RWAudioDevList recordDevList;

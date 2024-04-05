@@ -9,10 +9,11 @@
     <max-template-recursion>100</max-template-recursion>
     <includedir>
         <dir name="./"/>
-        <dir name="/usr/lib/x86_64-linux-gnu/wx/include/gtk3-unicode-3.2"/>
-        <dir name="/usr/include/wx-3.2"/>
     </includedir>
     <defines>
+        <define name="__LINUX__"/>
+        <define name="__LINUX_PULSE__"/>
+        <define name="__LINUX_ALSA__"/>
         <define name="_FILE_OFFSET_BITS=64"/>
         <define name="WXUSINGDLL"/>
         <define name="__WXGTK__"/>
@@ -21,8 +22,9 @@
         <dir name="."/>
     </paths>
     <exclude>
-        <path name="../../.."/>
-        <path name="rtaudio/"/>
-        <path name="build/"/>
+        <path name="./build/"/>
     </exclude>
+    <libraries>
+        <library>wxwidgets</library>
+    </libraries>
 </project>

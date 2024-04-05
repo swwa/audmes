@@ -54,7 +54,7 @@ class MainFrame : public wxFrame {
   // end wxGlade
 
   void setoscbuf();
-  double calc_dc(float* data, int size);
+  double calc_dc(const float* data, int size);
 
   void OnSpanStart(wxCommandEvent& event);
   void OnGenStart(wxCommandEvent& event);

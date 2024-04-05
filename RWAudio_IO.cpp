@@ -143,7 +143,7 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
 #endif
 
   /* calculate the wave form according to the selected shape */
-  for (unsigned i = 0; i < nBufferFrames; i++) {
+  for (i = 0; i < nBufferFrames; i++) {
     double y = 0;
     double y2 = 0;
     bool noise = lfsr16();

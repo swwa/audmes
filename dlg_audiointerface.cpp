@@ -240,7 +240,7 @@ void AudioInterfaceDialog::SetDevices(RWAudioDevList devreclist, RWAudioDevList 
 
         if (srateplay == sraterec) {
           if (srateplay == m_freq) cfreq = p_cho->GetCount();
-          p_cho->Append(wxString::Format(wxT("%d "), srateplay));
+          p_cho->Append(wxString::Format(wxT("%u "), srateplay));
         }
       }
     }
@@ -315,7 +315,7 @@ void AudioInterfaceDialog::OnChoiceChanged(wxCommandEvent& WXUNUSED(event)) {
 
         if (srateplay == sraterec) {
           if (srateplay == m_freq) cfreq = p_cho->GetCount();
-          p_cho->Append(wxString::Format(wxT("%d "), srateplay));
+          p_cho->Append(wxString::Format(wxT("%u "), srateplay));
         }
       }
     }
