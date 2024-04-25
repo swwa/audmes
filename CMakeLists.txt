@@ -5,23 +5,26 @@ project(AudMeS)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(AM_SOURCES
+set(CPP_SOURCES
 	AudMeS.cpp
 	AudMeS.h
 	CtrlOScope.cpp
 	CtrlOScope.h
 	dlg_audiointerface.cpp
 	dlg_audiointerface.h
-	fourier.c
-	fourier.h
 	RWAudio_IO.cpp
 	RWAudio_IO.h
-	rtaudio/RtAudio.cpp
-	rtaudio/RtAudio.h
 	sma_2d.cpp
 	sma_2d.h
 )
 
+set(AM_SOURCES
+	${CPP_SOURCES}
+	rtaudio/RtAudio.cpp
+	rtaudio/RtAudio.h
+	fourier.c
+	fourier.h
+)
 add_subdirectory (tests)
 
 include_directories(.) # for local libfccp
@@ -165,5 +168,10 @@ if (APPLE)
 	install(FILES "${CMAKE_SOURCE_DIR}/NEWS" DESTINATION .)
 	set(CPACK_GENERATOR "DragNDrop")
 endif()
+
+add_custom_target(
+	clang-tidy-check cd ..\; clang-tidy -p ${CMAKE_BINARY_DIR}/compile_commands.json ${CPP_SOURCES} DEPENDS ${CPP_SOURCES})
+
+add_custom_target(check DEPENDS clang-tidy-check)
 
 INCLUDE(CPack)
