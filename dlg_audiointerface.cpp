@@ -62,11 +62,10 @@ wxEND_EVENT_TABLE()
  * AudioInterfaceDialog constructors
  */
 
-AudioInterfaceDialog::AudioInterfaceDialog() { Init(); }
+AudioInterfaceDialog::AudioInterfaceDialog() {}
 
 AudioInterfaceDialog::AudioInterfaceDialog(wxWindow* parent, wxWindowID id, const wxString& caption,
                                            const wxPoint& pos, const wxSize& size, long style) {
-  Init();
   Create(parent, id, caption, pos, size, style);
 }
 
@@ -89,14 +88,6 @@ bool AudioInterfaceDialog::Create(wxWindow* parent, wxWindowID id, const wxStrin
   return true;
 }
 
-/*!
- * Member initialisation
- */
-
-void AudioInterfaceDialog::Init() {
-  ////@begin AudioInterfaceDialog member initialisation
-  ////@end AudioInterfaceDialog member initialisation
-}
 /*!
  * Control creation for AudioInterfaceDialog
  */

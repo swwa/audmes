@@ -101,9 +101,6 @@ class AudioInterfaceDialog : public wxDialog {
               const wxSize& size = SYMBOL_AUDIOINTERFACEDIALOG_SIZE,
               long style = SYMBOL_AUDIOINTERFACEDIALOG_STYLE);
 
-  /// Initialises member variables
-  void Init();
-
   /// Creates the controls and sizers
   void CreateControls();
 
