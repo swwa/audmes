@@ -233,8 +233,8 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
                               choice_fftry_choices, 0);
 
   label_avg = new wxStaticText(notebook_1_spe, -1, wxT("Averaging (N):"));
-  const wxString choice_fftavg_choices[] = {wxT("1"), wxT("5"), wxT("10"), wxT("20")};
-  choice_fftavg = new wxChoice(notebook_1_spe, ID_FFTAVG, wxDefaultPosition, wxDefaultSize, 4,
+  const wxString choice_fftavg_choices[] = {wxT("1"), wxT("2"), wxT("5"), wxT("10"), wxT("20")};
+  choice_fftavg = new wxChoice(notebook_1_spe, ID_FFTAVG, wxDefaultPosition, wxDefaultSize, 5,
                                choice_fftavg_choices, 0);
 
   label_spe_ref = new wxStaticText(notebook_1_spe, -1, wxT("Ref Level [dB]"));
