@@ -256,7 +256,7 @@ void CtrlOScope::PaintGraph(wxDC& dc) {
 void CtrlOScope::PaintTrack(wxDC& dc, size_t from, size_t to, double xstep, wxColor color,
                             wxArrayDouble& points) {
   dc.SetPen(wxPen(color, 1, wxPENSTYLE_SOLID));
-  int lastx = 0, lasty = 0, xpos = 0;
+  int lastx = 0, lasty = 0, xpos;
   wxRect rec = GetClientRect();
   // iterate trough the data points in range
   for (size_t i = from; i <= to; i++) {
