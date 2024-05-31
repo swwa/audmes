@@ -98,8 +98,8 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
   notebook_1_gen = new wxPanel(notebook_1, -1);
   notebook_1_frm = new wxPanel(notebook_1, -1);
   sizer_4_copy_staticbox = new wxStaticBox(notebook_1_gen, -1, wxT("Right channel"));
-  sizer_12_staticbox = new wxStaticBox(notebook_1_osc, -1, wxT("Left channel (Red)"));
-  sizer_12_copy_staticbox = new wxStaticBox(notebook_1_osc, -1, wxT("Right channel (Green)"));
+  sizer_12_staticbox = new wxStaticBox(notebook_1_osc, -1, wxT("Left channel"));
+  sizer_12_copy_staticbox = new wxStaticBox(notebook_1_osc, -1, wxT("Right channel"));
   sizer_4_staticbox = new wxStaticBox(notebook_1_gen, -1, wxT("Left channel"));
   sizer_spe_fft_staticbox = new wxStaticBox(notebook_1_spe, -1, wxT("FFT"));
   sizer_spe_disp_staticbox = new wxStaticBox(notebook_1_spe, -1, wxT("Display"));
@@ -164,14 +164,7 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
 
   /* oscilloscope panel */
   window_osc = new CtrlOScope(notebook_1_osc, _T(""), _T(""));
-  label_5_copy = new wxStaticText(notebook_1_osc, -1, wxT("X Scale [us/div]: "));
-  const wxString choice_osc_swp_choices[] = {
-      wxT("10"),   wxT("20"),   wxT("50"),   wxT("100"),   wxT("200"),   wxT("500"),
-      wxT("1000"), wxT("2000"), wxT("5000"), wxT("10000"), wxT("20000"), wxT("50000"),
-  };
-  choice_osc_swp = new wxChoice(notebook_1_osc, ID_OSCXSCALE, wxDefaultPosition, wxDefaultSize, 12,
-                                choice_osc_swp_choices, 0);
-  label_6 = new wxStaticText(notebook_1_osc, -1, wxT("Res [V/div]: "));
+  label_6 = new wxStaticText(notebook_1_osc, -1, wxT("[V/div]: "));
   const wxString choice_osc_l_res_choices[] = {
       wxT("1"),    wxT("2"),    wxT("4"),     wxT("8"),    wxT("16"),   wxT("32"),
       wxT("64"),   wxT("128"),  wxT("256"),   wxT("512"),  wxT("1024"), wxT("2048"),
@@ -185,7 +178,7 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
   choice_osc_l_off = new wxChoice(notebook_1_osc, -1, wxDefaultPosition, wxDefaultSize, 11,
                                   choice_osc_l_off_choices, 0);
 
-  label_6_copy = new wxStaticText(notebook_1_osc, -1, wxT("Res [V/div]: "));
+  label_6_copy = new wxStaticText(notebook_1_osc, -1, wxT("[V/div]: "));
   const wxString choice_osc_l_res_copy_choices[] = {
       wxT("1"),    wxT("2"),    wxT("4"),     wxT("8"),    wxT("16"),   wxT("32"),
       wxT("64"),   wxT("128"),  wxT("256"),   wxT("512"),  wxT("1024"), wxT("2048"),
@@ -199,10 +192,17 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
   choice_osc_l_off_copy = new wxChoice(notebook_1_osc, -1, wxDefaultPosition, wxDefaultSize, 11,
                                        choice_osc_l_off_copy_choices, 0);
 
-  button_osc_start = new wxToggleButton(notebook_1_osc, ID_OSCSTART, wxT("Start"));
-
   button_autocalibrate = new wxButton(notebook_1_osc, ID_AUTOCAL, wxT("Auto Cal"));
-  /// triggering control
+
+  const wxString choice_osc_swp_choices[] = {
+      wxT("10"),   wxT("20"),   wxT("50"),   wxT("100"),   wxT("200"),   wxT("500"),
+      wxT("1000"), wxT("2000"), wxT("5000"), wxT("10000"), wxT("20000"), wxT("50000"),
+  };
+  choice_osc_swp = new wxChoice(notebook_1_osc, ID_OSCXSCALE, wxDefaultPosition, wxDefaultSize, 12,
+                                choice_osc_swp_choices, 0);
+  label_5_copy = new wxStaticText(notebook_1_osc, -1, wxT("Time [us/div]: "));
+
+  // triggering control
   label_8 = new wxStaticText(notebook_1_osc, -1, wxT("Trigger: "));
   const wxString choice_osc_trig_source_choices[] = {wxT("Off"), wxT("Left channel"),
                                                      wxT("Right channel")};
@@ -212,6 +212,8 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
   const wxString choice_osc_trig_edge_choices[] = {wxT("Rising edge"), wxT("Falling edge")};
   choice_osc_trig_edge = new wxChoice(notebook_1_osc, ID_OSCRTRIG, wxDefaultPosition, wxDefaultSize,
                                       2, choice_osc_trig_edge_choices, 0);
+
+  button_osc_start = new wxToggleButton(notebook_1_osc, ID_OSCSTART, wxT("Start"));
 
   /* Spectrum analyzer */
   label_5 = new wxStaticText(notebook_1_spe, -1, wxT("FFT Window Type:"));
@@ -378,11 +380,6 @@ void MainFrame::do_layout() {
 
   // oscilloscope
   sizer_10->Add(window_osc, 1, wxEXPAND, 0);  // CtrlOScope
-  // sizer_13: wxHORIZONTAL
-  sizer_13->Add(label_5_copy, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);    // X Scale [samples/div]
-  sizer_13->Add(choice_osc_swp, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);  // 20, 50....50000
-  // sizer_11: wxVERTICAL
-  sizer_11->Add(sizer_13, 0, wxALIGN_CENTER_HORIZONTAL, 0);
 
   // sizer_14: wxHorizontal
   sizer_14->Add(label_6, 0, wxLEFT | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
@@ -418,10 +415,16 @@ void MainFrame::do_layout() {
   sizer_12_copy->Add(sizer_15_copy, 1, wxEXPAND, 0);
   sizer_11->Add(sizer_12_copy, 0, wxALL | wxEXPAND, 5);
 
+  // sizer_13: wxHORIZONTAL
+  sizer_13->Add(label_5_copy, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);    // X Scale time
+  sizer_13->Add(5, 5, 1, 0, 0);                                          // spacer
+  sizer_13->Add(choice_osc_swp, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);  // 20, 50....50000
+  sizer_11->Add(sizer_13, 1, wxEXPAND, 0);
+
   sizer_16->Add(label_8, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);  // Trigger
   sizer_16->Add(5, 5, 1, 0, 0);                                   // spacer
   sizer_16->Add(choice_osc_trig_source, 0, wxALL | wxALIGN_CENTER_VERTICAL,
-                5);  // Off, Lefft, ... Channel
+                5);  // Off, Left, ... Channel
   sizer_11->Add(sizer_16, 1, wxEXPAND, 0);
 
   sizer_16_copy->Add(label_8_copy, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);  // Trigger Edge
