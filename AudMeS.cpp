@@ -97,10 +97,10 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
   notebook_1_osc = new wxPanel(notebook_1, -1);
   notebook_1_gen = new wxPanel(notebook_1, -1);
   notebook_1_frm = new wxPanel(notebook_1, -1);
-  sizer_4_copy_staticbox = new wxStaticBox(notebook_1_gen, -1, wxT("Right channel"));
-  sizer_12_staticbox = new wxStaticBox(notebook_1_osc, -1, wxT("Left channel"));
-  sizer_12_copy_staticbox = new wxStaticBox(notebook_1_osc, -1, wxT("Right channel"));
-  sizer_4_staticbox = new wxStaticBox(notebook_1_gen, -1, wxT("Left channel"));
+  sizer_gen_l_staticbox = new wxStaticBox(notebook_1_gen, -1, wxT("Left channel"));
+  sizer_gen_r_staticbox = new wxStaticBox(notebook_1_gen, -1, wxT("Right channel"));
+  sizer_osc_l_staticbox = new wxStaticBox(notebook_1_osc, -1, wxT("Left channel"));
+  sizer_osc_r_staticbox = new wxStaticBox(notebook_1_osc, -1, wxT("Right channel"));
   sizer_spe_fft_staticbox = new wxStaticBox(notebook_1_spe, -1, wxT("FFT"));
   sizer_spe_disp_staticbox = new wxStaticBox(notebook_1_spe, -1, wxT("Display"));
   sizer_spe_scale_staticbox = new wxStaticBox(notebook_1_spe, -1, wxT("Scale"));
@@ -129,25 +129,25 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
 
   /* generator panel */
   checkbox_l_en = new wxCheckBox(notebook_1_gen, ID_GENLENB, wxT("Enable Output"));
-  label_1 = new wxStaticText(notebook_1_gen, -1, wxT("Waveform: "));
+  label_gen_wave_l = new wxStaticText(notebook_1_gen, -1, wxT("Waveform: "));
   const wxString choice_l_wav_choices[] = {wxT("Sine"), wxT("Rectangular"), wxT("Saw"),
                                            wxT("Triangle"), wxT("Wh-Noise")};
   choice_l_wav = new wxChoice(notebook_1_gen, ID_GENSHP_L, wxDefaultPosition, wxDefaultSize, 5,
                               choice_l_wav_choices, 0);
-  label_2 = new wxStaticText(notebook_1_gen, -1, wxT("Frequency [20..20000Hz]: "));
+  label__gen_freq_l = new wxStaticText(notebook_1_gen, -1, wxT("Frequency [20..20000Hz]: "));
   slide_l_fr = new wxSlider(notebook_1_gen, ID_GENLFREQ, 80, 0, 200);
-  label_3 = new wxStaticText(notebook_1_gen, -1, wxT("Amplitude [0..-60dB]: "));
+  label_gen_ampl_l = new wxStaticText(notebook_1_gen, -1, wxT("Amplitude [0..-60dB]: "));
   slide_l_am = new wxSlider(notebook_1_gen, ID_GENLAMP, 0, -60, 0);
 
   checkbox_r_en = new wxCheckBox(notebook_1_gen, ID_GENRENB, wxT("Enable Output"));
-  label_1_copy_1 = new wxStaticText(notebook_1_gen, -1, wxT("Waveform: "));
+  label_gen_wave_r = new wxStaticText(notebook_1_gen, -1, wxT("Waveform: "));
   const wxString choice_r_wav_choices[] = {wxT("Sine"), wxT("Rectangular"), wxT("Saw"),
                                            wxT("Triangle"), wxT("Wh-Noise")};
   choice_r_wav = new wxChoice(notebook_1_gen, ID_GENSHP_R, wxDefaultPosition, wxDefaultSize, 5,
                               choice_r_wav_choices, 0);
-  label_2_copy_1 = new wxStaticText(notebook_1_gen, -1, wxT("Frequency [20..20000Hz]: "));
+  label_gen_freq_r = new wxStaticText(notebook_1_gen, -1, wxT("Frequency [20..20000Hz]: "));
   slide_r_fr = new wxSlider(notebook_1_gen, ID_GENRFREQ, 80, 0, 200);
-  label_3_copy_1 = new wxStaticText(notebook_1_gen, -1, wxT("Amplitude [0..-60dB]: "));
+  label_gen_ampl_r = new wxStaticText(notebook_1_gen, -1, wxT("Amplitude [0..-60dB]: "));
   slide_r_am = new wxSlider(notebook_1_gen, ID_GENRAMP, 0, -60, 0);
   button_gen_start = new wxToggleButton(notebook_1_gen, ID_GENSTART, wxT("Start"));
 
@@ -164,33 +164,33 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
 
   /* oscilloscope panel */
   window_osc = new CtrlOScope(notebook_1_osc, _T(""), _T(""));
-  label_6 = new wxStaticText(notebook_1_osc, -1, wxT("[V/div]: "));
+  label_osc_div_l = new wxStaticText(notebook_1_osc, -1, wxT("[V/div]: "));
   const wxString choice_osc_l_res_choices[] = {
       wxT("1"),    wxT("2"),    wxT("4"),     wxT("8"),    wxT("16"),   wxT("32"),
       wxT("64"),   wxT("128"),  wxT("256"),   wxT("512"),  wxT("1024"), wxT("2048"),
       wxT("4096"), wxT("8192"), wxT("16384"), wxT("32768")};
   choice_osc_l_res = new wxChoice(notebook_1_osc, -1, wxDefaultPosition, wxDefaultSize, 16,
                                   choice_osc_l_res_choices, 0);
-  label_7 = new wxStaticText(notebook_1_osc, -1, wxT("Offset [V/div]: "));
+  label_osc_off_l = new wxStaticText(notebook_1_osc, -1, wxT("Offset [V/div]: "));
   const wxString choice_osc_l_off_choices[] = {wxT("100"), wxT("80"),  wxT("60"),  wxT("40"),
                                                wxT("20"),  wxT("0"),   wxT("-20"), wxT("-40"),
                                                wxT("-60"), wxT("-80"), wxT("-100")};
   choice_osc_l_off = new wxChoice(notebook_1_osc, -1, wxDefaultPosition, wxDefaultSize, 11,
                                   choice_osc_l_off_choices, 0);
 
-  label_6_copy = new wxStaticText(notebook_1_osc, -1, wxT("[V/div]: "));
-  const wxString choice_osc_l_res_copy_choices[] = {
+  label_osc_div_r = new wxStaticText(notebook_1_osc, -1, wxT("[V/div]: "));
+  const wxString choice_osc_r_res_choices[] = {
       wxT("1"),    wxT("2"),    wxT("4"),     wxT("8"),    wxT("16"),   wxT("32"),
       wxT("64"),   wxT("128"),  wxT("256"),   wxT("512"),  wxT("1024"), wxT("2048"),
       wxT("4096"), wxT("8192"), wxT("16384"), wxT("32768")};
-  choice_osc_l_res_copy = new wxChoice(notebook_1_osc, -1, wxDefaultPosition, wxDefaultSize, 16,
-                                       choice_osc_l_res_copy_choices, 0);
-  label_7_copy = new wxStaticText(notebook_1_osc, -1, wxT("Offset [V/div]: "));
-  const wxString choice_osc_l_off_copy_choices[] = {wxT("100"), wxT("80"),  wxT("60"),  wxT("40"),
-                                                    wxT("20"),  wxT("0"),   wxT("-20"), wxT("-40"),
-                                                    wxT("-60"), wxT("-80"), wxT("-100")};
-  choice_osc_l_off_copy = new wxChoice(notebook_1_osc, -1, wxDefaultPosition, wxDefaultSize, 11,
-                                       choice_osc_l_off_copy_choices, 0);
+  choice_osc_r_res = new wxChoice(notebook_1_osc, -1, wxDefaultPosition, wxDefaultSize, 16,
+                                  choice_osc_r_res_choices, 0);
+  label_osc_off_r = new wxStaticText(notebook_1_osc, -1, wxT("Offset [V/div]: "));
+  const wxString choice_osc_r_off_choices[] = {wxT("100"), wxT("80"),  wxT("60"),  wxT("40"),
+                                               wxT("20"),  wxT("0"),   wxT("-20"), wxT("-40"),
+                                               wxT("-60"), wxT("-80"), wxT("-100")};
+  choice_osc_r_off = new wxChoice(notebook_1_osc, -1, wxDefaultPosition, wxDefaultSize, 11,
+                                  choice_osc_r_off_choices, 0);
 
   button_autocalibrate = new wxButton(notebook_1_osc, ID_AUTOCAL, wxT("Auto Cal"));
 
@@ -200,7 +200,7 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
   };
   choice_osc_swp = new wxChoice(notebook_1_osc, ID_OSCXSCALE, wxDefaultPosition, wxDefaultSize, 12,
                                 choice_osc_swp_choices, 0);
-  label_5_copy = new wxStaticText(notebook_1_osc, -1, wxT("Time [us/div]: "));
+  label_osc_time = new wxStaticText(notebook_1_osc, -1, wxT("Time [us/div]: "));
 
   // triggering control
   label_8 = new wxStaticText(notebook_1_osc, -1, wxT("Trigger: "));
@@ -208,7 +208,7 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
                                                      wxT("Right channel")};
   choice_osc_trig_source = new wxChoice(notebook_1_osc, ID_OSCLTRIG, wxDefaultPosition,
                                         wxDefaultSize, 3, choice_osc_trig_source_choices, 0);
-  label_8_copy = new wxStaticText(notebook_1_osc, -1, wxT("Trigger edge: "));
+  label_osc_trig = new wxStaticText(notebook_1_osc, -1, wxT("Trigger edge: "));
   const wxString choice_osc_trig_edge_choices[] = {wxT("Rising edge"), wxT("Falling edge")};
   choice_osc_trig_edge = new wxChoice(notebook_1_osc, ID_OSCRTRIG, wxDefaultPosition, wxDefaultSize,
                                       2, choice_osc_trig_edge_choices, 0);
@@ -279,8 +279,8 @@ void MainFrame::set_properties() {
   choice_osc_l_res->SetSelection(0);
   choice_osc_l_off->SetSelection(0);
   choice_osc_trig_source->SetSelection(0);
-  choice_osc_l_res_copy->SetSelection(0);
-  choice_osc_l_off_copy->SetSelection(0);
+  choice_osc_r_res->SetSelection(0);
+  choice_osc_r_off->SetSelection(0);
   choice_osc_trig_edge->SetSelection(0);
   choice_fft->SetSelection(1);
   choice_fftlength->SetSelection(4);
@@ -300,19 +300,19 @@ void MainFrame::do_layout() {
   wxBoxSizer* sizer_9 = new wxBoxSizer(wxVERTICAL);
   wxBoxSizer* sizer_10 = new wxBoxSizer(wxHORIZONTAL);
   wxBoxSizer* sizer_11 = new wxBoxSizer(wxVERTICAL);
-  wxStaticBoxSizer* sizer_12_copy = new wxStaticBoxSizer(sizer_12_copy_staticbox, wxVERTICAL);
+  wxStaticBoxSizer* sizer_12_copy = new wxStaticBoxSizer(sizer_osc_r_staticbox, wxVERTICAL);
   wxBoxSizer* sizer_16_copy = new wxBoxSizer(wxHORIZONTAL);
   wxBoxSizer* sizer_15_copy = new wxBoxSizer(wxHORIZONTAL);
   wxBoxSizer* sizer_14_copy = new wxBoxSizer(wxHORIZONTAL);
-  wxStaticBoxSizer* sizer_12 = new wxStaticBoxSizer(sizer_12_staticbox, wxVERTICAL);
+  wxStaticBoxSizer* sizer_12 = new wxStaticBoxSizer(sizer_osc_l_staticbox, wxVERTICAL);
   wxBoxSizer* sizer_16 = new wxBoxSizer(wxHORIZONTAL);
   wxBoxSizer* sizer_15 = new wxBoxSizer(wxHORIZONTAL);
   wxBoxSizer* sizer_14 = new wxBoxSizer(wxHORIZONTAL);
   wxBoxSizer* sizer_13 = new wxBoxSizer(wxHORIZONTAL);
   wxBoxSizer* sizer_2 = new wxBoxSizer(wxVERTICAL);
   wxBoxSizer* sizer_3 = new wxBoxSizer(wxHORIZONTAL);
-  wxStaticBoxSizer* sizer_4_copy = new wxStaticBoxSizer(sizer_4_copy_staticbox, wxVERTICAL);
-  wxStaticBoxSizer* sizer_4 = new wxStaticBoxSizer(sizer_4_staticbox, wxVERTICAL);
+  wxStaticBoxSizer* sizer_4_copy = new wxStaticBoxSizer(sizer_gen_r_staticbox, wxVERTICAL);
+  wxStaticBoxSizer* sizer_4 = new wxStaticBoxSizer(sizer_gen_l_staticbox, wxVERTICAL);
   wxBoxSizer* sizer_gen_sync = new wxBoxSizer(wxHORIZONTAL);
   wxBoxSizer* sizer_gen_sync2 = new wxBoxSizer(wxHORIZONTAL);
 
@@ -339,26 +339,26 @@ void MainFrame::do_layout() {
 
   // generator
   sizer_4->Add(checkbox_l_en, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
-  sizer_GenL->Add(label_1, 0, wxALL | wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL, 5);
+  sizer_GenL->Add(label_gen_wave_l, 0, wxALL | wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL, 5);
   sizer_GenL->Add(choice_l_wav, 1, wxALL | wxEXPAND, 5);
-  sizer_GenL->Add(label_2, 0, wxALL | wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL, 5);
+  sizer_GenL->Add(label__gen_freq_l, 0, wxALL | wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL, 5);
   sizer_txtfreql->Add(slide_l_fr, 0, wxEXPAND, 5);
   sizer_txtfreql->Add(txt_freq_l, wxALL | wxEXPAND, 5);
   sizer_GenL->Add(sizer_txtfreql, 1, wxALL | wxEXPAND, 5);
-  sizer_GenL->Add(label_3, 0, wxALL | wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL, 5);
+  sizer_GenL->Add(label_gen_ampl_l, 0, wxALL | wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL, 5);
   sizer_GenL->Add(slide_l_am, 1, wxEXPAND, 5);
   sizer_4->Add(sizer_GenL, 0, wxALL | wxEXPAND, 5);
   sizer_3->Add(sizer_4, 0, wxALL | wxEXPAND, 5);
 
   sizer_4_copy->Add(checkbox_r_en, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
                     5);
-  sizer_GenR->Add(label_1_copy_1, 0, wxALL | wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL, 5);
+  sizer_GenR->Add(label_gen_wave_r, 0, wxALL | wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL, 5);
   sizer_GenR->Add(choice_r_wav, 1, wxALL | wxEXPAND, 5);
-  sizer_GenR->Add(label_2_copy_1, 0, wxALL | wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL, 5);
+  sizer_GenR->Add(label_gen_freq_r, 0, wxALL | wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL, 5);
   sizer_txtfreqr->Add(slide_r_fr, 0, wxEXPAND, 5);
   sizer_txtfreqr->Add(txt_freq_r, wxALL | wxEXPAND, 5);
   sizer_GenR->Add(sizer_txtfreqr, 1, wxALL | wxEXPAND, 5);
-  sizer_GenR->Add(label_3_copy_1, 0, wxALL | wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL, 5);
+  sizer_GenR->Add(label_gen_ampl_r, 0, wxALL | wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL, 5);
   sizer_GenR->Add(slide_r_am, 1, wxEXPAND, 5);
   sizer_4_copy->Add(sizer_GenR, 0, wxALL | wxEXPAND, 5);
   sizer_3->Add(sizer_4_copy, 0, wxALL | wxEXPAND, 5);
@@ -382,13 +382,14 @@ void MainFrame::do_layout() {
   sizer_10->Add(window_osc, 1, wxEXPAND, 0);  // CtrlOScope
 
   // sizer_14: wxHorizontal
-  sizer_14->Add(label_6, 0, wxLEFT | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
+  sizer_14->Add(label_osc_div_l, 0, wxLEFT | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
                 5);                              // Res[V/Div]
   sizer_14->Add(5, 5, 1, 0, 0);                  // spacer
   sizer_14->Add(choice_osc_l_res, 0, wxALL, 5);  // 2, 4, 8......32768
   // sizer_12: StaticBox Left Channel (Red)
   sizer_12->Add(sizer_14, 1, wxEXPAND, 0);
-  sizer_15->Add(label_7, 0, wxLEFT | wxRIGHT | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
+  sizer_15->Add(label_osc_off_l, 0,
+                wxLEFT | wxRIGHT | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
                 5);              // Offset [V/div]
   sizer_15->Add(5, 5, 1, 0, 0);  // spacer
   sizer_15->Add(choice_osc_l_off, 0, wxLEFT | wxRIGHT | wxALIGN_CENTER_VERTICAL,
@@ -400,23 +401,24 @@ void MainFrame::do_layout() {
                 wxLEFT | wxRIGHT | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
                 5);  // autocalibrate
 
-  sizer_14_copy->Add(label_6_copy, 0, wxLEFT | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
-                     5);                                   // Res[V/div]
-  sizer_14_copy->Add(5, 5, 1, 0, 0);                       // spacer
-  sizer_14_copy->Add(choice_osc_l_res_copy, 0, wxALL, 5);  // 2, 4, ... 32768
+  sizer_14_copy->Add(label_osc_div_r, 0,
+                     wxLEFT | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
+                     5);                              // Res[V/div]
+  sizer_14_copy->Add(5, 5, 1, 0, 0);                  // spacer
+  sizer_14_copy->Add(choice_osc_r_res, 0, wxALL, 5);  // 2, 4, ... 32768
   // sizer_12_copy: StaticBox Right Channel (Green)
   sizer_12_copy->Add(sizer_14_copy, 1, wxEXPAND, 0);
-  sizer_15_copy->Add(label_7_copy, 0,
+  sizer_15_copy->Add(label_osc_off_r, 0,
                      wxLEFT | wxRIGHT | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
                      5);              // Offset [V/div]
   sizer_15_copy->Add(5, 5, 1, 0, 0);  // spacer
-  sizer_15_copy->Add(choice_osc_l_off_copy, 0, wxLEFT | wxRIGHT | wxALIGN_CENTER_VERTICAL,
+  sizer_15_copy->Add(choice_osc_r_off, 0, wxLEFT | wxRIGHT | wxALIGN_CENTER_VERTICAL,
                      5);  // 100, 80, ... -100
   sizer_12_copy->Add(sizer_15_copy, 1, wxEXPAND, 0);
   sizer_11->Add(sizer_12_copy, 0, wxALL | wxEXPAND, 5);
 
   // sizer_13: wxHORIZONTAL
-  sizer_13->Add(label_5_copy, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);    // X Scale time
+  sizer_13->Add(label_osc_time, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);  // X Scale time
   sizer_13->Add(5, 5, 1, 0, 0);                                          // spacer
   sizer_13->Add(choice_osc_swp, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);  // 20, 50....50000
   sizer_11->Add(sizer_13, 1, wxEXPAND, 0);
@@ -427,8 +429,8 @@ void MainFrame::do_layout() {
                 5);  // Off, Left, ... Channel
   sizer_11->Add(sizer_16, 1, wxEXPAND, 0);
 
-  sizer_16_copy->Add(label_8_copy, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);  // Trigger Edge
-  sizer_16_copy->Add(5, 5, 1, 0, 0);                                        // spacer
+  sizer_16_copy->Add(label_osc_trig, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);  // Trigger Edge
+  sizer_16_copy->Add(5, 5, 1, 0, 0);                                          // spacer
   sizer_16_copy->Add(choice_osc_trig_edge, 0, wxALL | wxALIGN_CENTER_VERTICAL,
                      5);  // Rising, ... edge
   sizer_11->Add(sizer_16_copy, 1, wxEXPAND, 0);
@@ -543,9 +545,9 @@ void MainFrame::set_custom_props() {
   m_SamplingFreq = 44100;
 
   choice_osc_l_res->SetSelection(15);
-  choice_osc_l_res_copy->SetSelection(15);
+  choice_osc_r_res->SetSelection(15);
   choice_osc_l_off->SetSelection(5);
-  choice_osc_l_off_copy->SetSelection(5);
+  choice_osc_r_off->SetSelection(5);
 
   sweep_div = wxAtoi(choice_osc_swp->GetString(choice_osc_swp->GetSelection()));
   setoscbuf();
@@ -731,7 +733,7 @@ void MainFrame::OnAutoCalClick(wxCommandEvent& WXUNUSED(event)) {
     diff = maxValueR - minValueR;
     lgdiff = log(diff) / log(2);
     if (lgdiff > 15) lgdiff = 15;
-    choice_osc_l_res_copy->SetSelection((int)lgdiff);
+    choice_osc_r_res->SetSelection((int)lgdiff);
 
     // then center the wave - peaks must be located symetrically from the centre
 
@@ -811,8 +813,8 @@ void MainFrame::DrawOscilloscope(void) {
 
   double range_div = pow(2, choice_osc_l_res->GetSelection() - 15);
   double shft_val = 20.0 * (choice_osc_l_off->GetSelection() - 5) / 128.0;
-  double range_div2 = pow(2, choice_osc_l_res_copy->GetSelection() - 15);
-  double shft_val2 = 20.0 * (choice_osc_l_off_copy->GetSelection() - 5) / 128.0;
+  double range_div2 = pow(2, choice_osc_r_res->GetSelection() - 15);
+  double shft_val2 = 20.0 * (choice_osc_r_off->GetSelection() - 5) / 128.0;
   double hysteresis_level = range_div / 20.0;
 
   // triggering - re-done a little bit, more or less ...
@@ -1140,16 +1142,16 @@ void MainFrame::OnFrmStart(wxCommandEvent& WXUNUSED(event)) {
 void MainFrame::OnGeneratorChanged(wxCommandEvent& WXUNUSED(event)) {
   if (checkbox_gen_sync->IsChecked()) {
     slide_r_fr->Enable(false);
-    label_1_copy_1->Enable(false);
+    label_gen_wave_r->Enable(false);
     txt_freq_r->Enable(false);
     choice_r_wav->Enable(false);
-    label_2_copy_1->Enable(false);
+    label_gen_freq_r->Enable(false);
   } else {
     slide_r_fr->Enable(true);
     choice_r_wav->Enable(true);
     txt_freq_r->Enable(true);
-    label_1_copy_1->Enable(true);
-    label_2_copy_1->Enable(true);
+    label_gen_wave_r->Enable(true);
+    label_gen_freq_r->Enable(true);
   }
 
   if (button_gen_start->GetValue()) {
@@ -1183,10 +1185,10 @@ void MainFrame::OnGenScrollChanged(wxScrollEvent& WXUNUSED(event)) {
   wxString bla;
 
   bla.Printf(wxT("Amplitude: %d dB"), slide_l_am->GetValue());
-  label_3->SetLabel(bla);
+  label_gen_ampl_l->SetLabel(bla);
 
   bla.Printf(wxT("Amplitude: %d dB"), slide_r_am->GetValue());
-  label_3_copy_1->SetLabel(bla);
+  label_gen_ampl_r->SetLabel(bla);
 
   if (button_gen_start->GetValue()) {
     SendGenSettings();

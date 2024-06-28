@@ -91,46 +91,47 @@ class MainFrame : public wxFrame {
 
  protected:
   // begin wxGlade: MainFrame::attributes
-  wxStaticBox* sizer_12_copy_staticbox;
-  wxStaticBox* sizer_12_staticbox;
-  wxStaticBox* sizer_4_copy_staticbox;
-  wxStaticBox* sizer_4_staticbox;
+  wxStaticBox* sizer_osc_r_staticbox;
+  wxStaticBox* sizer_osc_l_staticbox;
+  wxStaticBox* sizer_gen_r_staticbox;
+  wxStaticBox* sizer_gen_l_staticbox;
   wxStaticBox* sizer_spe_fft_staticbox;
   wxStaticBox* sizer_spe_disp_staticbox;
   wxStaticBox* sizer_spe_scale_staticbox;
   wxMenuBar* frame_1_menubar;
   wxStatusBar* frame_1_statusbar;
+
   wxCheckBox* checkbox_l_en;
-  wxStaticText* label_1;
+  wxStaticText* label_gen_wave_l;
   wxChoice* choice_l_wav;
-  wxStaticText* label_2;
+  wxStaticText* label__gen_freq_l;
   wxSlider* slide_l_fr;
-  wxStaticText* label_3;
+  wxStaticText* label_gen_ampl_l;
   wxSlider* slide_l_am;
   wxCheckBox* checkbox_r_en;
-  wxStaticText* label_1_copy_1;
+  wxStaticText* label_gen_wave_r;
   wxChoice* choice_r_wav;
-  wxStaticText* label_2_copy_1;
+  wxStaticText* label_gen_freq_r;
   wxSlider* slide_r_fr;
-  wxStaticText* label_3_copy_1;
+  wxStaticText* label_gen_ampl_r;
   wxSlider* slide_r_am;
   wxToggleButton* button_gen_start;
-
   wxPanel* notebook_1_gen;
+
   CtrlOScope* window_osc;
-  wxStaticText* label_5_copy;
+  wxStaticText* label_osc_time;
   wxChoice* choice_osc_swp;
-  wxStaticText* label_6;
+  wxStaticText* label_osc_div_l;
   wxChoice* choice_osc_l_res;
-  wxStaticText* label_7;
+  wxStaticText* label_osc_off_l;
   wxChoice* choice_osc_l_off;
   wxStaticText* label_8;
   wxChoice* choice_osc_trig_source;
-  wxStaticText* label_6_copy;
-  wxChoice* choice_osc_l_res_copy;
-  wxStaticText* label_7_copy;
-  wxChoice* choice_osc_l_off_copy;
-  wxStaticText* label_8_copy;
+  wxStaticText* label_osc_div_r;
+  wxChoice* choice_osc_r_res;
+  wxStaticText* label_osc_off_r;
+  wxChoice* choice_osc_r_off;
+  wxStaticText* label_osc_trig;
   wxChoice* choice_osc_trig_edge;
   wxToggleButton* button_osc_start;
   wxPanel* notebook_1_osc;
