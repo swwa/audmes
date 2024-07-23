@@ -166,33 +166,33 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
   window_osc = new CtrlOScope(notebook_1_osc, _T(""), _T(""));
   label_osc_div_l = new wxStaticText(notebook_1_osc, -1, wxT("[V/div]: "));
   const wxString choice_osc_l_res_choices[] = {
-      wxT("1"),    wxT("2"),    wxT("4"),     wxT("8"),    wxT("16"),   wxT("32"),
-      wxT("64"),   wxT("128"),  wxT("256"),   wxT("512"),  wxT("1024"), wxT("2048"),
-      wxT("4096"), wxT("8192"), wxT("16384"), wxT("32768")};
-  choice_osc_l_res = new wxChoice(notebook_1_osc, -1, wxDefaultPosition, wxDefaultSize, 16,
+      wxT("0.2"), wxT("0.1"),  wxT("50m"),  wxT("20m"),  wxT("10m"), wxT("5m"),  wxT("2m"),
+      wxT("1m"),  wxT("500u"), wxT("200u"), wxT("100u"), wxT("50u"), wxT("20u"), wxT("10u"),
+  };
+  choice_osc_l_res = new wxChoice(notebook_1_osc, -1, wxDefaultPosition, wxDefaultSize, 14,
                                   choice_osc_l_res_choices, 0);
-  label_osc_off_l = new wxStaticText(notebook_1_osc, -1, wxT("Offset [V/div]: "));
-  const wxString choice_osc_l_off_choices[] = {wxT("100"), wxT("80"),  wxT("60"),  wxT("40"),
-                                               wxT("20"),  wxT("0"),   wxT("-20"), wxT("-40"),
-                                               wxT("-60"), wxT("-80"), wxT("-100")};
+  label_osc_off_l = new wxStaticText(notebook_1_osc, -1, wxT("Offset: "));
+  const wxString choice_osc_l_off_choices[] = {wxT("1"),    wxT("0.8"),  wxT("0.6"),  wxT("0.4"),
+                                               wxT("0.2"),  wxT("0"),    wxT("-0.2"), wxT("-0.4"),
+                                               wxT("-0.6"), wxT("-0.8"), wxT("-1")};
   choice_osc_l_off = new wxChoice(notebook_1_osc, -1, wxDefaultPosition, wxDefaultSize, 11,
                                   choice_osc_l_off_choices, 0);
 
   label_osc_div_r = new wxStaticText(notebook_1_osc, -1, wxT("[V/div]: "));
   const wxString choice_osc_r_res_choices[] = {
-      wxT("1"),    wxT("2"),    wxT("4"),     wxT("8"),    wxT("16"),   wxT("32"),
-      wxT("64"),   wxT("128"),  wxT("256"),   wxT("512"),  wxT("1024"), wxT("2048"),
-      wxT("4096"), wxT("8192"), wxT("16384"), wxT("32768")};
-  choice_osc_r_res = new wxChoice(notebook_1_osc, -1, wxDefaultPosition, wxDefaultSize, 16,
+      wxT("0.2"), wxT("0.1"),  wxT("50m"),  wxT("20m"),  wxT("10m"), wxT("5m"),  wxT("2m"),
+      wxT("1m"),  wxT("500u"), wxT("200u"), wxT("100u"), wxT("50u"), wxT("20u"), wxT("10u"),
+  };
+  choice_osc_r_res = new wxChoice(notebook_1_osc, -1, wxDefaultPosition, wxDefaultSize, 14,
                                   choice_osc_r_res_choices, 0);
-  label_osc_off_r = new wxStaticText(notebook_1_osc, -1, wxT("Offset [V/div]: "));
-  const wxString choice_osc_r_off_choices[] = {wxT("100"), wxT("80"),  wxT("60"),  wxT("40"),
-                                               wxT("20"),  wxT("0"),   wxT("-20"), wxT("-40"),
-                                               wxT("-60"), wxT("-80"), wxT("-100")};
+  label_osc_off_r = new wxStaticText(notebook_1_osc, -1, wxT("Offset: "));
+  const wxString choice_osc_r_off_choices[] = {wxT("1"),    wxT("0.8"),  wxT("0.6"),  wxT("0.4"),
+                                               wxT("0.2"),  wxT("0"),    wxT("-0.2"), wxT("-0.4"),
+                                               wxT("-0.6"), wxT("-0.8"), wxT("-1")};
   choice_osc_r_off = new wxChoice(notebook_1_osc, -1, wxDefaultPosition, wxDefaultSize, 11,
                                   choice_osc_r_off_choices, 0);
 
-  button_autocalibrate = new wxButton(notebook_1_osc, ID_AUTOCAL, wxT("Auto Cal"));
+  button_autocalibrate = new wxButton(notebook_1_osc, ID_AUTOCAL, wxT("Auto Range"));
 
   const wxString choice_osc_swp_choices[] = {
       wxT("10"),   wxT("20"),   wxT("50"),   wxT("100"),   wxT("200"),   wxT("500"),
@@ -543,8 +543,8 @@ void MainFrame::set_custom_props() {
   m_RecordDev = 0;
   m_SamplingFreq = 44100;
 
-  choice_osc_l_res->SetSelection(15);
-  choice_osc_r_res->SetSelection(15);
+  choice_osc_l_res->SetSelection(0);
+  choice_osc_r_res->SetSelection(0);
   choice_osc_l_off->SetSelection(5);
   choice_osc_r_off->SetSelection(5);
 
@@ -724,18 +724,16 @@ void MainFrame::OnAutoCalClick(wxCommandEvent& WXUNUSED(event)) {
       if (minValueR > g_OscBuffer_Right[i]) minValueR = g_OscBuffer_Right[i];
       if (maxValueR < g_OscBuffer_Right[i]) maxValueR = g_OscBuffer_Right[i];
     }
-    int diff = maxValueL - minValueL;
-    float lgdiff = log(diff) / log(2);
-    if (lgdiff > 15) lgdiff = 15;
+
+    auto diff = 1 / (maxValueL - minValueL);
+    auto lgdiff = log(diff) / log(2);
+    if (lgdiff > 13) lgdiff = 13;
     choice_osc_l_res->SetSelection((int)lgdiff);
 
-    diff = maxValueR - minValueR;
+    diff = 1 / (maxValueR - minValueR);
     lgdiff = log(diff) / log(2);
-    if (lgdiff > 15) lgdiff = 15;
+    if (lgdiff > 13) lgdiff = 13;
     choice_osc_r_res->SetSelection((int)lgdiff);
-
-    // then center the wave - peaks must be located symetrically from the centre
-
   } else {
     wxMessageBox(wxT("Please start recording"), _T("Could not auto calibrate"),
                  wxICON_INFORMATION | wxOK);
@@ -810,10 +808,11 @@ void MainFrame::DrawOscilloscope(void) {
   double trigger_level = 0.0;
   unsigned long int xtrig = 0;  // point where the trigger occures
 
-  double range_div = pow(2, choice_osc_l_res->GetSelection() - 15);
-  double shft_val = 20.0 * (choice_osc_l_off->GetSelection() - 5) / 128.0;
-  double range_div2 = pow(2, choice_osc_r_res->GetSelection() - 15);
-  double shft_val2 = 20.0 * (choice_osc_r_off->GetSelection() - 5) / 128.0;
+  const double range[] = {1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000};
+  double range_div = 1 / range[choice_osc_l_res->GetSelection()];
+  double shft_val = 20.0 * (choice_osc_l_off->GetSelection() - 5) / 100.0;
+  double range_div2 = 1 / range[choice_osc_r_res->GetSelection()];
+  double shft_val2 = 20.0 * (choice_osc_r_off->GetSelection() - 5) / 100.0;
   double hysteresis_level = range_div / 20.0;
 
   // triggering - re-done a little bit, more or less ...
