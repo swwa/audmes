@@ -99,8 +99,9 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
   notebook_1_frm = new wxPanel(notebook_1, -1);
   sizer_gen_l_staticbox = new wxStaticBox(notebook_1_gen, -1, wxT("Left channel"));
   sizer_gen_r_staticbox = new wxStaticBox(notebook_1_gen, -1, wxT("Right channel"));
-  sizer_osc_l_staticbox = new wxStaticBox(notebook_1_osc, -1, wxT("Left channel"));
-  sizer_osc_r_staticbox = new wxStaticBox(notebook_1_osc, -1, wxT("Right channel"));
+  sizer_osc_l_staticbox = new wxStaticBox(notebook_1_osc, -1, wxT("Vertical Left"));
+  sizer_osc_r_staticbox = new wxStaticBox(notebook_1_osc, -1, wxT("Vertical Right"));
+  sizer_osc_h_staticbox = new wxStaticBox(notebook_1_osc, -1, wxT("Horizontal"));
   sizer_spe_fft_staticbox = new wxStaticBox(notebook_1_spe, -1, wxT("FFT"));
   sizer_spe_disp_staticbox = new wxStaticBox(notebook_1_spe, -1, wxT("Display"));
   sizer_spe_scale_staticbox = new wxStaticBox(notebook_1_spe, -1, wxT("Scale"));
@@ -192,7 +193,7 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
   choice_osc_r_off = new wxChoice(notebook_1_osc, -1, wxDefaultPosition, wxDefaultSize, 11,
                                   choice_osc_r_off_choices, 0);
 
-  button_autocalibrate = new wxButton(notebook_1_osc, ID_AUTOCAL, wxT("Auto Range"));
+  button_autocalibrate = new wxButton(notebook_1_osc, ID_AUTOCAL, wxT("Vertical Auto Range"));
 
   const wxString choice_osc_swp_choices[] = {
       wxT("10"),   wxT("20"),   wxT("50"),   wxT("100"),   wxT("200"),   wxT("500"),
@@ -306,6 +307,7 @@ void MainFrame::do_layout() {
   wxBoxSizer* sizer_15L = new wxBoxSizer(wxHORIZONTAL);
   wxBoxSizer* sizer_14L = new wxBoxSizer(wxHORIZONTAL);
   wxStaticBoxSizer* sizer_12R = new wxStaticBoxSizer(sizer_osc_r_staticbox, wxVERTICAL);
+  wxStaticBoxSizer* sizer_12H = new wxStaticBoxSizer(sizer_osc_h_staticbox, wxVERTICAL);
   wxBoxSizer* sizer_16R = new wxBoxSizer(wxHORIZONTAL);
   wxBoxSizer* sizer_15R = new wxBoxSizer(wxHORIZONTAL);
   wxBoxSizer* sizer_14R = new wxBoxSizer(wxHORIZONTAL);
@@ -395,11 +397,11 @@ void MainFrame::do_layout() {
   sizer_15L->Add(choice_osc_l_off, 0, wxLEFT | wxRIGHT | wxALIGN_CENTER_VERTICAL,
                  5);  // 100, 80, ... -100
   sizer_12L->Add(sizer_15L, 1, wxEXPAND, 0);
-  sizer_11->Add(sizer_12L, 0, wxALL | wxEXPAND, 5);
-
   sizer_11->Add(button_autocalibrate, 0,
                 wxLEFT | wxRIGHT | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
                 5);  // autocalibrate
+
+  sizer_11->Add(sizer_12L, 0, wxALL | wxEXPAND, 5);
 
   sizer_14R->Add(label_osc_div_r, 0, wxLEFT | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
                  5);                              // Res[V/div]
@@ -420,20 +422,21 @@ void MainFrame::do_layout() {
   sizer_13->Add(label_osc_time, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);  // X Scale time
   sizer_13->Add(5, 5, 1, 0, 0);                                          // spacer
   sizer_13->Add(choice_osc_swp, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);  // 20, 50....50000
-  sizer_11->Add(sizer_13, 1, wxEXPAND, 0);
+  sizer_12H->Add(sizer_13, 1, wxEXPAND, 0);
 
   sizer_16L->Add(label_8, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);  // Trigger
   sizer_16L->Add(5, 5, 1, 0, 0);                                   // spacer
   sizer_16L->Add(choice_osc_trig_source, 0, wxALL | wxALIGN_CENTER_VERTICAL,
                  5);  // Off, Left, ... Channel
-  sizer_11->Add(sizer_16L, 1, wxEXPAND, 0);
+  sizer_12H->Add(sizer_16L, 1, wxEXPAND, 0);
 
   sizer_16R->Add(label_osc_trig, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);  // Trigger Edge
   sizer_16R->Add(5, 5, 1, 0, 0);                                          // spacer
   sizer_16R->Add(choice_osc_trig_edge, 0, wxALL | wxALIGN_CENTER_VERTICAL,
                  5);  // Rising, ... edge
-  sizer_11->Add(sizer_16R, 1, wxEXPAND, 0);
+  sizer_12H->Add(sizer_16R, 1, wxEXPAND, 0);
 
+  sizer_11->Add(sizer_12H, 1, wxEXPAND, 0);
   sizer_10->Add(sizer_11, 0, 0, 0);
   sizer_9->Add(sizer_10, 1, wxEXPAND, 0);
   sizer_9->Add(button_osc_start, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);

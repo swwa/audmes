@@ -93,6 +93,7 @@ class MainFrame : public wxFrame {
   // begin wxGlade: MainFrame::attributes
   wxStaticBox* sizer_osc_r_staticbox;
   wxStaticBox* sizer_osc_l_staticbox;
+  wxStaticBox* sizer_osc_h_staticbox;
   wxStaticBox* sizer_gen_r_staticbox;
   wxStaticBox* sizer_gen_l_staticbox;
   wxStaticBox* sizer_spe_fft_staticbox;
