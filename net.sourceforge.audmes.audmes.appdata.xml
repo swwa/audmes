@@ -26,6 +26,16 @@
   </kudos>
 
   <releases>
+    <release version="2024.07.28" date="2024-07-28">
+      <description>
+        <ul>
+          <li>Rearrange oscilloscope view</li>
+          <li>Normalize vertical settings to +- 1V and adapt settings</li>
+          <li>Remove DC from Spectrum</li>
+          <li>Fix clipping region in graph</li>
+        </ul>
+      </description>
+    </release>
     <release version="2024.02.18" date="2024-02-18">
       <description>
         <ul>

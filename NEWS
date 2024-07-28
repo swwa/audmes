@@ -1,6 +1,16 @@
 News
 ====
 
+2024-07-28
+----------
+
+- Rearrange oscilloscope view
+- Normalize vertical settings to +- 1V and adapt settings
+- Remove DC from Spectrum
+- Fix clipping region in graph
+- Add ccpcheck and clang-tidy settings
+- Refactor code using above tool hints
+
 2024-02-18
 ----------
 
