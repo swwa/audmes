@@ -25,7 +25,7 @@ jobs:
           cmake --build . --target package
 
       - name: Archive build result
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: linux-binary
           path: |
@@ -33,7 +33,7 @@ jobs:
             build/AudMeS-*.deb
 
   MacOS:
-    runs-on: macos-11
+    runs-on: macos-12
     env:
       CC: cc
       CXX: c++
@@ -58,7 +58,7 @@ jobs:
           cmake --build . --target package
 
       - name: Archive build result
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: macos-binary
           path: |
@@ -86,7 +86,7 @@ jobs:
             mingw-w64-i686-gcc
             mingw-w64-i686-cmake
             mingw-w64-i686-make
-            mingw-w64-i686-wxwidgets3.0-msw
+            mingw-w64-i686-wxwidgets3.2-msw
 
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -100,7 +100,7 @@ jobs:
           cmake --build .
 
       - name: Archive build result
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: win-binary
           path: |
