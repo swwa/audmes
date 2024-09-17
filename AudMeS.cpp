@@ -312,8 +312,8 @@ void MainFrame::do_layout() {
   wxBoxSizer* sizer_15R = new wxBoxSizer(wxHORIZONTAL);
   wxBoxSizer* sizer_14R = new wxBoxSizer(wxHORIZONTAL);
   wxBoxSizer* sizer_13 = new wxBoxSizer(wxHORIZONTAL);
-  wxStaticBoxSizer* sizer_GenEnL = new wxStaticBoxSizer(sizer_gen_r_staticbox, wxVERTICAL);
-  wxStaticBoxSizer* sizer_GenEnR = new wxStaticBoxSizer(sizer_gen_l_staticbox, wxVERTICAL);
+  wxStaticBoxSizer* sizer_GenEnL = new wxStaticBoxSizer(sizer_gen_l_staticbox, wxVERTICAL);
+  wxStaticBoxSizer* sizer_GenEnR = new wxStaticBoxSizer(sizer_gen_r_staticbox, wxVERTICAL);
   wxBoxSizer* sizer_gen_sync = new wxBoxSizer(wxHORIZONTAL);
   wxBoxSizer* sizer_gen_sync2 = new wxBoxSizer(wxHORIZONTAL);
 
