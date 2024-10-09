@@ -256,10 +256,11 @@ void CtrlOScope::PaintGraph(wxDC& dc) {
 void CtrlOScope::PaintTrack(wxDC& dc, size_t from, size_t to, double xstep, wxColor color,
                             wxArrayDouble& points) {
   dc.SetPen(wxPen(color, 1, wxPENSTYLE_SOLID));
-  int lastx = 0, lasty = 0, xpos;
   wxRect rec = GetClientRect();
+  std::vector<wxPoint> pv;
   // iterate trough the data points in range
   for (size_t i = from; i <= to; i++) {
+    int xpos;
     if (m_LogX)
       xpos = (int)ldist + xstep * log10(m_pointsX.Item(i) / m_MinXValue);
     else
@@ -271,14 +272,10 @@ void CtrlOScope::PaintTrack(wxDC& dc, size_t from, size_t to, double xstep, wxCo
     double ypoint =
         rec.height - bdist -
         (rec.height - bdist - tdist) * (ydatapoint - m_MinYValue) / (m_MaxYValue - m_MinYValue);
-    if (lastx == 0) {
-      dc.DrawPoint((int)(xpos), (int)(ypoint));
-    } else {
-      dc.DrawLine(lastx, lasty, (int)(xpos), (int)(ypoint));
-    }
-    lastx = (int)(xpos);
-    lasty = (int)(ypoint);
+    wxPoint pt = {xpos, (int)ypoint};
+    pv.push_back(pt);
   }
+  dc.DrawLines(pv.size(), &pv[0]);
 
   if (wxT("") != m_UserText) {
     dc.SetTextForeground(m_whColor);
