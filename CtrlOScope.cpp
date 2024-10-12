@@ -34,10 +34,8 @@
 
 #include "CtrlOScope.h"
 
-#include <math.h>
+#include <cmath>
 
-/////////////////////////////////////////////////////////////////////////////
-// CtrlOScope
 CtrlOScope::CtrlOScope(wxWindow* parent, wxString xname, wxString yname)
     : wxControl(parent, -1, wxDefaultPosition, wxSize(300, 200)) {
   m_bgColor.Set(0, 0, 0);
@@ -66,11 +64,9 @@ CtrlOScope::CtrlOScope(wxWindow* parent, wxString xname, wxString yname)
   Bind(wxEVT_SIZE, &CtrlOScope::OnSize, this);
   Bind(wxEVT_PAINT, &CtrlOScope::OnPaint, this);
   Bind(wxEVT_ERASE_BACKGROUND, &CtrlOScope::OnEraseBackground, this);
+}
 
-}  // CtrlOScope
-
-/////////////////////////////////////////////////////////////////////////////
-CtrlOScope::~CtrlOScope() {}  // ~CtrlOScope
+CtrlOScope::~CtrlOScope() {}
 
 void CtrlOScope::SetTrack1(wxArrayDouble const& ardbl) { m_points1 = ardbl; }
 
@@ -78,25 +74,22 @@ void CtrlOScope::SetTrack2(wxArrayDouble const& ardbl) { m_points2 = ardbl; }
 
 void CtrlOScope::SetTrackX(wxArrayDouble const& ardbl) { m_pointsX = ardbl; }
 
-/////////////////////////////////////////////////////////////////////////////
 void CtrlOScope::SetXRange(double dLower, double dUpper, int logrange) {
   m_MinXValue = dLower;
   m_MaxXValue = dUpper;
   m_LogX = logrange;
-}  // SetRange
+}
 
 void CtrlOScope::SetYRange(double dLower, double dUpper, int logrange) {
   m_MinYValue = dLower;
   m_MaxYValue = dUpper;
   m_LogY = logrange;
-}  // SetRange
-
-void CtrlOScope::OnPaint(wxPaintEvent& WXUNUSED(event)) {
-  wxPaintDC dc(this);  // device context for painting
-  PaintAll(dc);
 }
 
-void CtrlOScope::PaintAll(wxDC& dc) {
+void CtrlOScope::OnSize(wxSizeEvent& event) { event.Skip(); }
+
+void CtrlOScope::OnPaint(wxPaintEvent& WXUNUSED(event)) {
+  wxPaintDC cdc(this);  // device context for painting
   // here will be the Double Buffer
   wxRect rec = GetClientRect();
 
@@ -108,7 +101,7 @@ void CtrlOScope::PaintAll(wxDC& dc) {
 
   PaintGraph(*memDC);
 
-  dc.Blit(rec.x, rec.y, rec.width, rec.height, memDC, 0, 0, wxCOPY);
+  cdc.Blit(rec.x, rec.y, rec.width, rec.height, memDC, 0, 0, wxCOPY);
 
   delete bmpBlit;
   delete memDC;
@@ -133,7 +126,7 @@ void CtrlOScope::PaintGraph(wxDC& dc) {
 
   /* spocitat vysku pisma pro spodni odstup a sirky pto odstup zleva */
   /* calculate space for legend */
-  if (m_YUnit != wxT("")) {
+  if (!m_YUnit.empty()) {
     dc.GetTextExtent(m_YUnit, &tw, &th);
     udist = tw;
   }
@@ -145,7 +138,7 @@ void CtrlOScope::PaintGraph(wxDC& dc) {
   if (ldist < (udist + tw + 8)) {
     ldist = udist + tw + 8;
   }
-  if (m_XUnit != wxT("")) {
+  if (!m_XUnit.empty()) {
     dc.GetTextExtent(_T("T"), &tw, &th);
     udist = th;
   }
@@ -201,7 +194,6 @@ void CtrlOScope::PaintGraph(wxDC& dc) {
     /* draw vertical lines with linear distance */
     xstep = (double)(rec.width - ldist - rdist) / m_NumberOfVerticals;
     for (int i = 0; i <= m_NumberOfVerticals; i++) {
-      /* kresli vsechny cary */
       dc.DrawLine((int)(ldist + xstep * i), tdist, (int)(ldist + xstep * i), rec.height - bdist);
       double cl = m_MinXValue + (m_MaxXValue - m_MinXValue) * i / m_NumberOfVerticals;
       int clk = cl / 1000;
@@ -246,15 +238,15 @@ void CtrlOScope::PaintGraph(wxDC& dc) {
     if ((int)ihigh < ((int)m_pointsX.GetCount() - 1)) ihigh++;
 
     // left channel
-    PaintTrack(dc, ilow, ihigh, xstep, m_trColor, m_points1);
+    PaintTrack(dc, ilow, ihigh, xstep, m_trColor, m_pointsX, m_points1);
 
     // right channel
-    PaintTrack(dc, ilow, ihigh, xstep, m_tr2Color, m_points2);
+    PaintTrack(dc, ilow, ihigh, xstep, m_tr2Color, m_pointsX, m_points2);
   }
 }
 
-void CtrlOScope::PaintTrack(wxDC& dc, size_t from, size_t to, double xstep, wxColor color,
-                            wxArrayDouble& points) {
+void CtrlOScope::PaintTrack(wxDC& dc, size_t from, size_t to, double xstep, const wxColor& color,
+                            wxArrayDouble& xpoints, wxArrayDouble& ypoints) {
   dc.SetPen(wxPen(color, 1, wxPENSTYLE_SOLID));
   wxRect rec = GetClientRect();
   std::vector<wxPoint> pv;
@@ -262,11 +254,11 @@ void CtrlOScope::PaintTrack(wxDC& dc, size_t from, size_t to, double xstep, wxCo
   for (size_t i = from; i <= to; i++) {
     int xpos;
     if (m_LogX)
-      xpos = (int)ldist + xstep * log10(m_pointsX.Item(i) / m_MinXValue);
+      xpos = ldist + xstep * log10(m_pointsX.Item(i) / m_MinXValue);
     else
-      xpos = ldist + m_pointsX.Item(i) * xstep * m_NumberOfVerticals / (m_MaxXValue - m_MinXValue);
+      xpos = ldist + xpoints.Item(i) * xstep * m_NumberOfVerticals / (m_MaxXValue - m_MinXValue);
     // find the point in the graph and limit to the graph area
-    double ydatapoint = points.Item(i);
+    double ydatapoint = ypoints.Item(i);
     if (ydatapoint > m_MaxYValue) ydatapoint = m_MaxYValue;
     if (ydatapoint < m_MinYValue) ydatapoint = m_MinYValue;
     double ypoint =
@@ -282,9 +274,3 @@ void CtrlOScope::PaintTrack(wxDC& dc, size_t from, size_t to, double xstep, wxCo
     dc.DrawText(m_UserText, m_UserTextPosX, m_UserTextPosY);
   }
 }
-
-/////////////////////////////////////////////////////////////////////////////
-void CtrlOScope::OnSize(wxSizeEvent& event)  // UINT nType, int cx, int cy)
-{
-  event.Skip();
-}  // OnSize

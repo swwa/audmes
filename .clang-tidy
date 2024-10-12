@@ -10,6 +10,7 @@ Checks: >
   portability-*,
   readability-*,
   -misc-non-private-member-variables-in-classes,
+  -misc-include-cleaner,
   -modernize-use-trailing-return-type,
   -modernize-avoid-c-arrays,
   -modernize-use-using,

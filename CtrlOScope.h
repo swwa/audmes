@@ -73,10 +73,9 @@ class CtrlOScope : public wxControl {
   int m_UserTextPosY;
 
  private:
-  void PaintAll(wxDC& dc);
   void PaintGraph(wxDC& dc);
-  void PaintTrack(wxDC& dc, size_t from, size_t to, double xstep, wxColor color,
-                  wxArrayDouble& points);
+  void PaintTrack(wxDC& dc, size_t from, size_t to, double xstep, const wxColor& color,
+                  wxArrayDouble& xpoints, wxArrayDouble& ypoints);
   int ldist = 0;   // legend space on the left
   int rdist = 20;  // space on the right
   int tdist = 10;  // space on top
