@@ -107,6 +107,28 @@ void CtrlOScope::OnPaint(wxPaintEvent& WXUNUSED(event)) {
   delete memDC;
 }
 
+inline double sinc(double x) {
+  if (x == 0.0) return 1.0;
+  else return sin(x * M_PI) / (x * M_PI);
+}
+
+static void sinc_interpolate(wxArrayDouble& xdata, wxArrayDouble& ydata, wxArrayDouble& xpoints,
+                             wxArrayDouble& ypoints) {
+  size_t size = xpoints.size()-1;
+  auto srate = size / xpoints[size];
+  for (size_t j = 0; j < size * 5; j++) {
+    size_t i = 0;
+    double sum = 0.0;
+    double tim = 1.0 * j / (srate * 5);
+    while (i <= size) {
+      sum += sinc((tim - xpoints[i]) * srate) * ypoints[i];
+      i++;
+    }
+    xdata.Add(tim);
+    ydata.Add(sum);
+  }
+}
+
 void CtrlOScope::PaintGraph(wxDC& dc) {
   wxRect rec = GetClientRect();
   wxString bla;
@@ -224,6 +246,9 @@ void CtrlOScope::PaintGraph(wxDC& dc) {
     dc.SetClippingRegion(ldist, tdist, rec.width - ldist - rdist + 1,
                          rec.height - tdist - bdist + 1);
 
+    wxArrayDouble xdata;
+    wxArrayDouble ydata;
+    sinc_interpolate(xdata, ydata, m_pointsX, m_points1);
     size_t ilow = 0, ihigh = 0;
     // iterate though all X points in the data
     for (size_t i = 0; i < m_pointsX.GetCount(); i++) {
@@ -238,7 +263,9 @@ void CtrlOScope::PaintGraph(wxDC& dc) {
     if ((int)ihigh < ((int)m_pointsX.GetCount() - 1)) ihigh++;
 
     // left channel
-    PaintTrack(dc, ilow, ihigh, xstep, m_trColor, m_pointsX, m_points1);
+    PaintTrack(dc, ilow, ihigh*5-1, xstep, m_trColor, xdata, ydata);
+    xdata.Clear();
+    ydata.Clear();
 
     // right channel
     PaintTrack(dc, ilow, ihigh, xstep, m_tr2Color, m_pointsX, m_points2);
