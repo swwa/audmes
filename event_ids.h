@@ -54,3 +54,4 @@
 #define ID_LOAD_SPE 10032
 #define ID_SAVE_SPE 10033
 #define ID_SAVE_OSC 10034
+#define ID_SINC 10035

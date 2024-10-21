@@ -55,6 +55,8 @@ CtrlOScope::CtrlOScope(wxWindow* parent, wxString xname, wxString yname)
   m_YUnit = yname;
   m_XUnit = xname;
 
+  m_interp = LINE;
+
   m_NumberOfVerticals = 0;
 
   m_UserText = wxT("");
@@ -73,6 +75,8 @@ void CtrlOScope::SetTrack1(wxArrayDouble const& ardbl) { m_points1 = ardbl; }
 void CtrlOScope::SetTrack2(wxArrayDouble const& ardbl) { m_points2 = ardbl; }
 
 void CtrlOScope::SetTrackX(wxArrayDouble const& ardbl) { m_pointsX = ardbl; }
+
+void CtrlOScope::SetInterp(CtrlOScope::Interpolation interp) { m_interp = interp; }
 
 void CtrlOScope::SetXRange(double dLower, double dUpper, int logrange) {
   m_MinXValue = dLower;
@@ -108,13 +112,15 @@ void CtrlOScope::OnPaint(wxPaintEvent& WXUNUSED(event)) {
 }
 
 inline double sinc(double x) {
-  if (x == 0.0) return 1.0;
-  else return sin(x * M_PI) / (x * M_PI);
+  if (x == 0.0)
+    return 1.0;
+  else
+    return sin(x * M_PI) / (x * M_PI);
 }
 
 static void sinc_interpolate(wxArrayDouble& xdata, wxArrayDouble& ydata, wxArrayDouble& xpoints,
                              wxArrayDouble& ypoints) {
-  size_t size = xpoints.size()-1;
+  size_t size = xpoints.size() - 1;
   auto srate = size / xpoints[size];
   for (size_t j = 0; j < size * 5; j++) {
     size_t i = 0;
@@ -246,9 +252,6 @@ void CtrlOScope::PaintGraph(wxDC& dc) {
     dc.SetClippingRegion(ldist, tdist, rec.width - ldist - rdist + 1,
                          rec.height - tdist - bdist + 1);
 
-    wxArrayDouble xdata;
-    wxArrayDouble ydata;
-    sinc_interpolate(xdata, ydata, m_pointsX, m_points1);
     size_t ilow = 0, ihigh = 0;
     // iterate though all X points in the data
     for (size_t i = 0; i < m_pointsX.GetCount(); i++) {
@@ -263,9 +266,16 @@ void CtrlOScope::PaintGraph(wxDC& dc) {
     if ((int)ihigh < ((int)m_pointsX.GetCount() - 1)) ihigh++;
 
     // left channel
-    PaintTrack(dc, ilow, ihigh*5-1, xstep, m_trColor, xdata, ydata);
-    xdata.Clear();
-    ydata.Clear();
+    if (m_interp == SINC) {
+      wxArrayDouble xdata;
+      wxArrayDouble ydata;
+      sinc_interpolate(xdata, ydata, m_pointsX, m_points1);
+      PaintTrack(dc, ilow, ihigh * 5 - 1, xstep, m_trColor, xdata, ydata);
+      xdata.Clear();
+      ydata.Clear();
+    } else {
+      PaintTrack(dc, ilow, ihigh, xstep, m_trColor, m_pointsX, m_points1);
+    }
 
     // right channel
     PaintTrack(dc, ilow, ihigh, xstep, m_tr2Color, m_pointsX, m_points2);

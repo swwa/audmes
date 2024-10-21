@@ -36,9 +36,12 @@ class CtrlOScope : public wxControl {
   void SetXRange(double dLower, double dUpper, int logrange);
   void SetYRange(double dLower, double dUpper, int logrange);
 
+  enum Interpolation { DOT, LINE, SINC };
+
   void SetTrack1(wxArrayDouble const& ardbl);
   void SetTrack2(wxArrayDouble const& ardbl);
   void SetTrackX(wxArrayDouble const& ardbl);
+  void SetInterp(const CtrlOScope::Interpolation interp);
   void SetNumOfVerticals(int num) { m_NumberOfVerticals = num; };
 
   void ShowUserText(wxString const& text, int xpos, int ypos) {
@@ -71,6 +74,8 @@ class CtrlOScope : public wxControl {
   wxString m_UserText;
   int m_UserTextPosX;
   int m_UserTextPosY;
+
+  Interpolation m_interp;
 
  private:
   void PaintGraph(wxDC& dc);

@@ -69,6 +69,7 @@ wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_MENU(ID_SAVE_SPE, MainFrame::OnSaveSPE)
   EVT_MENU(ID_SAVE_OSC, MainFrame::OnSaveOSC)
   EVT_BUTTON(ID_AUTOCAL, MainFrame::OnAutoCalClick)
+  EVT_TOGGLEBUTTON(ID_SINC, MainFrame::OnAutoSincClick)
   EVT_CHOICE(ID_OSCXSCALE, MainFrame::OnOscXScaleChanged)
   EVT_CHOICE(ID_FFTLENGTH, MainFrame::OnOscXScaleChanged)
   EVT_CHOICE(ID_FFTAVG, MainFrame::OnFFTAvgChanged)
@@ -193,7 +194,8 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
   choice_osc_r_off = new wxChoice(notebook_1_osc, -1, wxDefaultPosition, wxDefaultSize, 11,
                                   choice_osc_r_off_choices, 0);
 
-  button_autocalibrate = new wxButton(notebook_1_osc, ID_AUTOCAL, wxT("Vertical Auto Range"));
+  button_autocalibrate = new wxButton(notebook_1_osc, ID_AUTOCAL, wxT("V Autorange"));
+  button_sinc = new wxToggleButton(notebook_1_osc, ID_SINC, wxT("sin(x)/x"));
 
   const wxString choice_osc_swp_choices[] = {
       wxT("10"),   wxT("20"),   wxT("50"),   wxT("100"),   wxT("200"),   wxT("500"),
@@ -302,6 +304,7 @@ void MainFrame::do_layout() {
   wxBoxSizer* sizer_9 = new wxBoxSizer(wxVERTICAL);
   wxBoxSizer* sizer_10 = new wxBoxSizer(wxHORIZONTAL);
   wxBoxSizer* sizer_11 = new wxBoxSizer(wxVERTICAL);
+  wxBoxSizer* sizer_11B = new wxBoxSizer(wxHORIZONTAL);
   wxStaticBoxSizer* sizer_12L = new wxStaticBoxSizer(sizer_osc_l_staticbox, wxVERTICAL);
   wxBoxSizer* sizer_16L = new wxBoxSizer(wxHORIZONTAL);
   wxBoxSizer* sizer_15L = new wxBoxSizer(wxHORIZONTAL);
@@ -397,9 +400,11 @@ void MainFrame::do_layout() {
   sizer_15L->Add(choice_osc_l_off, 0, wxLEFT | wxRIGHT | wxALIGN_CENTER_VERTICAL,
                  5);  // 100, 80, ... -100
   sizer_12L->Add(sizer_15L, 1, wxEXPAND, 0);
-  sizer_11->Add(button_autocalibrate, 0,
-                wxLEFT | wxRIGHT | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
-                5);  // autocalibrate
+
+  sizer_11B->Add(button_autocalibrate, 0,
+                 wxLEFT | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
+  sizer_11B->Add(button_sinc, 0, wxRIGHT | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
+  sizer_11->Add(sizer_11B, 0, wxALL | wxEXPAND, 5);
 
   sizer_11->Add(sizer_12L, 0, wxALL | wxEXPAND, 5);
 
@@ -740,6 +745,14 @@ void MainFrame::OnAutoCalClick(wxCommandEvent& WXUNUSED(event)) {
   } else {
     wxMessageBox(wxT("Please start recording"), _T("Could not auto calibrate"),
                  wxICON_INFORMATION | wxOK);
+  }
+}
+
+void MainFrame::OnAutoSincClick(wxCommandEvent& WXUNUSED(event)) {
+  if (button_sinc->GetValue()) {
+    window_osc->SetInterp(CtrlOScope::Interpolation::SINC);
+  } else {
+    window_osc->SetInterp(CtrlOScope::Interpolation::LINE);
   }
 }
 

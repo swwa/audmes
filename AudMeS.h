@@ -81,6 +81,7 @@ class MainFrame : public wxFrame {
   void OnSaveSPE(wxCommandEvent& event);
   void OnSaveOSC(wxCommandEvent& event);
   void OnAutoCalClick(wxCommandEvent& event);
+  void OnAutoSincClick(wxCommandEvent& event);
   void OnOscXScaleChanged(wxCommandEvent& event);
   void OnFFTAvgChanged(wxCommandEvent& event);
   void OnFFTScaleChanged(wxCommandEvent& event);
@@ -189,6 +190,7 @@ class MainFrame : public wxFrame {
   wxArrayDouble frm_rgains;
 
   wxButton* button_autocalibrate;
+  wxToggleButton* button_sinc;
   wxString m_configfilename;
   std::string m_rtinfo;
 
