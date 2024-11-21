@@ -133,8 +133,8 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
   checkbox_l_en = new wxCheckBox(notebook_1_gen, ID_GENLENB, wxT("Enable Output"));
   label_gen_wave_l = new wxStaticText(notebook_1_gen, -1, wxT("Waveform: "));
   const wxString choice_l_wav_choices[] = {wxT("Sine"), wxT("Rectangular"), wxT("Saw"),
-                                           wxT("Triangle"), wxT("Wh-Noise")};
-  choice_l_wav = new wxChoice(notebook_1_gen, ID_GENSHP_L, wxDefaultPosition, wxDefaultSize, 5,
+                                           wxT("Triangle"), wxT("Wh-Noise"), wxT("Wobble")};
+  choice_l_wav = new wxChoice(notebook_1_gen, ID_GENSHP_L, wxDefaultPosition, wxDefaultSize, 6,
                               choice_l_wav_choices, 0);
   label__gen_freq_l = new wxStaticText(notebook_1_gen, -1, wxT("Frequency [20..20000Hz]: "));
   slide_l_fr = new wxSlider(notebook_1_gen, ID_GENLFREQ, 80, 0, 200);
@@ -144,8 +144,8 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
   checkbox_r_en = new wxCheckBox(notebook_1_gen, ID_GENRENB, wxT("Enable Output"));
   label_gen_wave_r = new wxStaticText(notebook_1_gen, -1, wxT("Waveform: "));
   const wxString choice_r_wav_choices[] = {wxT("Sine"), wxT("Rectangular"), wxT("Saw"),
-                                           wxT("Triangle"), wxT("Wh-Noise")};
-  choice_r_wav = new wxChoice(notebook_1_gen, ID_GENSHP_R, wxDefaultPosition, wxDefaultSize, 5,
+                                           wxT("Triangle"), wxT("Wh-Noise"), wxT("Wobble")};
+  choice_r_wav = new wxChoice(notebook_1_gen, ID_GENSHP_R, wxDefaultPosition, wxDefaultSize, 6,
                               choice_r_wav_choices, 0);
   label_gen_freq_r = new wxStaticText(notebook_1_gen, -1, wxT("Frequency [20..20000Hz]: "));
   slide_r_fr = new wxSlider(notebook_1_gen, ID_GENRFREQ, 80, 0, 200);

@@ -46,6 +46,8 @@ extern long int g_SpeBufferPosition;
 extern std::atomic<bool> g_OscBufferChanged;
 extern std::atomic<bool> g_SpeBufferChanged;
 
+static double f_wobble = 0.0;
+
 /*
  * pseudo noise generator - linear feedback shift register
  * derived from https://en.wikipedia.org/wiki/Linear-feedback_shift_register
@@ -174,6 +176,9 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
           y = -1.0;
         }
         break;
+      case 5: /* sine wave wobble */
+        y = sin(aRWAudioClass->m_genPhase_l + sin(f_wobble));
+        break;
       default: /* sine wave */
         y = sin(aRWAudioClass->m_genPhase_l);
         break;
@@ -205,6 +210,9 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
           y2 = -1.0;
         }
         break;
+      case 5: /* sine wave */
+        y2 = sin(aRWAudioClass->m_genPhase_r - aRWAudioClass->m_genPhaseDif + sin(f_wobble));
+        break;
       default: /* sine wave */
         y2 = sin(aRWAudioClass->m_genPhase_r - aRWAudioClass->m_genPhaseDif);
         break;
@@ -224,7 +232,7 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
 
     if ((2.0 * M_PI) < aRWAudioClass->m_genPhase_l) aRWAudioClass->m_genPhase_l -= 2.0 * M_PI;
     if ((2.0 * M_PI) < aRWAudioClass->m_genPhase_r) aRWAudioClass->m_genPhase_r -= 2.0 * M_PI;
-
+    f_wobble += 30.0 / aRWAudioClass->m_sampleRate;
     *outBuf++ = (float)(aRWAudioClass->m_genGain_l * y);
     if (aRWAudioClass->m_channels_out > 1) *outBuf++ = (float)(aRWAudioClass->m_genGain_r * y2);
 
@@ -254,7 +262,7 @@ int RWAudio::InitSnd(long int oscbuflen, long int spebuflen, std::string &rtinfo
 
   m_genFR_l = m_genFR_r = 0.0;
   m_genShape_l = m_genShape_r = 0;
-  m_genGain_l = m_genGain_r = 1.0;
+  m_genGain_l = m_genGain_r = 0.0;
   m_genPhase_l = m_genPhase_r = 0.0;
   m_genPhaseDif = 0.0;
 
