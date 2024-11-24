@@ -23,6 +23,7 @@
 
 #include <wx/dynarray.h>
 #include <wx/wx.h>
+#include <vector>
 
 class CtrlOScope : public wxControl {
  public:
