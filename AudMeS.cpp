@@ -132,8 +132,8 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
   /* generator panel */
   checkbox_l_en = new wxCheckBox(notebook_1_gen, ID_GENLENB, wxT("Enable Output"));
   label_gen_wave_l = new wxStaticText(notebook_1_gen, -1, wxT("Waveform: "));
-  const wxString choice_l_wav_choices[] = {wxT("Sine"), wxT("Rectangular"), wxT("Saw"),
-                                           wxT("Triangle"), wxT("Wh-Noise"), wxT("Wobble")};
+  const wxString choice_l_wav_choices[] = {wxT("Sine"),     wxT("Rectangular"), wxT("Saw"),
+                                           wxT("Triangle"), wxT("Wh-Noise"),    wxT("Wobble")};
   choice_l_wav = new wxChoice(notebook_1_gen, ID_GENSHP_L, wxDefaultPosition, wxDefaultSize, 6,
                               choice_l_wav_choices, 0);
   label__gen_freq_l = new wxStaticText(notebook_1_gen, -1, wxT("Frequency [20..20000Hz]: "));
@@ -143,8 +143,8 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
 
   checkbox_r_en = new wxCheckBox(notebook_1_gen, ID_GENRENB, wxT("Enable Output"));
   label_gen_wave_r = new wxStaticText(notebook_1_gen, -1, wxT("Waveform: "));
-  const wxString choice_r_wav_choices[] = {wxT("Sine"), wxT("Rectangular"), wxT("Saw"),
-                                           wxT("Triangle"), wxT("Wh-Noise"), wxT("Wobble")};
+  const wxString choice_r_wav_choices[] = {wxT("Sine"),     wxT("Rectangular"), wxT("Saw"),
+                                           wxT("Triangle"), wxT("Wh-Noise"),    wxT("Wobble")};
   choice_r_wav = new wxChoice(notebook_1_gen, ID_GENSHP_R, wxDefaultPosition, wxDefaultSize, 6,
                               choice_r_wav_choices, 0);
   label_gen_freq_r = new wxStaticText(notebook_1_gen, -1, wxT("Frequency [20..20000Hz]: "));
@@ -767,7 +767,8 @@ void MainFrame::CalcFreqResponse() {
 
     if (0 == frm_measure) {
       // play new frequency e.g. from 20Hz to 20kHz
-      m_RWAudio->PlaySetGenerator(freq, freq, 0, 0, pow(10, slide_l_am->GetValue() / 20.0),
+      m_RWAudio->PlaySetGenerator(freq, freq, RWAudio::SINE, RWAudio::SINE,
+                                  pow(10, slide_l_am->GetValue() / 20.0),
                                   pow(10, slide_r_am->GetValue() / 20.0));
       wxString bla;
       bla.Printf(wxT("Frequency : %.1f "), freq);
@@ -1234,8 +1235,8 @@ void MainFrame::SendGenSettings() {
   txt_freq_r->GetValue().ToDouble(&doubleToFreq);
   freq_r = (float)doubleToFreq;
 
-  int shapeleft = choice_l_wav->GetSelection();
-  int shaperight = choice_r_wav->GetSelection();
+  RWAudio::Waveform shapeleft = static_cast<RWAudio::Waveform>(choice_l_wav->GetSelection());
+  RWAudio::Waveform shaperight = static_cast<RWAudio::Waveform>(choice_r_wav->GetSelection());
 
   if (checkbox_gen_sync->IsChecked()) {
     freq_r = freq_l;

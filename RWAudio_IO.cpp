@@ -46,7 +46,7 @@ extern long int g_SpeBufferPosition;
 extern std::atomic<bool> g_OscBufferChanged;
 extern std::atomic<bool> g_SpeBufferChanged;
 
-static double f_wobble = 0.0;
+static double ph_wobble = 0.0;
 
 /*
  * pseudo noise generator - linear feedback shift register
@@ -152,32 +152,32 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
 
     /* left channel */
     switch (aRWAudioClass->m_genShape_l) {
-      case 1:
+      case RWAudio::RECT:
         if (aRWAudioClass->m_genPhase_l < M_PI) {
           y = 1.0;
         } else {
           y = -1.0;
         }
         break;
-      case 2:
+      case RWAudio::SAW:
         y = (aRWAudioClass->m_genPhase_l - M_PI) / M_PI;
         break;
-      case 3:
+      case RWAudio::TRI:
         if (aRWAudioClass->m_genPhase_l < M_PI) {
           y = 2 * (aRWAudioClass->m_genPhase_l - M_PI / 2) / M_PI;
         } else {
           y = 2 * (3 * M_PI / 2 - aRWAudioClass->m_genPhase_l) / M_PI;
         }
         break;
-      case 4:
+      case RWAudio::NOISE:
         if (noise) {
           y = 1.0;
         } else {
           y = -1.0;
         }
         break;
-      case 5: /* sine wave wobble */
-        y = sin(aRWAudioClass->m_genPhase_l + sin(f_wobble));
+      case RWAudio::WOBBLE:
+        y = sin(aRWAudioClass->m_genPhase_l + sin(ph_wobble));
         break;
       default: /* sine wave */
         y = sin(aRWAudioClass->m_genPhase_l);
@@ -185,17 +185,17 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
     }
     /* right channel */
     switch (aRWAudioClass->m_genShape_r) {
-      case 1:
+      case RWAudio::RECT:
         if ((aRWAudioClass->m_genPhase_r - aRWAudioClass->m_genPhaseDif) < M_PI) {
           y2 = 1;
         } else {
           y2 = -1;
         }
         break;
-      case 2:
+      case RWAudio::SAW:
         y2 = ((aRWAudioClass->m_genPhase_r - aRWAudioClass->m_genPhaseDif) - M_PI) / M_PI;
         break;
-      case 3:
+      case RWAudio::TRI:
         if (aRWAudioClass->m_genPhase_r < M_PI) {
           y2 = 2 * (aRWAudioClass->m_genPhase_r - aRWAudioClass->m_genPhaseDif - M_PI / 2) / M_PI;
         } else {
@@ -203,15 +203,15 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
                M_PI;
         }
         break;
-      case 4:
+      case RWAudio::NOISE:
         if (noise) {
           y2 = 1.0;
         } else {
           y2 = -1.0;
         }
         break;
-      case 5: /* sine wave */
-        y2 = sin(aRWAudioClass->m_genPhase_r - aRWAudioClass->m_genPhaseDif + sin(f_wobble));
+      case RWAudio::WOBBLE:
+        y2 = sin(aRWAudioClass->m_genPhase_r - aRWAudioClass->m_genPhaseDif + sin(ph_wobble));
         break;
       default: /* sine wave */
         y2 = sin(aRWAudioClass->m_genPhase_r - aRWAudioClass->m_genPhaseDif);
@@ -232,7 +232,7 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
 
     if ((2.0 * M_PI) < aRWAudioClass->m_genPhase_l) aRWAudioClass->m_genPhase_l -= 2.0 * M_PI;
     if ((2.0 * M_PI) < aRWAudioClass->m_genPhase_r) aRWAudioClass->m_genPhase_r -= 2.0 * M_PI;
-    f_wobble += 30.0 / aRWAudioClass->m_sampleRate;
+    ph_wobble += 30.0 / aRWAudioClass->m_sampleRate;
     *outBuf++ = (float)(aRWAudioClass->m_genGain_l * y);
     if (aRWAudioClass->m_channels_out > 1) *outBuf++ = (float)(aRWAudioClass->m_genGain_r * y2);
 
@@ -261,7 +261,7 @@ int RWAudio::InitSnd(long int oscbuflen, long int spebuflen, std::string &rtinfo
   m_sampleRate = srate;
 
   m_genFR_l = m_genFR_r = 0.0;
-  m_genShape_l = m_genShape_r = 0;
+  m_genShape_l = m_genShape_r = SINE;
   m_genGain_l = m_genGain_r = 0.0;
   m_genPhase_l = m_genPhase_r = 0.0;
   m_genPhaseDif = 0.0;
@@ -413,7 +413,7 @@ int RWAudio::GetRWAudioDevices(RWAudioDevList *play, RWAudioDevList *record) {
 /********************************************************************/
 /*************      Parameter settings            *******************/
 /********************************************************************/
-int RWAudio::PlaySetGenerator(float f1, float f2, int s1, int s2, float g1, float g2) {
+int RWAudio::PlaySetGenerator(float f1, float f2, Waveform s1, Waveform s2, float g1, float g2) {
   if (2 * f1 < m_sampleRate)
     m_genFR_l = f1;
   else
