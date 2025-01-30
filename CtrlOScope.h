@@ -27,7 +27,8 @@
 
 class CtrlOScope : public wxControl {
  public:
-  CtrlOScope(wxWindow* parent, wxString xname = _T("X"), wxString yname = _T("Y"));
+  CtrlOScope(wxWindow* parent, wxString xname = _T("X"), wxString yname = _T("Y"),
+             int histogram = 0);
 
   virtual ~CtrlOScope();
   void OnPaint(wxPaintEvent& event);
@@ -77,6 +78,8 @@ class CtrlOScope : public wxControl {
   int m_UserTextPosY;
 
   Interpolation m_interp;
+
+  int m_Histogram;
 
  private:
   void PaintGraph(wxDC& dc);
