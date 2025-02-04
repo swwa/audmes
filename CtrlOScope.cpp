@@ -304,7 +304,7 @@ void CtrlOScope::PaintTrack(wxDC& dc, size_t from, size_t to, double xstep, cons
     wxPoint pt = {xpos, (int)ypoint};
     pv.push_back(pt);
   }
-  dc.DrawLines(pv.size(), &pv[0]);
+  if (pv.size() > 1) dc.DrawLines(pv.size(), &pv[0]);
 
   if (wxT("") != m_UserText) {
     dc.SetTextForeground(m_whColor);
