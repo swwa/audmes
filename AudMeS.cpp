@@ -401,9 +401,9 @@ void MainFrame::do_layout() {
                  5);  // 100, 80, ... -100
   sizer_12L->Add(sizer_15L, 1, wxEXPAND, 0);
 
-  sizer_11B->Add(button_autocalibrate, 0,
-                 wxLEFT | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
-  sizer_11B->Add(button_sinc, 0, wxRIGHT | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
+  sizer_11B->Add(button_autocalibrate, 0, wxLEFT | wxALIGN_CENTER_VERTICAL, 5);
+  sizer_11B->Add(5, 5, 1, 0, 0);                  // spacer
+  sizer_11B->Add(button_sinc, 0, wxRIGHT | wxALIGN_CENTER_VERTICAL, 5);
   sizer_11->Add(sizer_11B, 0, wxALL | wxEXPAND, 5);
 
   sizer_11->Add(sizer_12L, 0, wxALL | wxEXPAND, 5);
