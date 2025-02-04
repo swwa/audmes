@@ -278,7 +278,16 @@ void CtrlOScope::PaintGraph(wxDC& dc) {
     }
 
     // right channel
-    PaintTrack(dc, ilow, ihigh, xstep, m_tr2Color, m_pointsX, m_points2);
+    if (m_interp == SINC) {
+      wxArrayDouble xdata;
+      wxArrayDouble ydata;
+      sinc_interpolate(xdata, ydata, m_pointsX, m_points2);
+      PaintTrack(dc, ilow, ihigh * 5 - 1, xstep, m_tr2Color, xdata, ydata);
+      xdata.Clear();
+      ydata.Clear();
+    } else {
+      PaintTrack(dc, ilow, ihigh, xstep, m_tr2Color, m_pointsX, m_points2);
+    }
   }
 }
 
