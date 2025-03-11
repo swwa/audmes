@@ -35,6 +35,7 @@
 #include "CtrlOScope.h"
 
 #include <cmath>
+#include <vector>
 
 CtrlOScope::CtrlOScope(wxWindow* parent, wxString xname, wxString yname)
     : wxControl(parent, -1, wxDefaultPosition, wxSize(300, 200)) {

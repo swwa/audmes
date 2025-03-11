@@ -24,7 +24,7 @@
 #include <wx/defs.h>  // for WXUNUSED
 #include "RWAudio_IO.h"
 
-#include <math.h>
+#include <cmath>
 #include <stdio.h>
 
 #include <atomic>
