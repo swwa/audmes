@@ -111,6 +111,10 @@ Package and install
     cmake --build . --target package
     sudo dpkg -i AudMeS-xxxx.xx.xx-Linux.deb
 
+## Compiling on Windows 11 with Msys2
+
+Download Msys2 from <https://www.msys2.org/>
+
 ## Compiling on Windows 10 with MinGW
 
 Get the following software:

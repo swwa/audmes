@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.1)
+cmake_minimum_required (VERSION 3.10)
 
 project(AudMeS)
 
@@ -16,7 +16,7 @@ set(CPP_SOURCES
 	RWAudio_IO.h
 	sma_2d.cpp
 	sma_2d.h
-)
+	)
 
 set(AM_SOURCES
 	${CPP_SOURCES}
@@ -24,7 +24,8 @@ set(AM_SOURCES
 	rtaudio/RtAudio.h
 	fourier.c
 	fourier.h
-)
+	)
+
 add_subdirectory (tests)
 
 include_directories(.) # for local libfccp
@@ -41,8 +42,12 @@ endif()
 
 if (WIN32)
 	set(AM_SOURCES ${AM_SOURCES} audmes.rc)
-	string(REPLACE "\\" "/" HDIR "$ENV{HOMEDRIVE}$ENV{HOMEPATH}")
-	set(wxWidgets_ROOT_DIR "${HDIR}/projects/wx3.0.5")
+	set(wxWidgets_USE_LIBS ON)
+endif()
+
+if (MINGW)
+	execute_process(COMMAND bash -c "wx-config --prefix | tr -d '\n'" OUTPUT_VARIABLE MINGW_DIR)
+	message("wxWidgets dir settings: ${MINGW_DIR}")
 endif()
 
 if (${APPLE})
@@ -82,7 +87,7 @@ if (${APPLE})
 		MACOSX_BUNDLE TRUE
 		XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY ""
 		MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/Info.plist"
-	)
+		)
 endif()
 
 if (MSVC)
@@ -103,20 +108,16 @@ endif()
 
 if (MINGW)
 	add_definitions(-D__WINDOWS_WASAPI__ -D__WINDOWS_DS__)
-	target_link_libraries(${PROJECT_NAME} -mwindows ${wxWidgets_LIBRARIES} dsound ksuser mfplat mfuuid wmcodecdspuuid winmm ole32)
-	# TODO remove this
-	if (EXISTS "${wxWidgets_LIB_DIR}/wxbase30u_gcc810.dll")
-		add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy "${wxWidgets_LIB_DIR}/wxbase30u_gcc810.dll" "."
-		COMMAND ${CMAKE_COMMAND} -E copy "${wxWidgets_LIB_DIR}/wxbase30ud_gcc810.dll" "."
-		COMMAND ${CMAKE_COMMAND} -E copy "${wxWidgets_LIB_DIR}/wxmsw30u_core_gcc810.dll" "."
-		COMMAND ${CMAKE_COMMAND} -E copy "${wxWidgets_LIB_DIR}/wxmsw30ud_core_gcc810.dll" ".")
-	endif()
+	target_link_libraries(
+		${PROJECT_NAME}
+		${wxWidgets_LIBRARIES}
+		dsound ksuser mfplat mfuuid wmcodecdspuuid winmm ole32
+		)
 endif()
 
-set(CPACK_PACKAGE_VERSION_MAJOR "2024")
-set(CPACK_PACKAGE_VERSION_MINOR "07")
-set(CPACK_PACKAGE_VERSION_PATCH "28")
+set(CPACK_PACKAGE_VERSION_MAJOR "2025")
+set(CPACK_PACKAGE_VERSION_MINOR "04")
+set(CPACK_PACKAGE_VERSION_PATCH "05")
 
 if (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Linux")
 	install(TARGETS ${PROJECT_NAME} DESTINATION "bin")
@@ -135,20 +136,31 @@ if (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Linux")
 endif()
 
 if (MINGW)
-	if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-		message(WARNING "Installation only in **Release** builds supported")
-	endif()
+	#if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+	#	message(WARNING "Installation only in **Release** builds supported")
+	#endif()
 	set(CMAKE_INSTALL_PREFIX .)
 	install(TARGETS ${PROJECT_NAME} DESTINATION .)
 	install(FILES "${CMAKE_SOURCE_DIR}/README.md" DESTINATION .)
 	install(FILES "${CMAKE_SOURCE_DIR}/NEWS" RENAME "NEWS.txt" DESTINATION .)
 	# add runtime libraries - static linking does not work with wxWidgets binaries
-	set(MINGW_LIBS "c:/Program Files (x86)/mingw-w64/i686-8.1.0-posix-sjlj-rt_v6-rev0/mingw32/bin")
-	install(FILES "${MINGW_LIBS}/libwinpthread-1.dll" DESTINATION .)
-	install(FILES "${MINGW_LIBS}/libstdc++-6.dll" DESTINATION .)
-	install(FILES "${MINGW_LIBS}/libgcc_s_sjlj-1.dll" DESTINATION .)
-	install(FILES "${wxWidgets_LIB_DIR}/wxbase30u_gcc810.dll" DESTINATION .)
-	install(FILES "${wxWidgets_LIB_DIR}/wxmsw30u_core_gcc810.dll" DESTINATION .)
+	install(FILES "${MINGW_DIR}/bin/libgcc_s_dw2-1.dll" DESTINATION .)
+	install(FILES "${MINGW_DIR}/bin/libstdc++-6.dll" DESTINATION .)
+	install(FILES "${MINGW_DIR}/bin/libwinpthread-1.dll" DESTINATION .)
+	install(FILES "${MINGW_DIR}/bin/wxbase32u_gcc_custom.dll" DESTINATION .)
+	install(FILES "${MINGW_DIR}/bin/wxmsw32u_core_gcc_custom.dll" DESTINATION .)
+	install(FILES "${MINGW_DIR}/bin/liblzma-5.dll" DESTINATION .)
+	install(FILES "${MINGW_DIR}/bin/zlib1.dll" DESTINATION .)
+	install(FILES "${MINGW_DIR}/bin/libjpeg-8.dll" DESTINATION .)
+	install(FILES "${MINGW_DIR}/bin/libpcre2-16-0.dll" DESTINATION .)
+	install(FILES "${MINGW_DIR}/bin/libpng16-16.dll" DESTINATION .)
+	install(FILES "${MINGW_DIR}/bin/libtiff-6.dll" DESTINATION .)
+	install(FILES "${MINGW_DIR}/bin/libdeflate.dll" DESTINATION .)
+	install(FILES "${MINGW_DIR}/bin/libjbig-0.dll" DESTINATION .)
+	install(FILES "${MINGW_DIR}/bin/libLerc.dll" DESTINATION .)
+	install(FILES "${MINGW_DIR}/bin/libzstd.dll" DESTINATION .)
+	install(FILES "${MINGW_DIR}/bin/libwebp-7.dll" DESTINATION .)
+	install(FILES "${MINGW_DIR}/bin/libsharpyuv-0.dll" DESTINATION .)
 	set(CPACK_GENERATOR "ZIP")
 endif()
 
@@ -158,14 +170,15 @@ if (APPLE)
 	install(TARGETS ${APP_NAME}
 		BUNDLE DESTINATION . COMPONENT Runtime
 		RUNTIME DESTINATION bin COMPONENT Runtime
-	)
+		)
 	set(APPS "\${CMAKE_INSTALL_PREFIX}/${APP_NAME}.app")
 	set(CMAKE_MACOSX_RPATH ON)
 	set(DIRS ${CMAKE_BINARY_DIR})
 	# Replace absolut library paths with relative to app paths
 	install(CODE "include(BundleUtilities)
 		set(BU_CHMOD_BUNDLE_ITEMS ON)
-		fixup_bundle(\"${APPS}\" \"\" \"${DIRS}\")")
+		fixup_bundle(\"${APPS}\" \"\" \"${DIRS}\")"
+		)
 	# Add files to top level dmg directoy
 	install(FILES "${CMAKE_SOURCE_DIR}/README.md" DESTINATION .)
 	install(FILES "${CMAKE_SOURCE_DIR}/NEWS" DESTINATION .)
@@ -173,7 +186,8 @@ if (APPLE)
 endif()
 
 add_custom_target(
-	clang-tidy-check cd ..\; clang-tidy -p ${CMAKE_BINARY_DIR}/compile_commands.json ${CPP_SOURCES} DEPENDS ${CPP_SOURCES})
+	clang-tidy-check cd ..\; clang-tidy -p ${CMAKE_BINARY_DIR}/compile_commands.json ${CPP_SOURCES} DEPENDS ${CPP_SOURCES}
+	)
 
 add_custom_target(check DEPENDS clang-tidy-check)
 

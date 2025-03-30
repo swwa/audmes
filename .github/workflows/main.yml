@@ -21,7 +21,6 @@ jobs:
           mkdir build
           cd build
           cmake ..
-          cmake --build .
           cmake --build . --target package
 
       - name: Archive build result
@@ -53,7 +52,6 @@ jobs:
           mkdir build
           cd build
           cmake ..
-          cmake --build .
           cmake --build . --target package
 
       - name: Archive build result
@@ -96,11 +94,11 @@ jobs:
           mkdir build
           cd build
           cmake ..
-          cmake --build .
+          cmake --build . --target package
 
       - name: Archive build result
         uses: actions/upload-artifact@v4
         with:
           name: win-binary
           path: |
-            build/AudMeS.exe
+            build/AudMeS-*.zip
