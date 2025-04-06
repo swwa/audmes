@@ -77,17 +77,11 @@ when running AudMeS.exe, you compiled in Debug mode. Run cmake again with
 
 ## Compiling on Linux
 
-The following instructions are for Debian, Ubuntu and similar.
+The following instructions are for Debian 12, Ubuntu and similar.
 
 Install the basic development tools and dependencies
 
     sudo apt install build-essential git cmake
-
-    # Debian 11
-    sudo apt install libwxgtk3.0-gtk3-dev
-    sudo apt install libfccp-dev libpulse-dev libasound2-dev
-
-    # Debian 12
     sudo apt install libwxgtk3.2-dev
     sudo apt install libfccp-dev libpulse-dev libasound2-dev
 
@@ -114,6 +108,40 @@ Package and install
 ## Compiling on Windows 11 with Msys2
 
 Download Msys2 from <https://www.msys2.org/>
+
+Run `mingw32` terminal and install packages:
+
+    pacman -S git mingw-w64-i686-gcc mingw-w64-i686-cmake mingw-w64-i686-make
+    pacman -S mingw-w64-i686-wxwidgets3.2-msw
+
+Do not install packages for other than i686 targets.
+
+Get code:
+
+    mkdir projects
+    git clone https://git.code.sf.net/p/audmes/git audmes
+    cd audmes
+
+Clone libfccp:
+
+    git clone https://github.com/ben-strasser/fast-cpp-csv-parser libfccp
+
+Compiling:
+
+    mkdir build
+    cd build
+    cmake ..
+    cmake --build . 
+
+Run the program:
+
+    AudMeS.exe
+
+Package into a ZIP:
+
+    cmake --build . --target package
+
+The ZIP archive contains the executable, libraries and text files for distribution.
 
 ## Compiling on Windows 10 with MinGW
 
@@ -148,7 +176,7 @@ Use the desktop shortcut "Git bash" you get after after installing git.
 
 Create a directory to store the project.
 
-    $ENV{HOMEDRIVE}$ENV{HOMEPATH}/projects
+    mkdir $ENV{HOMEDRIVE}$ENV{HOMEPATH}/projects
 
 WxWidgets:
 

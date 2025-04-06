@@ -1,6 +1,17 @@
 News
 ====
 
+2025-04-05
+----------
+
+- Add sin(x)/x interpolation in oscilloscope view
+- Add wobble sine in generator (slightly frequency modulated sine wave)
+- Add GutHub actions (build pipeline)
+- Rework oscilloscope channel range to full scale factor
+- Update dependencies
+- Refactor code
+- Fix reversed left and right label in generator
+
 2024-07-28
 ----------
 

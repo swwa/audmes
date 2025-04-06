@@ -9,7 +9,7 @@
 	<key>CFBundleExecutable</key>
 	<string>AudMes</string>
 	<key>CFBundleGetInfoString</key>
-	<string>AudMes version 2022-04-20</string>
+	<string>AudMes version 2025-04-05</string>
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.education</string>
 	<key>CFBundleIconFile</key>
@@ -19,13 +19,13 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleLongVersionString</key>
-	<string>Version 2022-04-20</string>
+	<string>Version 2025-04-05</string>
 	<key>CFBundleName</key>
 	<string>AudMeS</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>2022-04-20</string>
+	<string>2025-04-05</string>
 	<key>CFBundleSignature</key>
 	<string>auDy</string>
 	<key>CFBundleSupportedPlatforms</key>
@@ -33,11 +33,11 @@
 		<string>MacOSX</string>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>2022-04-20</string>
+	<string>2025-04-05</string>
 	<key>NSHighResolutionCapable</key>
 	<true/>
 	<key>NSHumanReadableCopyright</key>
-	<string>AudMeS Version 2022-04-20 - GPLv2</string>
+	<string>AudMeS Version 2025-04-05 - GPLv2</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 	<key>CFBundleDisplayName</key>

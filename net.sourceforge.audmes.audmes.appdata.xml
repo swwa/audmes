@@ -26,6 +26,18 @@
   </kudos>
 
   <releases>
+    <release version="2025.04.05" date="2025-04-05>
+      <description>
+        <ul>
+          <li>Add sin(x)/x interpolation in oscilloscope view
+          <li>Add wobble sine in generator (slightly frequency modulated sine wave)
+          <li>Rework oscilloscope channel range to full scale factor
+          <li>Update dependencies
+          <li>Refactor code
+          <li>Fix reversed left and right label in generator<li>Rearrange oscilloscope view</li>
+        </ul>
+      </description>
+    </release>
     <release version="2024.07.28" date="2024-07-28">
       <description>
         <ul>
