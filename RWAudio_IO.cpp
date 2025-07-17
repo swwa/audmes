@@ -246,6 +246,7 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
 RWAudio::RWAudio() {
   m_Buflen_Changed = false;
   m_sampleRate = 0;
+  stream_running = 0;
 }
 
 RWAudio::~RWAudio() {
@@ -306,22 +307,34 @@ int RWAudio::InitSnd(long int oscbuflen, long int spebuflen, std::string &rtinfo
   for (unsigned int i = 0; i < devices; i++) {
     info = m_AudioDriver->getDeviceInfo(i);
   }
+  cardrec = m_AudioDriver->getDefaultInputDevice();
+  cardplay = m_AudioDriver->getDefaultOutputDevice();
+  return 0;
+}
 
-  // start audio streams
-  if (RestartAudio(m_AudioDriver->getDefaultInputDevice(),
-                   m_AudioDriver->getDefaultOutputDevice())) {
+int RWAudio::StartSnd() {
+  if (StartAudio(cardrec, cardplay)) {
     return 2;
+  }
+  stream_running++;
+  return 0;
+}
+
+int RWAudio::StopSnd() {
+  if (stream_running > 0) {
+    stream_running--;
+    if (stream_running == 0) {
+      m_AudioDriver->stopStream();
+      m_AudioDriver->closeStream();
+    }
   }
   return 0;
 }
 
-int RWAudio::RestartAudio(int recDevId, int playDevId) {
-  // if stream is open (and running), stop it
+int RWAudio::StartAudio(int recDevId, int playDevId) {
   if (m_AudioDriver->isStreamOpen()) {
-    m_AudioDriver->stopStream();
-    m_AudioDriver->closeStream();
+    return 0;
   }
-
   // adapt to number of channels
   RtAudio::DeviceInfo info = m_AudioDriver->getDeviceInfo(recDevId);
   if (info.inputChannels > 1 || info.duplexChannels > 1)
@@ -441,12 +454,11 @@ int RWAudio::PlaySetGenerator(float f1, float f2, Waveform s1, Waveform s2, floa
 }
 
 void RWAudio::SetSndDevices(unsigned int irec, unsigned int iplay, unsigned int srate) {
-  unsigned int cardrec, cardplay;
-
   cardrec = irec;
   cardplay = iplay;
   m_sampleRate = srate;
 
-  // redefine audio streams
-  RestartAudio(cardrec, cardplay);
+  if (stream_running > 0) {
+    StartAudio(cardrec, cardplay);
+  }
 }

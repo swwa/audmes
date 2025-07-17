@@ -37,6 +37,8 @@ class RWAudio {
   ~RWAudio();
 
   int InitSnd(long int oscbuflen, long int spebuflen, std::string& rtinfo, unsigned int srate);
+  int StartSnd();
+  int StopSnd();
 
   void SetSndDevices(unsigned int irec, unsigned int iplay, unsigned int srate);
 
@@ -75,7 +77,10 @@ class RWAudio {
  protected:
   RtAudio* m_AudioDriver;
 
-  int RestartAudio(int recDevId, int playDevId);
+ private:
+  int stream_running;
+  unsigned int cardrec, cardplay;
+  int StartAudio(int recDevId, int playDevId);
 };
 
 #endif  // RWAUDIO_IO_H

@@ -404,7 +404,7 @@ void MainFrame::do_layout() {
   sizer_12L->Add(sizer_15L, 1, wxEXPAND, 0);
 
   sizer_11B->Add(button_autocalibrate, 0, wxLEFT | wxALIGN_CENTER_VERTICAL, 5);
-  sizer_11B->Add(5, 5, 1, 0, 0);                  // spacer
+  sizer_11B->Add(5, 5, 1, 0, 0);  // spacer
   sizer_11B->Add(button_sinc, 0, wxRIGHT | wxALIGN_CENTER_VERTICAL, 5);
   sizer_11->Add(sizer_11B, 0, wxALL | wxEXPAND, 5);
 
@@ -799,6 +799,7 @@ void MainFrame::CalcFreqResponse() {
     window_1_frm->ShowUserText(wxString(""), 0, 0);
     button_frm_start->SetValue(false);
     button_frm_start->SetLabel(_T("Start"));
+    m_RWAudio->StopSnd();
     SendGenSettings();  // stop generator
   }
 }
@@ -1109,16 +1110,20 @@ void MainFrame::OnSpanStart(wxCommandEvent& WXUNUSED(event)) {
     m_SMASpeLeft->SetNumRecords(m_SpeBufferLength >> 1);
     m_SMASpeRight->SetNumRecords(m_SpeBufferLength >> 1);
     button_spe_start->SetLabel(_T("Stop"));
+    m_RWAudio->StartSnd();
   } else {
     button_spe_start->SetLabel(_T("Start"));
+    m_RWAudio->StopSnd();
   }
 }
 
 void MainFrame::OnGenStart(wxCommandEvent& WXUNUSED(event)) {
   if (button_gen_start->GetValue()) {
     button_gen_start->SetLabel(_T("Stop"));
+    m_RWAudio->StartSnd();
   } else {
     button_gen_start->SetLabel(_T("Start"));
+    m_RWAudio->StopSnd();
   }
   SendGenSettings();
 }
@@ -1126,8 +1131,10 @@ void MainFrame::OnGenStart(wxCommandEvent& WXUNUSED(event)) {
 void MainFrame::OnOscStart(wxCommandEvent& WXUNUSED(event)) {
   if (button_osc_start->GetValue()) {
     button_osc_start->SetLabel(_T("Stop"));
+    m_RWAudio->StartSnd();
   } else {
     button_osc_start->SetLabel(_T("Start"));
+    m_RWAudio->StopSnd();
   }
 }
 
@@ -1148,11 +1155,12 @@ void MainFrame::OnFrmStart(wxCommandEvent& WXUNUSED(event)) {
 
     frm_measure = 0;
     frm_running = true;
+    m_RWAudio->StartSnd();
   } else {
     frm_running = false;
     button_frm_start->SetValue(false);
     button_frm_start->SetLabel(_T("Start"));
-    SendGenSettings();  // stop generator
+    m_RWAudio->StopSnd();
   }
 }
 
