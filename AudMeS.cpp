@@ -139,7 +139,7 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
   label__gen_freq_l = new wxStaticText(notebook_1_gen, -1, wxT("Frequency [20..20000Hz]: "));
   slide_l_fr = new wxSlider(notebook_1_gen, ID_GENLFREQ, 80, 0, 200);
   label_gen_ampl_l = new wxStaticText(notebook_1_gen, -1, wxT("Amplitude [0..-60dB]: "));
-  slide_l_am = new wxSlider(notebook_1_gen, ID_GENLAMP, 0, -60, 0);
+  slide_l_am = new wxSlider(notebook_1_gen, ID_GENLAMP, -3, -60, 0);
 
   checkbox_r_en = new wxCheckBox(notebook_1_gen, ID_GENRENB, wxT("Enable Output"));
   label_gen_wave_r = new wxStaticText(notebook_1_gen, -1, wxT("Waveform: "));
@@ -150,7 +150,7 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
   label_gen_freq_r = new wxStaticText(notebook_1_gen, -1, wxT("Frequency [20..20000Hz]: "));
   slide_r_fr = new wxSlider(notebook_1_gen, ID_GENRFREQ, 80, 0, 200);
   label_gen_ampl_r = new wxStaticText(notebook_1_gen, -1, wxT("Amplitude [0..-60dB]: "));
-  slide_r_am = new wxSlider(notebook_1_gen, ID_GENRAMP, 0, -60, 0);
+  slide_r_am = new wxSlider(notebook_1_gen, ID_GENRAMP, -3, -60, 0);
   button_gen_start = new wxToggleButton(notebook_1_gen, ID_GENSTART, wxT("Start"));
 
   checkbox_gen_sync = new wxCheckBox(notebook_1_gen, ID_GENSYNC, wxT("L and R are synchronized"));
@@ -271,6 +271,7 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
 }
 
 void MainFrame::set_properties() {
+  wxScrollEvent event;
   // begin wxGlade: MainFrame::set_properties
   SetTitle(wxT("AUDio MEasurement System"));
   int frame_1_statusbar_widths[] = {-1};
@@ -291,6 +292,7 @@ void MainFrame::set_properties() {
   choice_fftavg->SetSelection(0);
   choice_spe_ref->SetSelection(0);
   choice_spe_dbdiv->SetSelection(2);
+  OnGenScrollChanged(event);
   // end wxGlade
 }
 
@@ -1199,10 +1201,10 @@ void MainFrame::OnGenScrollRChanged(wxScrollEvent& WXUNUSED(event)) {
 void MainFrame::OnGenScrollChanged(wxScrollEvent& WXUNUSED(event)) {
   wxString bla;
 
-  bla.Printf(wxT("Amplitude: %d dB"), slide_l_am->GetValue());
+  bla.Printf(wxT("Amplitude [0..-60]: %d dB"), slide_l_am->GetValue());
   label_gen_ampl_l->SetLabel(bla);
 
-  bla.Printf(wxT("Amplitude: %d dB"), slide_r_am->GetValue());
+  bla.Printf(wxT("Amplitude [0..-60]: %d dB"), slide_r_am->GetValue());
   label_gen_ampl_r->SetLabel(bla);
 
   if (button_gen_start->GetValue()) {
