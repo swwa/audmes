@@ -33,7 +33,10 @@
 
 #include "dlg_audiointerface.h"
 #include "event_ids.h"
-#include "fourier.h"
+
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_fft_real.h>
+#include <gsl/gsl_fft_halfcomplex.h>
 
 wxIMPLEMENT_CLASS(MainFrame, wxFrame);
 
@@ -87,6 +90,10 @@ long int g_SpeBufferPosition;
 
 std::atomic<bool> g_OscBufferChanged{false};
 std::atomic<bool> g_SpeBufferChanged{false};
+
+static gsl_fft_real_wavetable* fft_wavetable = NULL;
+static gsl_fft_real_workspace* fft_workspace = NULL;
+static int fft_allocated = -1;
 
 ///////////////////////////////////////////////////////////////////////
 MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPoint& pos,
@@ -402,7 +409,7 @@ void MainFrame::do_layout() {
   sizer_12L->Add(sizer_15L, 1, wxEXPAND, 0);
 
   sizer_11B->Add(button_autocalibrate, 0, wxLEFT | wxALIGN_CENTER_VERTICAL, 5);
-  sizer_11B->Add(5, 5, 1, 0, 0);                  // spacer
+  sizer_11B->Add(5, 5, 1, 0, 0);  // spacer
   sizer_11B->Add(button_sinc, 0, wxRIGHT | wxALIGN_CENTER_VERTICAL, 5);
   sizer_11->Add(sizer_11B, 0, wxALL | wxEXPAND, 5);
 
@@ -609,6 +616,12 @@ void MainFrame::OnAboutClick(wxCommandEvent& WXUNUSED(event)) {
 void MainFrame::OnExitClick(wxCommandEvent& WXUNUSED(event)) { Close(); }
 
 void MainFrame::OnClose(wxCloseEvent& WXUNUSED(event)) {
+  if (fft_allocated > 0) {
+    gsl_fft_real_wavetable_free(fft_wavetable);
+    gsl_fft_real_workspace_free(fft_workspace);
+    fft_allocated = -1;
+  }
+
   m_timer->Stop();
   Destroy();
 }
@@ -898,11 +911,9 @@ double MainFrame::calc_dc(const float* data, int size) {
 }
 
 void MainFrame::DrawSpectrum(void) {
-  double *realin, *realout, *imagout, *windowf;
+  double *realin, *windowf;
   int nsampl = m_SpeBufferLength;
   realin = (double*)malloc(nsampl * sizeof(double));
-  realout = (double*)malloc(nsampl * sizeof(double));
-  imagout = (double*)malloc(nsampl * sizeof(double));
   windowf = (double*)malloc(nsampl * sizeof(double));
   spe_freqs.Clear();
   spe_lmagns.Clear();
@@ -937,97 +948,96 @@ void MainFrame::DrawSpectrum(void) {
       break;
   }
 
-  double dval = 0.0;
-  double dmax = 0.0;
-  double dval_db = 0.0;
+  if (fft_allocated != nsampl) {
+    if (fft_allocated > 0) {
+      gsl_fft_real_wavetable_free(fft_wavetable);
+      gsl_fft_real_workspace_free(fft_workspace);
+    }
+
+    fft_workspace = gsl_fft_real_workspace_alloc(nsampl);
+    fft_wavetable = gsl_fft_real_wavetable_alloc(nsampl);
+    fft_allocated = nsampl;
+  }
 
   // left channel
-  double offsetL = calc_dc(g_SpeBuffer_Left, nsampl);
-  for (int i = 0; i < nsampl; i++) {
-    // copy and apply window
-    realin[i] = (g_SpeBuffer_Left[i] - offsetL) * windowf[i];
+  for (int i = 0; i < nsampl; ++i)
+    realin[i] = g_SpeBuffer_Left[i] * windowf[i];  // copy and apply window
+
+  gsl_fft_real_transform(realin, 1, nsampl, fft_wavetable, fft_workspace);
+
+  for (int i = 1; i < nsampl / 2; ++i) {
+    const double re = realin[i + i - 1];
+    const double im = realin[i + i];
+    // multiply amplitude by 2 to compensate
+    m_SMASpeLeft->AddVal(i, 2 * sqrt(re * re + im * im));
+    spe_lmagns.Add(20.0 * log10(m_SMASpeLeft->GetSMA(i)));
   }
 
-  if (fft_double(nsampl, 0, realin, NULL, realout, imagout)) {
-    // use only up to nsampl/2 and skip DC
-    for (int i = 1; i < nsampl / 2; i++) {
-      // multiply amplitude by 2 to compensate
-      dval = 2 * sqrt(realout[i] * realout[i] + imagout[i] * imagout[i]);
-      m_SMASpeLeft->AddVal(i, dval);
-      dval_db = 20.0 * log10(m_SMASpeLeft->GetSMA(i));
-      spe_lmagns.Add(dval_db);
-    }
-  } else {
-    /* wrong computation */
-    for (int i = 0; i < nsampl / 2; i++) {
-      spe_lmagns.Add(-150);
-    }
+  // right channel
+  for (int i = 0; i < nsampl; i++)
+    realin[i] = g_SpeBuffer_Right[i] * windowf[i];  // copy and apply window
+
+  gsl_fft_real_transform(realin, 1, nsampl, fft_wavetable, fft_workspace);
+
+  for (int i = 1; i < nsampl / 2; ++i) {
+    const double re = realin[i + i - 1];
+    const double im = realin[i + i];
+    // multiply amplitude by 2 to compensate
+    m_SMASpeRight->AddVal(i, 2 * sqrt(re * re + im * im));
+    spe_rmagns.Add(20.0 * log10(m_SMASpeRight->GetSMA(i)));
   }
 
+  // THD
   /* find frequency index with highest amplitude */
+  double dmax = 0.0;
   int fmax = 0;
-  for (int i = 0; i < nsampl / 2; i++) {
+  for (int i = 1; i < nsampl / 2; ++i) {
     if (m_SMASpeLeft->GetSMA(i) > dmax) {
       dmax = m_SMASpeLeft->GetSMA(i);
+      fmax = i;
+    }
+
+    if (m_SMASpeRight->GetSMA(i) > dmax) {
+      dmax = m_SMASpeRight->GetSMA(i);
       fmax = i;
     }
   }
 
   /* use that frequency as base and calculate distortion
-   * but only if the magnitude is above -90 db
+   *  but only if the magnitude is above -90 db
    */
   double freq = 0.0;
-  double thd = 0.0;
-  double thdval[10] = {1.0E-6};
+  double thdl = 0.0;
+  double thdr = 0.0;
+  const double thd0l = m_SMASpeLeft->GetSMA(fmax);
+  const double thd0r = m_SMASpeRight->GetSMA(fmax);
+
   if (fmax > 0 && dmax > 0.00003) {
-    freq = (double)fmax * m_SamplingFreq / nsampl;
-    for (int i = 0; i < 10; i++) {
-      int j = fmax * (i + 1);
-      if (j < nsampl / 2)
-        thdval[i] = m_SMASpeLeft->GetSMA(j);
-      else
-        thdval[i] = 0.0;
+    // const int nthd = 10 * fmax;
+    const int nthd = 3 * fmax;  // for my FM-tuner 2 harmonics only
+    for (int i = fmax + fmax; i <= nthd && i < nsampl / 2; i += fmax) {
+      thdl += m_SMASpeLeft->GetSMA(i);
+      thdr += m_SMASpeLeft->GetSMA(i);
     }
-    thd = 100 *
-          (thdval[1] + thdval[2] + thdval[3] + thdval[4] + thdval[5] + thdval[6] + thdval[7] +
-           thdval[8] + thdval[9]) /
-          thdval[0];
+
+    thdl *= 100.0 / thd0l;
+    thdr *= 100.0 / thd0r;
+
+    freq = (double)fmax * m_SamplingFreq / nsampl;
   }
 
   /* display base frequency, magnitude and distortion */
   wxString freqency;
-  freqency.Printf(wxT("Frequency : %.1lf Hz, Magnitude: %.1lf dB, THD : %lf%%, Avg: %d/%d"), freq,
-                  20.0 * log10(thdval[0]), thd, m_SMASpeLeft->GetNumSummed(1),
-                  m_SMASpeLeft->GetNumAverage());
+  freqency.Printf(
+      wxT("Frequency : %.1lf Hz, Magnitude: %.1lf dB, THD: %8.4lf%% %8.4lf%%, Avg: %d/%d"), freq,
+      20.0 * log10(std::max(thd0l, thd0r)), thdl, thdr, m_SMASpeLeft->GetNumSummed(1),
+      m_SMASpeLeft->GetNumAverage());
   frame_1_statusbar->SetStatusText(freqency);
-
-  // right channel
-  double offsetR = calc_dc(g_SpeBuffer_Right, nsampl);
-  for (int i = 0; i < nsampl; i++) {
-    // copy and apply window
-    realin[i] = (g_SpeBuffer_Right[i] - offsetR) * windowf[i];
-  }
-
-  if (fft_double(nsampl, 0, realin, NULL, realout, imagout)) {
-    // use only up to nsampl/2 and skip DC
-    for (int i = 1; i < nsampl / 2; i++) {
-      dval = 2 * sqrt(realout[i] * realout[i] + imagout[i] * imagout[i]);
-      m_SMASpeRight->AddVal(i, dval);
-      dval_db = (20.0 * log10(m_SMASpeRight->GetSMA(i)));
-      spe_rmagns.Add(dval_db);
-    }
-  } else {
-    /* wrong computation */
-    for (int i = 0; i < nsampl / 2; i++) {
-      spe_rmagns.Add(-150);
-    }
-  }
 
   double fbase = (double)m_SamplingFreq / nsampl;
   // frequencies without DC
-  for (int i = 1; i < nsampl / 2; i++) {
-    spe_freqs.Add(fbase * i);
-  }
+  for (int i = 1; i < nsampl / 2; ++i) spe_freqs.Add(fbase * i);
+
   window_1_spe->SetTrack1(spe_lmagns);
   window_1_spe->SetTrack2(spe_rmagns);
   window_1_spe->SetTrackX(spe_freqs);
@@ -1035,16 +1045,17 @@ void MainFrame::DrawSpectrum(void) {
     case 1:
       window_1_spe->SetXRange(20, 20000, 1);
       break;
+
     case 2:
       window_1_spe->SetXRange(10, 100000, 1);
       break;
+
     default:
       window_1_spe->SetXRange(2, 2000, 1);
       break;
   }
+
   free(realin);
-  free(realout);
-  free(imagout);
   free(windowf);
 }
 
