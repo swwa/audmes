@@ -233,11 +233,11 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
                             choice_fft_choices, 0);
 
   label_9 = new wxStaticText(notebook_1_spe, -1, wxT("Number of samples:"));
-  const wxString choice_fftlength_choices[] = {wxT("128"),   wxT("256"),  wxT("512"),  wxT("1024"),
-                                               wxT("2048"),  wxT("4096"), wxT("8192"), wxT("16384"),
-                                               wxT("32768"), wxT("65536")};
+  const wxString choice_fftlength_choices[] = {
+      wxT("48"),   wxT("96"),   wxT("128"),  wxT("256"),   wxT("512"),   wxT("1024"),
+      wxT("2048"), wxT("4096"), wxT("8192"), wxT("16384"), wxT("32768"), wxT("65536")};
   choice_fftlength = new wxChoice(notebook_1_spe, ID_FFTLENGTH, wxDefaultPosition, wxDefaultSize,
-                                  10, choice_fftlength_choices, 0);
+                                  12, choice_fftlength_choices, 0);
 
   label_rx = new wxStaticText(notebook_1_spe, -1, wxT("Freq:"));
   const wxString choice_fftry_choices[] = {wxT("2-2000"), wxT("20-20k"), wxT("10-100k")};
@@ -260,7 +260,7 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
   choice_spe_dbdiv = new wxChoice(notebook_1_spe, ID_FFTDBDIV, wxDefaultPosition, wxDefaultSize, 3,
                                   choice_spe_dbdiv_choices, 0);
 
-  window_1_spe = new CtrlOScope(notebook_1_spe, _T("Hz"), _T("dB"));
+  window_1_spe = new CtrlOScope(notebook_1_spe, _T("Hz"), _T("dB"), 1);
   button_spe_start = new wxToggleButton(notebook_1_spe, ID_SPANSTART, wxT("Start"));
 
   /* Frequency response */
@@ -292,9 +292,10 @@ void MainFrame::set_properties() {
   choice_osc_r_res->SetSelection(0);
   choice_osc_r_off->SetSelection(0);
   choice_osc_trig_edge->SetSelection(0);
-  choice_fft->SetSelection(1);
-  choice_fftlength->SetSelection(4);
-  choice_fftrx->SetSelection(2);
+  choice_fft->SetSelection(0);
+  //  choice_fftlength->SetSelection(4);
+  choice_fftlength->SetSelection(0);
+  choice_fftrx->SetSelection(1);
   choice_fftavg->SetSelection(0);
   choice_spe_ref->SetSelection(0);
   choice_spe_dbdiv->SetSelection(2);
@@ -554,9 +555,9 @@ void MainFrame::set_custom_props() {
   SetIcon(wxICON(audmes));
 #endif
 
-  m_PlayDev = 0;
-  m_RecordDev = 0;
-  m_SamplingFreq = 44100;
+  m_PlayDev = 1;
+  m_RecordDev = 6;
+  m_SamplingFreq = 48000;
 
   choice_osc_l_res->SetSelection(0);
   choice_osc_r_res->SetSelection(0);

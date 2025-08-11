@@ -37,7 +37,9 @@
 #include <cmath>
 #include <vector>
 
-CtrlOScope::CtrlOScope(wxWindow* parent, wxString xname, wxString yname)
+/////////////////////////////////////////////////////////////////////////////
+// CtrlOScope
+CtrlOScope::CtrlOScope(wxWindow* parent, wxString xname, wxString yname, int histogram)
     : wxControl(parent, -1, wxDefaultPosition, wxSize(300, 200)) {
   m_bgColor.Set(0, 0, 0);
   m_plColor.Set(0, 128, 0);
@@ -63,6 +65,8 @@ CtrlOScope::CtrlOScope(wxWindow* parent, wxString xname, wxString yname)
   m_UserText = wxT("");
   m_UserTextPosX = 0;
   m_UserTextPosY = 0;
+
+  m_Histogram = histogram;
 
   Bind(wxEVT_SIZE, &CtrlOScope::OnSize, this);
   Bind(wxEVT_PAINT, &CtrlOScope::OnPaint, this);
@@ -311,11 +315,16 @@ void CtrlOScope::PaintTrack(wxDC& dc, size_t from, size_t to, double xstep, cons
     double ypoint =
         rec.height - bdist -
         (rec.height - bdist - tdist) * (ydatapoint - m_MinYValue) / (m_MaxYValue - m_MinYValue);
-    wxPoint pt = {xpos, (int)ypoint};
-    pv.push_back(pt);
-  }
-  if (pv.size() > 1) dc.DrawLines(pv.size(), &pv[0]);
 
+    if (m_Histogram) {
+      xpos -= color == m_tr2Color;
+      dc.DrawLine((int)(xpos), rec.height - bdist, (int)(xpos), (int)(ypoint));
+    } else {
+      wxPoint pt = {xpos, (int)ypoint};
+      pv.push_back(pt);
+    }
+    if (pv.size() > 1) dc.DrawLines(pv.size(), &pv[0]);
+  }
   if (wxT("") != m_UserText) {
     dc.SetTextForeground(m_whColor);
     dc.DrawText(m_UserText, m_UserTextPosX, m_UserTextPosY);
