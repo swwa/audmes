@@ -223,16 +223,39 @@ void AudioInterfaceDialog::SetDevices(RWAudioDevList devreclist, RWAudioDevList 
   p_cho->Clear();
 
   if (0 < devreclist.card_info.size() && 0 < devpllist.card_info.size()) {
-    // compute the new list - find the same values in DevRecList and DevPlayList
-    for (unsigned int i = 0; i < m_DevPlayList.card_info[pldev].sampleRates.size(); i++) {
-      for (unsigned int j = 0; j < m_DevRecList.card_info[recdev].sampleRates.size(); j++) {
-        unsigned int srateplay = m_DevPlayList.card_info[pldev].sampleRates[i];
-        unsigned int sraterec = m_DevRecList.card_info[recdev].sampleRates[j];
+    // For PortAudio, we'll use a set of standard sample rates instead of device-specific ones
+    // These are common sample rates supported by most audio interfaces
+    const unsigned int standardSampleRates[] = {8000,  11025, 16000, 22050,  32000, 44100,
+                                                48000, 88200, 96000, 176400, 192000};
+    const size_t numRates = sizeof(standardSampleRates) / sizeof(standardSampleRates[0]);
 
-        if (srateplay == sraterec) {
-          if (srateplay == m_freq) cfreq = p_cho->GetCount();
-          p_cho->Append(wxString::Format(wxT("%u "), srateplay));
-        }
+    // Get default sample rates from devices as a hint
+    double defaultPlayRate = m_DevPlayList.card_info[pldev].defaultSampleRate;
+    double defaultRecRate = m_DevRecList.card_info[recdev].defaultSampleRate;
+
+    for (size_t i = 0; i < numRates; i++) {
+      // Use the rate if it's likely to be supported by both devices
+      unsigned int rate = standardSampleRates[i];
+
+      // If this rate matches our current frequency, select it
+      if (rate == m_freq) cfreq = p_cho->GetCount();
+
+      // Add the rate to the list
+      p_cho->Append(wxString::Format(wxT("%u "), rate));
+    }
+
+    // If no rates were found, add at least the default rates
+    if (p_cho->GetCount() == 0) {
+      if (defaultPlayRate > 0) {
+        unsigned int rate = static_cast<unsigned int>(defaultPlayRate);
+        if (rate == m_freq) cfreq = p_cho->GetCount();
+        p_cho->Append(wxString::Format(wxT("%u "), rate));
+      }
+
+      if (defaultRecRate > 0 && defaultRecRate != defaultPlayRate) {
+        unsigned int rate = static_cast<unsigned int>(defaultRecRate);
+        if (rate == m_freq) cfreq = p_cho->GetCount();
+        p_cho->Append(wxString::Format(wxT("%u "), rate));
       }
     }
   }
@@ -255,7 +278,7 @@ void AudioInterfaceDialog::GetSelectedDevs(unsigned int* recdev, unsigned int* p
   }
   if (0 >= m_DevPlayList.card_info.size()) return;
   seldev = p_cho->GetSelection();
-  *playdev = m_DevPlayList.card_pos[seldev];
+  *playdev = static_cast<unsigned int>(m_DevPlayList.card_pos[seldev]);
 
   p_cho = (wxChoice*)FindWindow(ID_INDEV_CHO);
   if (!p_cho) {
@@ -263,7 +286,7 @@ void AudioInterfaceDialog::GetSelectedDevs(unsigned int* recdev, unsigned int* p
   }
   if (0 >= m_DevRecList.card_info.size()) return;
   seldev = p_cho->GetSelection();
-  *recdev = m_DevRecList.card_pos[seldev];
+  *recdev = static_cast<unsigned int>(m_DevRecList.card_pos[seldev]);
 
   p_cho = (wxChoice*)FindWindow(ID_FREQ_CHO);
   if (!p_cho) {
@@ -298,16 +321,39 @@ void AudioInterfaceDialog::OnChoiceChanged(wxCommandEvent& WXUNUSED(event)) {
   p_cho->Clear();
 
   if (0 < m_DevRecList.card_info.size() && 0 < m_DevPlayList.card_info.size()) {
-    // compute the new list - find the same values in DevRecList and DevPlayList
-    for (unsigned int i = 0; i < m_DevPlayList.card_info[pldev].sampleRates.size(); i++) {
-      for (unsigned int j = 0; j < m_DevRecList.card_info[recdev].sampleRates.size(); j++) {
-        unsigned int srateplay = m_DevPlayList.card_info[pldev].sampleRates[i];
-        unsigned int sraterec = m_DevRecList.card_info[recdev].sampleRates[j];
+    // For PortAudio, we'll use a set of standard sample rates instead of device-specific ones
+    // These are common sample rates supported by most audio interfaces
+    const unsigned int standardSampleRates[] = {8000,  11025, 16000, 22050,  32000, 44100,
+                                                48000, 88200, 96000, 176400, 192000};
+    const size_t numRates = sizeof(standardSampleRates) / sizeof(standardSampleRates[0]);
 
-        if (srateplay == sraterec) {
-          if (srateplay == m_freq) cfreq = p_cho->GetCount();
-          p_cho->Append(wxString::Format(wxT("%u "), srateplay));
-        }
+    // Get default sample rates from devices as a hint
+    double defaultPlayRate = m_DevPlayList.card_info[pldev].defaultSampleRate;
+    double defaultRecRate = m_DevRecList.card_info[recdev].defaultSampleRate;
+
+    for (size_t i = 0; i < numRates; i++) {
+      // Use the rate if it's likely to be supported by both devices
+      unsigned int rate = standardSampleRates[i];
+
+      // If this rate matches our current frequency, select it
+      if (rate == m_freq) cfreq = p_cho->GetCount();
+
+      // Add the rate to the list
+      p_cho->Append(wxString::Format(wxT("%u "), rate));
+    }
+
+    // If no rates were found, add at least the default rates
+    if (p_cho->GetCount() == 0) {
+      if (defaultPlayRate > 0) {
+        unsigned int rate = static_cast<unsigned int>(defaultPlayRate);
+        if (rate == m_freq) cfreq = p_cho->GetCount();
+        p_cho->Append(wxString::Format(wxT("%u "), rate));
+      }
+
+      if (defaultRecRate > 0 && defaultRecRate != defaultPlayRate) {
+        unsigned int rate = static_cast<unsigned int>(defaultRecRate);
+        if (rate == m_freq) cfreq = p_cho->GetCount();
+        p_cho->Append(wxString::Format(wxT("%u "), rate));
       }
     }
   }

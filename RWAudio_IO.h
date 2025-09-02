@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////
-// RWAudio_IO - interface class between AudMeS and RtAudio
+// RWAudio_IO - interface class between AudMeS and PortAudio
 //            - multi-platform
 //////////////////////////////////////////////////////////////////////
 /*
@@ -24,11 +24,22 @@
 #ifndef RWAUDIO_IO_H
 #define RWAUDIO_IO_H
 
-#include <rtaudio/RtAudio.h>
+#include <portaudio.h>
+#include <vector>
+#include <string>
+
+struct RWAudioDeviceInfo {
+  std::string name;
+  int maxInputChannels;
+  int maxOutputChannels;
+  double defaultSampleRate;
+  bool isDefaultInput;
+  bool isDefaultOutput;
+};
 
 struct RWAudioDevList {
-  std::vector<RtAudio::DeviceInfo> card_info;
-  std::vector<unsigned int> card_pos;
+  std::vector<RWAudioDeviceInfo> card_info;
+  std::vector<int> card_pos;
 };
 
 class RWAudio {
@@ -40,7 +51,7 @@ class RWAudio {
   int StartSnd();
   int StopSnd();
 
-  void SetSndDevices(unsigned int irec, unsigned int iplay, unsigned int srate);
+  void SetSndDevices(int irec, int iplay, unsigned int srate);
 
   void ChangeBufLen(long int oscbuflen, long int spebuflen) {
     m_OscBufferLen = oscbuflen;
@@ -74,7 +85,9 @@ class RWAudio {
   bool m_Buflen_Changed;
 
  protected:
-  RtAudio* m_AudioDriver;
+  PaStream* m_InputStream;
+  PaStream* m_OutputStream;
+  bool m_StreamActive;
 
  private:
   int stream_running;

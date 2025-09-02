@@ -20,8 +20,6 @@ set(CPP_SOURCES
 
 set(AM_SOURCES
 	${CPP_SOURCES}
-	rtaudio/RtAudio.cpp
-	rtaudio/RtAudio.h
 	fourier.c
 	fourier.h
 	)
@@ -59,6 +57,13 @@ find_package(wxWidgets REQUIRED core base)
 include("${wxWidgets_USE_FILE}")
 message("wxWidgets lib settings: ${wxWidgets_LIBRARIES}")
 
+# Add the cmake directory to the module path
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+find_package(PortAudio REQUIRED)
+include_directories(${PORTAUDIO_INCLUDE_DIRS})
+message("PortAudio include dirs: ${PORTAUDIO_INCLUDE_DIRS}")
+message("PortAudio libraries: ${PORTAUDIO_LIBRARIES}")
+
 find_path(FCCP
 	libfccp/csv.h
 	HINTS .
@@ -71,16 +76,15 @@ message("libfccp found ${FCCP}")
 add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${AM_SOURCES})
 
 if (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Linux")
-	add_definitions(-D__LINUX_ALSA__ -D__LINUX_PULSE__ -D__LINUX__ -DHAVE_GETTIMEOFDAY)
-	target_link_libraries(${PROJECT_NAME} ${wxWidgets_LIBRARIES} asound pulse pulse-simple)
+	add_definitions(-D__LINUX__ -DHAVE_GETTIMEOFDAY)
+	target_link_libraries(${PROJECT_NAME} ${wxWidgets_LIBRARIES} ${PORTAUDIO_LIBRARIES})
 	target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra)
 endif()
 
 if (${APPLE})
-	add_definitions(-D__MACOSX_CORE__ -DHAVE_GETTIMEOFDAY)
-	find_library(COREAUDIO_LIB CoreAudio)
+	add_definitions(-DHAVE_GETTIMEOFDAY)
 	find_library(COREFOUNDATION_LIB CoreFoundation)
-	target_link_libraries(${PROJECT_NAME} ${wxWidgets_LIBRARIES} ${COREAUDIO_LIB} ${COREFOUNDATION_LIB})
+	target_link_libraries(${PROJECT_NAME} ${wxWidgets_LIBRARIES} ${PORTAUDIO_LIBRARIES} ${COREFOUNDATION_LIB})
 	set_source_files_properties(${audmes_icon} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 	set(CMAKE_OSX_DEPLOYMENT_TARGET 15)
 	# Create app Bundle but skip signing
@@ -92,9 +96,9 @@ if (${APPLE})
 endif()
 
 if (MSVC)
-	add_definitions(-D__WINDOWS_WASAPI__ -D__WINDOWS_DS__)
+	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 	set(wxWidgets_EXCLUDE_COMMON_LIBRARIES TRUE)
-	target_link_libraries(${PROJECT_NAME} ${wxWidgets_LIBRARIES} dsound ksuser mfplat mfuuid wmcodecdspuuid winmm ole32)
+	target_link_libraries(${PROJECT_NAME} ${wxWidgets_LIBRARIES} ${PORTAUDIO_LIBRARIES} winmm ole32)
 	if (EXISTS "${CMAKE_BINARY_DIR}/Release")
 		add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 		COMMAND ${CMAKE_COMMAND} -E copy "${wxWidgets_LIB_DIR}/wxbase30u_vc142_x64.dll" "Release"
@@ -108,11 +112,12 @@ if (MSVC)
 endif()
 
 if (MINGW)
-	add_definitions(-D__WINDOWS_WASAPI__ -D__WINDOWS_DS__)
+	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 	target_link_libraries(
 		${PROJECT_NAME}
 		${wxWidgets_LIBRARIES}
-		dsound ksuser mfplat mfuuid wmcodecdspuuid winmm ole32
+		${PORTAUDIO_LIBRARIES}
+		winmm ole32
 		)
 endif()
 

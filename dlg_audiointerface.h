@@ -71,8 +71,8 @@
  */
 
 struct AIStreamSettings {
-  unsigned int playDev;
-  unsigned int recordDev;
+  int playDev;
+  int recordDev;
   unsigned int freq;
 };
 
