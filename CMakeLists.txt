@@ -82,6 +82,7 @@ if (${APPLE})
 	find_library(COREFOUNDATION_LIB CoreFoundation)
 	target_link_libraries(${PROJECT_NAME} ${wxWidgets_LIBRARIES} ${COREAUDIO_LIB} ${COREFOUNDATION_LIB})
 	set_source_files_properties(${audmes_icon} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+	set(CMAKE_OSX_DEPLOYMENT_TARGET 15)
 	# Create app Bundle but skip signing
 	set_target_properties(${PROJECT_NAME} PROPERTIES
 		MACOSX_BUNDLE TRUE
