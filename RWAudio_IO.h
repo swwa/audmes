@@ -24,10 +24,20 @@
 #ifndef RWAUDIO_IO_H
 #define RWAUDIO_IO_H
 
-#include <rtaudio/RtAudio.h>
+#include <string>
+#include <vector>
+
+struct DeviceInfo {
+  std::string name;               /*!< Character string device identifier. */
+  unsigned int outputChannels{};  /*!< Maximum output channels supported by device. */
+  unsigned int inputChannels{};   /*!< Maximum input channels supported by device. */
+  unsigned int duplexChannels{};  /*!< Maximum simultaneous input/output channels supported by device. */
+  std::vector<unsigned int> sampleRates; /*!< Supported sample rates (queried from list of standard rates). */
+  unsigned int preferredSampleRate{}; /*!< Preferred sample rate, e.g. for WASAPI the system sample rate. */
+};
 
 struct RWAudioDevList {
-  std::vector<RtAudio::DeviceInfo> card_info;
+  std::vector<DeviceInfo> card_info;
   std::vector<unsigned int> card_pos;
 };
 
@@ -72,9 +82,6 @@ class RWAudio {
   long int m_OscBufferLen;
   long int m_SpeBufferLen;
   bool m_Buflen_Changed;
-
- protected:
-  RtAudio* m_AudioDriver;
 
  private:
   int stream_running;

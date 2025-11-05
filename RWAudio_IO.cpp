@@ -30,6 +30,8 @@
 #include <atomic>
 #include <map>
 
+#include <rtaudio/RtAudio.h>
+
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -47,6 +49,7 @@ extern std::atomic<bool> g_OscBufferChanged;
 extern std::atomic<bool> g_SpeBufferChanged;
 
 static double ph_wobble = 0.0;
+static RtAudio* m_AudioDriver;
 
 /*
  * pseudo noise generator - linear feedback shift register
@@ -408,13 +411,27 @@ int RWAudio::GetRWAudioDevices(RWAudioDevList *play, RWAudioDevList *record) {
 
       // add play card
       if ((info.outputChannels > 0) || (info.duplexChannels > 0)) {
-        play->card_info.push_back(info);
+        DeviceInfo card;
+        card.name = info.name;
+        card.duplexChannels = info.duplexChannels;
+        card.inputChannels = info.inputChannels;
+        card.outputChannels = info.outputChannels;
+        card.preferredSampleRate = info.preferredSampleRate;
+        card.sampleRates = info.sampleRates;
+        play->card_info.push_back(card);
         play->card_pos.push_back(i);
       }
 
       // add record card
       if ((info.inputChannels > 0) || (info.duplexChannels > 0)) {
-        record->card_info.push_back(info);
+        DeviceInfo card;
+        card.name = info.name;
+        card.duplexChannels = info.duplexChannels;
+        card.inputChannels = info.inputChannels;
+        card.outputChannels = info.outputChannels;
+        card.preferredSampleRate = info.preferredSampleRate;
+        card.sampleRates = info.sampleRates;
+        record->card_info.push_back(card);
         record->card_pos.push_back(i);
       }
     }
