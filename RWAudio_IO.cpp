@@ -351,7 +351,7 @@ int RWAudio::StartAudio(int recDevId, int playDevId) {
   RtAudio::StreamParameters iParams;
   RtAudio::StreamParameters oParams;
   RtAudio::StreamOptions rtAOptions;
-  unsigned int bufferFrames = 512;
+  unsigned int bufferFrames = 2048;
 
   iParams.deviceId = recDevId;
   oParams.deviceId = playDevId;
