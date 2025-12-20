@@ -26,14 +26,18 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 struct DeviceInfo {
-  std::string name;               /*!< Character string device identifier. */
-  unsigned int outputChannels{};  /*!< Maximum output channels supported by device. */
-  unsigned int inputChannels{};   /*!< Maximum input channels supported by device. */
-  unsigned int duplexChannels{};  /*!< Maximum simultaneous input/output channels supported by device. */
-  std::vector<unsigned int> sampleRates; /*!< Supported sample rates (queried from list of standard rates). */
-  unsigned int preferredSampleRate{}; /*!< Preferred sample rate, e.g. for WASAPI the system sample rate. */
+  std::string name;              /*!< Character string device identifier. */
+  unsigned int outputChannels{}; /*!< Maximum output channels supported by device. */
+  unsigned int inputChannels{};  /*!< Maximum input channels supported by device. */
+  unsigned int
+      duplexChannels{}; /*!< Maximum simultaneous input/output channels supported by device. */
+  std::vector<unsigned int>
+      sampleRates; /*!< Supported sample rates (queried from list of standard rates). */
+  unsigned int
+      preferredSampleRate{}; /*!< Preferred sample rate, e.g. for WASAPI the system sample rate. */
 };
 
 struct RWAudioDevList {
@@ -84,6 +88,8 @@ class RWAudio {
   bool m_Buflen_Changed;
 
  private:
+  class Impl;  // Forward declaration
+  std::unique_ptr<Impl> pImpl;
   int stream_running;
   unsigned int cardrec, cardplay;
   int StartAudio(int recDevId, int playDevId);

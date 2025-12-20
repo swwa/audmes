@@ -49,7 +49,10 @@ extern std::atomic<bool> g_OscBufferChanged;
 extern std::atomic<bool> g_SpeBufferChanged;
 
 static double ph_wobble = 0.0;
-static RtAudio* m_AudioDriver;
+class RWAudio::Impl {
+ public:
+  RtAudio *m_AudioDriver;
+};
 
 /*
  * pseudo noise generator - linear feedback shift register
@@ -240,21 +243,21 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
     if (aRWAudioClass->m_channels_out > 1) *outBuf++ = (float)(aRWAudioClass->m_genGain_r * y2);
 
 #ifdef _DEBUG
-      // fprintf(ddbg,"%04X %04X ",(float)(32768.f * y), (float)(32768.f * y2));
+    // fprintf(ddbg,"%04X %04X ",(float)(32768.f * y), (float)(32768.f * y2));
 #endif
   }
   return 0;
 }
 
-RWAudio::RWAudio() {
+RWAudio::RWAudio() : pImpl(new Impl()) {
   m_Buflen_Changed = false;
   m_sampleRate = 0;
   stream_running = 0;
 }
 
 RWAudio::~RWAudio() {
-  m_AudioDriver->stopStream();
-  m_AudioDriver->closeStream();
+  pImpl->m_AudioDriver->stopStream();
+  pImpl->m_AudioDriver->closeStream();
 }
 
 // Initialize RtAudio and start audio stream
@@ -301,17 +304,17 @@ int RWAudio::InitSnd(long int oscbuflen, long int spebuflen, std::string &rtinfo
   rtinfo = rtinfo + RtAudio::getVersion() + "\nCompiled APIs:\n";
   for (unsigned int i = 0; i < apis.size(); i++) rtinfo = rtinfo + "  " + apiMap[apis[i]] + "\n";
 
-  m_AudioDriver = new RtAudio();
-  rtinfo = rtinfo + "Current API: " + apiMap[m_AudioDriver->getCurrentApi()] + "\n";
+  pImpl->m_AudioDriver = new RtAudio();
+  rtinfo = rtinfo + "Current API: " + apiMap[pImpl->m_AudioDriver->getCurrentApi()] + "\n";
 
-  devices = m_AudioDriver->getDeviceCount();
+  devices = pImpl->m_AudioDriver->getDeviceCount();
   if (devices < 1) return 1;
 
   for (unsigned int i = 0; i < devices; i++) {
-    info = m_AudioDriver->getDeviceInfo(i);
+    info = pImpl->m_AudioDriver->getDeviceInfo(i);
   }
-  cardrec = m_AudioDriver->getDefaultInputDevice();
-  cardplay = m_AudioDriver->getDefaultOutputDevice();
+  cardrec = pImpl->m_AudioDriver->getDefaultInputDevice();
+  cardplay = pImpl->m_AudioDriver->getDefaultOutputDevice();
   return 0;
 }
 
@@ -327,24 +330,24 @@ int RWAudio::StopSnd() {
   if (stream_running > 0) {
     stream_running--;
     if (stream_running == 0) {
-      m_AudioDriver->stopStream();
-      m_AudioDriver->closeStream();
+      pImpl->m_AudioDriver->stopStream();
+      pImpl->m_AudioDriver->closeStream();
     }
   }
   return 0;
 }
 
 int RWAudio::StartAudio(int recDevId, int playDevId) {
-  if (m_AudioDriver->isStreamOpen()) {
+  if (pImpl->m_AudioDriver->isStreamOpen()) {
     return 0;
   }
   // adapt to number of channels
-  RtAudio::DeviceInfo info = m_AudioDriver->getDeviceInfo(recDevId);
+  RtAudio::DeviceInfo info = pImpl->m_AudioDriver->getDeviceInfo(recDevId);
   if (info.inputChannels > 1 || info.duplexChannels > 1)
     m_channels_in = 2;
   else
     m_channels_in = 1;
-  info = m_AudioDriver->getDeviceInfo(playDevId);
+  info = pImpl->m_AudioDriver->getDeviceInfo(playDevId);
   if (info.outputChannels > 1 || info.duplexChannels > 1)
     m_channels_out = 2;
   else
@@ -366,15 +369,15 @@ int RWAudio::StartAudio(int recDevId, int playDevId) {
   rtAOptions.flags = 0;
 
   try {
-    m_AudioDriver->openStream(&oParams, &iParams, RTAUDIO_FLOAT32, m_sampleRate, &bufferFrames,
-                              &inout, (void *)this, &rtAOptions, &catcherr);
+    pImpl->m_AudioDriver->openStream(&oParams, &iParams, RTAUDIO_FLOAT32, m_sampleRate,
+                                     &bufferFrames, &inout, (void *)this, &rtAOptions, &catcherr);
   } catch (RtAudioError &e) {
     // std::cerr << '\n' << e.getMessage() << '\n' << std::endl;
     return 1;
   }
 
   try {
-    m_AudioDriver->startStream();
+    pImpl->m_AudioDriver->startStream();
   } catch (RtAudioError &e) {
     // std::cerr << '\n' << e.getMessage() << '\n' << std::endl;
     return 1;
@@ -388,14 +391,14 @@ int RWAudio::StartAudio(int recDevId, int playDevId) {
 /********************************************************************/
 int RWAudio::GetRWAudioDevices(RWAudioDevList *play, RWAudioDevList *record) {
   // Determine the number of devices available
-  unsigned int devices = m_AudioDriver->getDeviceCount();
+  unsigned int devices = pImpl->m_AudioDriver->getDeviceCount();
 
   // Scan through devices for various capabilities
   RtAudio::DeviceInfo info;
   // if stream is open (and running), stop it
-  if (m_AudioDriver->isStreamOpen()) {
-    m_AudioDriver->stopStream();
-    m_AudioDriver->closeStream();
+  if (pImpl->m_AudioDriver->isStreamOpen()) {
+    pImpl->m_AudioDriver->stopStream();
+    pImpl->m_AudioDriver->closeStream();
   }
 
   play->card_info.clear();
@@ -404,7 +407,7 @@ int RWAudio::GetRWAudioDevices(RWAudioDevList *play, RWAudioDevList *record) {
   record->card_pos.clear();
 
   for (unsigned int i = 0; i < devices; i++) {
-    info = m_AudioDriver->getDeviceInfo(i);
+    info = pImpl->m_AudioDriver->getDeviceInfo(i);
 
     if (info.probed == true) {
       //      std::cout << "device = " << i << "; name: " << info.name << "\n";
