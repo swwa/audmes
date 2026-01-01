@@ -50,7 +50,7 @@ class RWAudio {
 
   int GetRWAudioDevices(RWAudioDevList* play, RWAudioDevList* record);
 
-  /* parameter settings */
+  /* generator */
   enum Waveform { SINE, RECT, SAW, TRI, NOISE, WOBBLE };
   int PlaySetGenerator(float, float, Waveform, Waveform, float, float);
 
@@ -59,7 +59,6 @@ class RWAudio {
     m_genPhase_r = m_genPhase_l;
   };
 
-  /* generator */
   float m_genFR_l, m_genFR_r;
   Waveform m_genShape_l, m_genShape_r;
   float m_genGain_l, m_genGain_r;
