@@ -69,7 +69,7 @@ wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_MENU(ID_SAVE_SPE, MainFrame::OnSaveSPE)
   EVT_MENU(ID_SAVE_OSC, MainFrame::OnSaveOSC)
   EVT_BUTTON(ID_AUTOCAL, MainFrame::OnAutoCalClick)
-  EVT_TOGGLEBUTTON(ID_SINC, MainFrame::OnAutoSincClick)
+  EVT_TOGGLEBUTTON(ID_SINC, MainFrame::OnSincClick)
   EVT_CHOICE(ID_OSCXSCALE, MainFrame::OnOscXScaleChanged)
   EVT_CHOICE(ID_FFTLENGTH, MainFrame::OnOscXScaleChanged)
   EVT_CHOICE(ID_FFTAVG, MainFrame::OnFFTAvgChanged)
@@ -750,12 +750,13 @@ void MainFrame::OnAutoCalClick(wxCommandEvent& WXUNUSED(event)) {
   }
 }
 
-void MainFrame::OnAutoSincClick(wxCommandEvent& WXUNUSED(event)) {
+void MainFrame::OnSincClick(wxCommandEvent& WXUNUSED(event)) {
   if (button_sinc->GetValue()) {
     window_osc->SetInterp(CtrlOScope::Interpolation::SINC);
   } else {
     window_osc->SetInterp(CtrlOScope::Interpolation::LINE);
   }
+  Refresh();
 }
 
 static const int frm_low = 20;

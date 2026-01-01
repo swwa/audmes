@@ -81,7 +81,7 @@ class MainFrame : public wxFrame {
   void OnSaveSPE(wxCommandEvent& event);
   void OnSaveOSC(wxCommandEvent& event);
   void OnAutoCalClick(wxCommandEvent& event);
-  void OnAutoSincClick(wxCommandEvent& event);
+  void OnSincClick(wxCommandEvent& event);
   void OnOscXScaleChanged(wxCommandEvent& event);
   void OnFFTAvgChanged(wxCommandEvent& event);
   void OnFFTScaleChanged(wxCommandEvent& event);
