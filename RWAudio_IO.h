@@ -42,11 +42,9 @@ class RWAudio {
 
   void SetSndDevices(unsigned int irec, unsigned int iplay, unsigned int srate);
 
-  void ChangeBufLen(long int oscbuflen, long int spebuflen) {
-    m_OscBufferLen = oscbuflen;
-    m_SpeBufferLen = spebuflen;
-    m_Buflen_Changed = true;
-  };
+  void ChangeBufLen(long int oscbuflen, long int spebuflen);
+
+  void SetTrigger(int channel, int edge, double level, double hyst, int pre);
 
   int GetRWAudioDevices(RWAudioDevList* play, RWAudioDevList* record);
 
@@ -71,7 +69,13 @@ class RWAudio {
 
   long int m_OscBufferLen;
   long int m_SpeBufferLen;
-  bool m_Buflen_Changed;
+
+  int m_channel;
+  bool m_triggered;
+  double m_edge;
+  double m_level;
+  double m_hyst;
+  double m_pre;
 
  protected:
   RtAudio* m_AudioDriver;

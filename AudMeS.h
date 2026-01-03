@@ -180,6 +180,11 @@ class MainFrame : public wxFrame {
   int frm_measure;
   double sweep_div;
 
+  int trigger_channel;
+  int trigger_edge;
+  double trigger_level;
+  int trigger_pre;
+
   wxArrayDouble osc_times;
   wxArrayDouble osc_lmagns;
   wxArrayDouble osc_rmagns;

@@ -47,6 +47,7 @@ extern std::atomic<bool> g_OscBufferChanged;
 extern std::atomic<bool> g_SpeBufferChanged;
 
 static double ph_wobble = 0.0;
+const int nrframes = 2048;
 
 /*
  * pseudo noise generator - linear feedback shift register
@@ -75,31 +76,71 @@ void catcherr(RtAudioError::Type WXUNUSED(type), const std::string &errorText) {
 int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
           double WXUNUSED(streamTime), RtAudioStreamStatus status, void *data) {
   RWAudio *aRWAudioClass = (RWAudio *)data;
-  unsigned i;
+  unsigned int i;
+  float *inBuf;
 
   if (status) std::cerr << "Audio stream over/underflow detected." << std::endl;
 
-  // copy input buffer into two L/R channels
-  if (aRWAudioClass->m_Buflen_Changed) {
-    aRWAudioClass->m_Buflen_Changed = false;
-    free(g_OscBuffer_Left);
-    free(g_OscBuffer_Right);
-    free(g_SpeBuffer_Left);
-    free(g_SpeBuffer_Right);
-    g_OscBufferPosition = 0;
-    g_SpeBufferPosition = 0;
-    g_OscBuffer_Left = (float *)malloc(aRWAudioClass->m_OscBufferLen * sizeof(float));
-    g_OscBuffer_Right = (float *)malloc(aRWAudioClass->m_OscBufferLen * sizeof(float));
-    g_SpeBuffer_Left = (float *)malloc(aRWAudioClass->m_SpeBufferLen * sizeof(float));
-    g_SpeBuffer_Right = (float *)malloc(aRWAudioClass->m_SpeBufferLen * sizeof(float));
-  }
-
-  float *inBuf = (float *)inputBuffer;
-
   // make a copy for oscilloscope
+  inBuf = (float *)inputBuffer;
+
   if (!g_OscBufferChanged.load()) {
-    for (i = 0; i < nBufferFrames; i++) {
-      // copy audio signal to fft real component.
+    // trigger
+    i = 0;
+    if (!aRWAudioClass->m_triggered) {
+      switch (aRWAudioClass->m_channel) {
+        case 1:
+          // left channel - look for the value under hysteresis point and then over level
+          while (i < nBufferFrames) {
+            if ((aRWAudioClass->m_level - aRWAudioClass->m_hyst) >
+                (aRWAudioClass->m_edge * (*inBuf++))) {
+              inBuf--;
+              break;
+            }
+            if (aRWAudioClass->m_channels_in > 1) inBuf++;
+            i++;
+          }
+          while (i < nBufferFrames) {
+            if (aRWAudioClass->m_level < (aRWAudioClass->m_edge * (*inBuf++))) {
+              aRWAudioClass->m_triggered = true;
+              inBuf--;
+              break;
+            }
+            if (aRWAudioClass->m_channels_in > 1) inBuf++;
+            i++;
+          }
+          break;
+        case 2:
+          // right channel
+          while (i < nBufferFrames) {
+            inBuf++;
+            if ((aRWAudioClass->m_level - aRWAudioClass->m_hyst) >
+                (aRWAudioClass->m_edge * *inBuf++)) {
+              inBuf--;
+              inBuf--;
+              break;
+            }
+            i++;
+          }
+          while (i < nBufferFrames) {
+            inBuf++;
+            if (aRWAudioClass->m_level < (aRWAudioClass->m_edge * *inBuf++)) {
+              aRWAudioClass->m_triggered = true;
+              inBuf--;
+              inBuf--;
+              break;
+            }
+            i++;
+          }
+          break;
+        default:
+          // no trigger
+          aRWAudioClass->m_triggered = false;
+          break;
+      }
+    }
+
+    while (i < nBufferFrames && !g_OscBufferChanged.load()) {
       g_OscBuffer_Left[g_OscBufferPosition] = *inBuf++;
       if (aRWAudioClass->m_channels_in > 1)
         g_OscBuffer_Right[g_OscBufferPosition] = *inBuf++;
@@ -107,20 +148,20 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
         g_OscBuffer_Right[g_OscBufferPosition] = 0;
 
       g_OscBufferPosition++;
-      // if the buffer is over we have to pick the data and then circullary fill the next one
+      i++;
       if (g_OscBufferPosition == aRWAudioClass->m_OscBufferLen) {
         g_OscBufferPosition = 0;
+        aRWAudioClass->m_triggered = false;
         g_OscBufferChanged.store(true);
         break;
       }
     }
   }
 
-  inBuf = (float *)inputBuffer;
   // make a copy for spectrum analyzer
+  inBuf = (float *)inputBuffer;
   if (!g_SpeBufferChanged.load()) {
     for (i = 0; i < nBufferFrames; i++) {
-      // copy audio signal to fft real component.
       g_SpeBuffer_Left[g_SpeBufferPosition] = *inBuf++;
       if (aRWAudioClass->m_channels_in > 1)
         g_SpeBuffer_Right[g_SpeBufferPosition] = *inBuf++;
@@ -128,8 +169,7 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
         g_SpeBuffer_Right[g_SpeBufferPosition] = 0;
 
       g_SpeBufferPosition++;
-      // if the buffer is over we have to pick the data and then circullary fill the next one
-      if (g_SpeBufferPosition == aRWAudioClass->m_SpeBufferLen) {
+      if (g_SpeBufferPosition >= aRWAudioClass->m_SpeBufferLen) {
         g_SpeBufferPosition = 0;
         g_SpeBufferChanged.store(true);
         break;
@@ -237,16 +277,21 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
     if (aRWAudioClass->m_channels_out > 1) *outBuf++ = (float)(aRWAudioClass->m_genGain_r * y2);
 
 #ifdef _DEBUG
-      // fprintf(ddbg,"%04X %04X ",(float)(32768.f * y), (float)(32768.f * y2));
+    // fprintf(ddbg,"%04X %04X ",(float)(32768.f * y), (float)(32768.f * y2));
 #endif
   }
   return 0;
 }
 
 RWAudio::RWAudio() {
-  m_Buflen_Changed = false;
   m_sampleRate = 0;
   stream_running = 0;
+  m_channel = 0;
+  m_triggered = false;
+  m_edge = 1.0;
+  m_level = 0.0;
+  m_hyst = 0.1;
+  m_pre = 0.0;
 }
 
 RWAudio::~RWAudio() {
@@ -254,7 +299,9 @@ RWAudio::~RWAudio() {
   m_AudioDriver->closeStream();
 }
 
-// Initialize RtAudio and start audio stream
+/*
+ * Initialize RtAudio and buffers
+ */
 int RWAudio::InitSnd(long int oscbuflen, long int spebuflen, std::string &rtinfo,
                      unsigned int srate) {
   m_OscBufferLen = oscbuflen;
@@ -269,7 +316,8 @@ int RWAudio::InitSnd(long int oscbuflen, long int spebuflen, std::string &rtinfo
 
   g_OscBufferPosition = 0;
   g_SpeBufferPosition = 0;
-
+  g_OscBufferChanged.store(false);
+  g_SpeBufferChanged.store(false);
   g_OscBuffer_Left = (float *)malloc(m_OscBufferLen * sizeof(float));
   g_OscBuffer_Right = (float *)malloc(m_OscBufferLen * sizeof(float));
   g_SpeBuffer_Left = (float *)malloc(m_SpeBufferLen * sizeof(float));
@@ -312,7 +360,14 @@ int RWAudio::InitSnd(long int oscbuflen, long int spebuflen, std::string &rtinfo
   return 0;
 }
 
+/*
+ * Start audio stream if not already running
+ */
 int RWAudio::StartSnd() {
+  if (m_AudioDriver->isStreamOpen()) {
+    stream_running++;
+    return 0;
+  }
   if (StartAudio(cardrec, cardplay)) {
     return 2;
   }
@@ -320,6 +375,9 @@ int RWAudio::StartSnd() {
   return 0;
 }
 
+/*
+ * Stop audio stream when no client is left
+ */
 int RWAudio::StopSnd() {
   if (stream_running > 0) {
     stream_running--;
@@ -331,10 +389,10 @@ int RWAudio::StopSnd() {
   return 0;
 }
 
+/*
+ * Start audio stream
+ */
 int RWAudio::StartAudio(int recDevId, int playDevId) {
-  if (m_AudioDriver->isStreamOpen()) {
-    return 0;
-  }
   // adapt to number of channels
   RtAudio::DeviceInfo info = m_AudioDriver->getDeviceInfo(recDevId);
   if (info.inputChannels > 1 || info.duplexChannels > 1)
@@ -351,7 +409,7 @@ int RWAudio::StartAudio(int recDevId, int playDevId) {
   RtAudio::StreamParameters iParams;
   RtAudio::StreamParameters oParams;
   RtAudio::StreamOptions rtAOptions;
-  unsigned int bufferFrames = 512;
+  unsigned int bufferFrames = nrframes;
 
   iParams.deviceId = recDevId;
   oParams.deviceId = playDevId;
@@ -380,9 +438,40 @@ int RWAudio::StartAudio(int recDevId, int playDevId) {
   return 0;
 }
 
-/********************************************************************/
-/*************      Devices enumeration           *******************/
-/********************************************************************/
+/*
+ * Change buffers
+ */
+void RWAudio::ChangeBufLen(long int oscbuflen, long int spebuflen) {
+  free(g_OscBuffer_Left);
+  free(g_OscBuffer_Right);
+  free(g_SpeBuffer_Left);
+  free(g_SpeBuffer_Right);
+  m_OscBufferLen = oscbuflen;
+  m_SpeBufferLen = spebuflen;
+  g_OscBufferPosition = 0;
+  g_SpeBufferPosition = 0;
+  g_OscBuffer_Left = (float *)malloc(m_OscBufferLen * sizeof(float));
+  g_OscBuffer_Right = (float *)malloc(m_OscBufferLen * sizeof(float));
+  g_SpeBuffer_Left = (float *)malloc(m_SpeBufferLen * sizeof(float));
+  g_SpeBuffer_Right = (float *)malloc(m_SpeBufferLen * sizeof(float));
+  g_OscBufferChanged = false;
+  g_SpeBufferChanged = false;
+};
+
+/*
+ * Set trigger parameters for oscilloscope
+ */
+void RWAudio::SetTrigger(int channel, int edge, double level, double hyst, int pre) {
+  m_channel = channel;
+  m_edge = edge;
+  m_level = level;
+  m_hyst = hyst;
+  m_pre = pre;
+};
+
+/*
+ * Devices enumeration
+ */
 int RWAudio::GetRWAudioDevices(RWAudioDevList *play, RWAudioDevList *record) {
   // Determine the number of devices available
   unsigned int devices = m_AudioDriver->getDeviceCount();
@@ -423,9 +512,9 @@ int RWAudio::GetRWAudioDevices(RWAudioDevList *play, RWAudioDevList *record) {
   return 0;
 }
 
-/********************************************************************/
-/*************      Parameter settings            *******************/
-/********************************************************************/
+/*
+ * Generator settings
+ */
 int RWAudio::PlaySetGenerator(float f1, float f2, Waveform s1, Waveform s2, float g1, float g2) {
   if (2 * f1 < m_sampleRate)
     m_genFR_l = f1;
@@ -453,6 +542,9 @@ int RWAudio::PlaySetGenerator(float f1, float f2, Waveform s1, Waveform s2, floa
   return 1;
 }
 
+/*
+ * Configure devices with desired settings
+ */
 void RWAudio::SetSndDevices(unsigned int irec, unsigned int iplay, unsigned int srate) {
   cardrec = irec;
   cardplay = iplay;
