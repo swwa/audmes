@@ -391,7 +391,7 @@ void MainFrame::do_layout() {
                  5);                              // Res[V/Div]
   sizer_14L->Add(5, 5, 1, 0, 0);                  // spacer
   sizer_14L->Add(choice_osc_l_res, 0, wxALL, 5);  // 2, 4, 8......32768
-  // sizer_12: StaticBox Left Channel (Red)
+  // sizer_12L: StaticBox Left Channel
   sizer_12L->Add(sizer_14L, 1, wxEXPAND, 0);
   sizer_15L->Add(label_osc_off_l, 0,
                  wxLEFT | wxRIGHT | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
@@ -412,7 +412,7 @@ void MainFrame::do_layout() {
                  5);                              // Res[V/div]
   sizer_14R->Add(5, 5, 1, 0, 0);                  // spacer
   sizer_14R->Add(choice_osc_r_res, 0, wxALL, 5);  // 2, 4, ... 32768
-  // sizer_12_copy: StaticBox Right Channel (Green)
+  // sizer_12R: StaticBox Right Channel
   sizer_12R->Add(sizer_14R, 1, wxEXPAND, 0);
   sizer_15R->Add(label_osc_off_r, 0,
                  wxLEFT | wxRIGHT | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
@@ -441,7 +441,7 @@ void MainFrame::do_layout() {
                  5);  // Rising, ... edge
   sizer_12H->Add(sizer_16R, 1, wxEXPAND, 0);
 
-  sizer_11->Add(sizer_12H, 1, wxEXPAND, 0);
+  sizer_11->Add(sizer_12H, 0, wxALL | wxEXPAND, 5);
   sizer_10->Add(sizer_11, 0, 0, 0);
   sizer_9->Add(sizer_10, 1, wxEXPAND, 0);
   sizer_9->Add(button_osc_start, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
@@ -450,7 +450,7 @@ void MainFrame::do_layout() {
   sizer_9->Fit(notebook_1_osc);
   sizer_9->SetSizeHints(notebook_1_osc);
 
-  // analyzer
+  // spectrum analyzer
   sizer_spe_10->Add(window_1_spe, 1, wxEXPAND, 0);
   wxSize window_1_spe_size = window_1_spe->GetSize();
   sizer_spe_10->SetMinSize(4 * window_1_spe_size.GetHeight(), window_1_spe_size.GetHeight());
