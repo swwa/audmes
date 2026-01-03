@@ -232,7 +232,7 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
   choice_fftlength = new wxChoice(notebook_1_spe, ID_FFTLENGTH, wxDefaultPosition, wxDefaultSize,
                                   10, choice_fftlength_choices, 0);
 
-  label_rx = new wxStaticText(notebook_1_spe, -1, wxT("Freq:"));
+  label_rx = new wxStaticText(notebook_1_spe, -1, wxT("Freq. Range: [Hz]"));
   const wxString choice_fftry_choices[] = {wxT("2-2000"), wxT("20-20k"), wxT("10-100k")};
   choice_fftrx = new wxChoice(notebook_1_spe, ID_FFTWINDOW, wxDefaultPosition, wxDefaultSize, 3,
                               choice_fftry_choices, 0);
@@ -288,7 +288,7 @@ void MainFrame::set_properties() {
   choice_osc_trig_edge->SetSelection(0);
   choice_fft->SetSelection(1);
   choice_fftlength->SetSelection(4);
-  choice_fftrx->SetSelection(2);
+  choice_fftrx->SetSelection(1);
   choice_fftavg->SetSelection(0);
   choice_spe_ref->SetSelection(0);
   choice_spe_dbdiv->SetSelection(2);
@@ -567,7 +567,7 @@ void MainFrame::set_custom_props() {
   window_osc->SetNumOfVerticals(10);
 
   /* analyzer */
-  window_1_spe->SetXRange(10, 100000, 1);
+  window_1_spe->SetXRange(20, 20000, 1);
   window_1_spe->SetYRange(-100, 0, 0);
 
   /* freq response */
