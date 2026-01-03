@@ -259,8 +259,6 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
   /* Frequency response */
   label_1_frm = new wxStaticText(notebook_1_frm, -1, wxT("Number of points (max 120):"));
   text_ctrl1_frm = new wxTextCtrl(notebook_1_frm, -1, wxT("24"));
-  label_2_frm = new wxStaticText(notebook_1_frm, -1, wxT("-"));
-  text_ctrl2_frm = new wxTextCtrl(notebook_1_frm, -1, wxT("-"));
   button_frm_start = new wxToggleButton(notebook_1_frm, ID_FRMSTART, wxT("Start"));
   window_1_frm = new CtrlOScope(notebook_1_frm, _T("Hz"), _T("dB"));
 
@@ -323,8 +321,8 @@ void MainFrame::do_layout() {
   wxBoxSizer* sizer_gen_sync2 = new wxBoxSizer(wxHORIZONTAL);
 
   wxBoxSizer* sizer_9_frm = new wxBoxSizer(wxVERTICAL);
-  wxBoxSizer* sizer_10_frm = new wxBoxSizer(wxVERTICAL);
-  wxBoxSizer* sizer_17_frm = new wxBoxSizer(wxHORIZONTAL);
+  wxBoxSizer* sizer_10_frm = new wxBoxSizer(wxHORIZONTAL);
+  wxBoxSizer* sizer_17_frm = new wxBoxSizer(wxVERTICAL);
 
   wxBoxSizer* sizer_txtfreql = new wxBoxSizer(wxVERTICAL);
   wxBoxSizer* sizer_txtfreqr = new wxBoxSizer(wxVERTICAL);
@@ -507,12 +505,8 @@ void MainFrame::do_layout() {
   sizer_17_frm->Add(text_ctrl1_frm, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
                     5);
   sizer_17_frm->Add(20, 20, 0, 0, 0);
-  sizer_17_frm->Add(label_2_frm, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
-  sizer_17_frm->Add(text_ctrl2_frm, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
-                    5);
-  sizer_17_frm->Add(20, 20, 0, 0, 0);
-  sizer_10_frm->Add(sizer_17_frm, 0, wxEXPAND, 0);
   sizer_10_frm->Add(window_1_frm, 1, wxEXPAND, 0);
+  sizer_10_frm->Add(sizer_17_frm, 0, wxEXPAND, 0);
   sizer_9_frm->Add(sizer_10_frm, 1, wxEXPAND, 0);
   sizer_9_frm->Add(button_frm_start, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
                    5);
