@@ -587,7 +587,7 @@ void MainFrame::set_custom_props() {
 
   int ret = 0;
 
-  ret = m_RWAudio->InitSnd((long int)(2.0 * m_OscBufferLength), m_SpeBufferLength, m_rtinfo,
+  ret = m_RWAudio->InitSnd((long int)(m_OscBufferLength), m_SpeBufferLength, m_rtinfo,
                            m_SamplingFreq);
 
   if (ret)
@@ -821,67 +821,17 @@ void MainFrame::DrawOscilloscope(void) {
   osc_lmagns.Clear();
   osc_rmagns.Clear();
   osc_times.Clear();
-  double trigger_edge;
-  double trigger_level = 0.0;
-  unsigned long int xtrig = 0;  // point where the trigger occures
 
   const double range[] = {1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000};
   double range_div = 1 / range[choice_osc_l_res->GetSelection()];
   double shft_val = 20.0 * (choice_osc_l_off->GetSelection() - 5) / 100.0;
   double range_div2 = 1 / range[choice_osc_r_res->GetSelection()];
   double shft_val2 = 20.0 * (choice_osc_r_off->GetSelection() - 5) / 100.0;
-  double hysteresis_level = range_div / 20.0;
 
-  // triggering - re-done a little bit, more or less ...
-  trigger_edge = (0 == choice_osc_trig_edge->GetSelection()) ? 1.0 : -1.0;
-  switch (choice_osc_trig_source->GetSelection()) {
-    case 1:
-      // left channel - look for the value under hysteresis point and then over 0
-      while (xtrig < m_OscBufferLength) {
-        if ((trigger_level - hysteresis_level) > (trigger_edge * g_OscBuffer_Left[xtrig])) {
-          break;
-        }
-        xtrig++;
-      }
-      while (xtrig < m_OscBufferLength) {
-        if (trigger_level < (trigger_edge * g_OscBuffer_Left[xtrig])) {
-          break;
-        }
-        xtrig++;
-      }
-      break;
-    case 2:
-      // right channel
-      while (xtrig < m_OscBufferLength) {
-        if ((trigger_level - hysteresis_level) > (trigger_edge * g_OscBuffer_Right[xtrig])) {
-          break;
-        }
-        xtrig++;
-      }
-      while (xtrig < m_OscBufferLength) {
-        if (trigger_level < (trigger_edge * g_OscBuffer_Right[xtrig])) {
-          break;
-        }
-        xtrig++;
-      }
-      break;
-    default:
-      // no trigger
-      break;
-  }
-
-  if (xtrig < m_OscBufferLength) {
-    unsigned long int finalBufferPoint =
-        xtrig + m_OscBufferLength;  // wrapped exactly for the OScopeCtrl X range
-    if (finalBufferPoint > 2.0 * m_OscBufferLength) {
-      finalBufferPoint = (unsigned long)(2.0 * m_OscBufferLength);
-    }
-
-    for (int i = 0; i + xtrig < finalBufferPoint; i++) {
-      osc_lmagns.Add(g_OscBuffer_Left[i + xtrig] / range_div - shft_val);
-      osc_rmagns.Add(g_OscBuffer_Right[i + xtrig] / range_div2 - shft_val2);
-      osc_times.Add((double)i / m_SamplingFreq);
-    }
+  for (unsigned long i = 0; i < m_OscBufferLength; i++) {
+    osc_lmagns.Add(g_OscBuffer_Left[i] / range_div - shft_val);
+    osc_rmagns.Add(g_OscBuffer_Right[i] / range_div2 - shft_val2);
+    osc_times.Add((double)i / m_SamplingFreq);
   }
 
   window_osc->SetTrack1(osc_lmagns);
@@ -1078,8 +1028,7 @@ void MainFrame::OnOscXScaleChanged(wxCommandEvent& WXUNUSED(event)) {
 
   m_SpeBufferLength = wxAtoi(choice_fftlength->GetString(choice_fftlength->GetSelection()));
 
-  m_RWAudio->ChangeBufLen((unsigned long)(2.0 * m_OscBufferLength),
-                          m_SpeBufferLength);  // we need bigger buffer because of synchronization
+  m_RWAudio->ChangeBufLen((unsigned long)(m_OscBufferLength), m_SpeBufferLength);
   m_SMASpeLeft->SetNumRecords(m_SpeBufferLength >> 1);
   m_SMASpeRight->SetNumRecords(m_SpeBufferLength >> 1);
 
@@ -1182,7 +1131,11 @@ void MainFrame::OnGeneratorChanged(wxCommandEvent& WXUNUSED(event)) {
   }
 }
 
-void MainFrame::OnOscChoiceChanged(wxCommandEvent& WXUNUSED(event)) {}
+void MainFrame::OnOscChoiceChanged(wxCommandEvent& WXUNUSED(event)) {
+  trigger_channel = choice_osc_trig_source->GetSelection();
+  trigger_edge = (0 == choice_osc_trig_edge->GetSelection()) ? 1.0 : -1.0;
+  m_RWAudio->SetTrigger(trigger_channel, trigger_edge, 0.0, 0.0, 10);
+}
 
 void MainFrame::OnGenScrollLChanged(wxScrollEvent& WXUNUSED(event)) {
   wxString bla;
@@ -1282,8 +1235,7 @@ void MainFrame::OnSelectSndCard(wxCommandEvent& WXUNUSED(event)) {
     m_SMASpeLeft->SetNumRecords(m_SpeBufferLength >> 1);
     m_SMASpeRight->SetNumRecords(m_SpeBufferLength >> 1);
     setoscbuf();
-    m_RWAudio->ChangeBufLen((unsigned long)(2.0 * m_OscBufferLength),
-                            m_SpeBufferLength);  // we need bigger buffer because of synchronization
+    m_RWAudio->ChangeBufLen((unsigned long)(m_OscBufferLength), m_SpeBufferLength);
     g_OscBufferChanged.store(false);
   }
 }
