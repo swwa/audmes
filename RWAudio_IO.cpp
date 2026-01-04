@@ -110,7 +110,7 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
       // if the buffer is over we have to pick the data and then circullary fill the next one
       if (g_OscBufferPosition == aRWAudioClass->m_OscBufferLen) {
         g_OscBufferPosition = 0;
-        g_OscBufferChanged = true;
+        g_OscBufferChanged.store(true);
         break;
       }
     }
@@ -131,7 +131,7 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
       // if the buffer is over we have to pick the data and then circullary fill the next one
       if (g_SpeBufferPosition == aRWAudioClass->m_SpeBufferLen) {
         g_SpeBufferPosition = 0;
-        g_SpeBufferChanged = true;
+        g_SpeBufferChanged.store(true);
         break;
       }
     }

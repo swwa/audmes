@@ -771,7 +771,7 @@ void MainFrame::CalcFreqResponse() {
       bla.Printf(wxT("Frequency : %.1f "), freq);
       window_1_frm->ShowUserText(bla, 100, 20);
     }
-    if (1 == frm_measure) g_SpeBufferChanged = false;  // now get audio data
+    if (1 == frm_measure) g_SpeBufferChanged.store(false);  // now get audio data
 
     if (g_SpeBufferChanged.load() && frm_measure > 1) {
       // new audio data has arrived
@@ -1050,7 +1050,7 @@ void MainFrame::OnTimer(wxTimerEvent& WXUNUSED(event)) {
   bool refresh = false;
   if (g_OscBufferChanged.load() && button_osc_start->GetValue()) {
     DrawOscilloscope();
-    g_OscBufferChanged = false;
+    g_OscBufferChanged.store(false);
     refresh = true;
   }
   if (frm_running) {
@@ -1061,7 +1061,7 @@ void MainFrame::OnTimer(wxTimerEvent& WXUNUSED(event)) {
   if (g_SpeBufferChanged.load() && button_spe_start->GetValue()) {
     DrawSpectrum();
     refresh = true;
-    g_SpeBufferChanged = false;
+    g_SpeBufferChanged.store(false);
   }
   if (refresh) {
     Refresh();
@@ -1081,8 +1081,8 @@ void MainFrame::OnOscXScaleChanged(wxCommandEvent& WXUNUSED(event)) {
   m_SMASpeLeft->SetNumRecords(m_SpeBufferLength >> 1);
   m_SMASpeRight->SetNumRecords(m_SpeBufferLength >> 1);
 
-  g_SpeBufferChanged = false;
-  g_OscBufferChanged = false;
+  g_SpeBufferChanged.store(false);
+  g_OscBufferChanged.store(false);
 }
 
 void MainFrame::OnFFTAvgChanged(wxCommandEvent& WXUNUSED(event)) {
@@ -1281,7 +1281,7 @@ void MainFrame::OnSelectSndCard(wxCommandEvent& WXUNUSED(event)) {
     setoscbuf();
     m_RWAudio->ChangeBufLen((unsigned long)(2.0 * m_OscBufferLength),
                             m_SpeBufferLength);  // we need bigger buffer because of synchronization
-    g_OscBufferChanged = false;
+    g_OscBufferChanged.store(false);
   }
 }
 
