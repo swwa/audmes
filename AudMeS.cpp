@@ -1158,6 +1158,7 @@ void MainFrame::OnFrmStart(wxCommandEvent& WXUNUSED(event)) {
     button_frm_start->SetValue(false);
     button_frm_start->SetLabel(_T("Start"));
     m_RWAudio->StopSnd();
+    SendGenSettings();  // stop generator
   }
 }
 
