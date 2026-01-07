@@ -106,6 +106,7 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
   sizer_spe_fft_staticbox = new wxStaticBox(notebook_1_spe, -1, wxT("FFT"));
   sizer_spe_disp_staticbox = new wxStaticBox(notebook_1_spe, -1, wxT("Display"));
   sizer_spe_scale_staticbox = new wxStaticBox(notebook_1_spe, -1, wxT("Scale"));
+  sizer_frm_prop_staticbox = new wxStaticBox(notebook_1_frm, -1, wxT("Properties"));
   frame_1_menubar = new wxMenuBar();
   wxMenu* wxglade_tmp_menu_1 = new wxMenu();
   wxglade_tmp_menu_1->Append(wxID_OPEN, wxT("&Open config...\tAlt+O"), wxT(""), wxITEM_NORMAL);
@@ -340,6 +341,7 @@ void MainFrame::do_layout() {
   wxStaticBoxSizer* sizer_spe_fft = new wxStaticBoxSizer(sizer_spe_fft_staticbox, wxVERTICAL);
   wxStaticBoxSizer* sizer_spe_disp = new wxStaticBoxSizer(sizer_spe_disp_staticbox, wxVERTICAL);
   wxStaticBoxSizer* sizer_spe_scale = new wxStaticBoxSizer(sizer_spe_scale_staticbox, wxVERTICAL);
+  wxStaticBoxSizer* sizer_frm_prop = new wxStaticBoxSizer(sizer_frm_prop_staticbox, wxVERTICAL);
 
   // generator
   sizer_GenEnL->Add(checkbox_l_en, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
@@ -504,9 +506,9 @@ void MainFrame::do_layout() {
   sizer_17_frm->Add(label_1_frm, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
   sizer_17_frm->Add(text_ctrl1_frm, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
                     5);
-  sizer_17_frm->Add(20, 20, 0, 0, 0);
+  sizer_frm_prop->Add(sizer_17_frm, 0, wxALL | wxEXPAND, 5);
   sizer_10_frm->Add(window_1_frm, 1, wxEXPAND, 0);
-  sizer_10_frm->Add(sizer_17_frm, 0, wxEXPAND, 0);
+  sizer_10_frm->Add(sizer_frm_prop, 0, wxALL | wxEXPAND, 5);
   sizer_9_frm->Add(sizer_10_frm, 1, wxEXPAND, 0);
   sizer_9_frm->Add(button_frm_start, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
                    5);
