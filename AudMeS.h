@@ -100,6 +100,7 @@ class MainFrame : public wxFrame {
   wxStaticBox* sizer_spe_fft_staticbox;
   wxStaticBox* sizer_spe_disp_staticbox;
   wxStaticBox* sizer_spe_scale_staticbox;
+  wxStaticBox* sizer_frm_prop_staticbox;
   wxMenuBar* frame_1_menubar;
   wxStatusBar* frame_1_statusbar;
 
