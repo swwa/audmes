@@ -160,9 +160,9 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
   text_gen_sync = new wxTextCtrl(notebook_1_gen, ID_GENPHASE, wxT("0"), wxDefaultPosition,
                                  wxDefaultSize, wxTE_PROCESS_ENTER);
 
-  txt_freq_l = new wxTextCtrl(notebook_1_gen, ID_TXT_FREQ_L, wxT("315.0"), wxDefaultPosition,
+  txt_freq_l = new wxTextCtrl(notebook_1_gen, ID_TXT_FREQ_L, wxT("  315.0"), wxDefaultPosition,
                               wxDefaultSize, wxTE_PROCESS_ENTER);
-  txt_freq_r = new wxTextCtrl(notebook_1_gen, ID_TXT_FREQ_R, wxT("315.0"), wxDefaultPosition,
+  txt_freq_r = new wxTextCtrl(notebook_1_gen, ID_TXT_FREQ_R, wxT("  315.0"), wxDefaultPosition,
                               wxDefaultSize, wxTE_PROCESS_ENTER);
 
   /* oscilloscope panel */
@@ -259,7 +259,7 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
 
   /* Frequency response */
   label_1_frm = new wxStaticText(notebook_1_frm, -1, wxT("Number of points (max 120):"));
-  text_ctrl1_frm = new wxTextCtrl(notebook_1_frm, -1, wxT("24"));
+  text_ctrl1_frm = new wxTextCtrl(notebook_1_frm, -1, wxT(" 24"));
   button_frm_start = new wxToggleButton(notebook_1_frm, ID_FRMSTART, wxT("Start"));
   window_1_frm = new CtrlOScope(notebook_1_frm, _T("Hz"), _T("dB"));
 
