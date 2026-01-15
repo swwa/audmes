@@ -77,56 +77,64 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
   RWAudio *aRWAudioClass = (RWAudio *)data;
   unsigned i;
   float *inBuf;
+  unsigned xtrig;
 
   if (status) std::cerr << "Audio stream over/underflow detected." << std::endl;
 
-  /*
-  // triggering - re-done a little bit, more or less ...
-  trigger_edge = (0 == choice_osc_trig_edge->GetSelection()) ? 1.0 : -1.0;
-  switch (choice_osc_trig_source->GetSelection()) {
-    case 1:
-      // left channel - look for the value under hysteresis point and then over 0
-      while (xtrig < m_OscBufferLength) {
-        if ((trigger_level - hysteresis_level) > (trigger_edge * g_OscBuffer_Left[xtrig])) {
-          break;
-        }
-        xtrig++;
-      }
-      while (xtrig < m_OscBufferLength) {
-        if (trigger_level < (trigger_edge * g_OscBuffer_Left[xtrig])) {
-          break;
-        }
-        xtrig++;
-      }
-      break;
-    case 2:
-      // right channel
-      while (xtrig < m_OscBufferLength) {
-        if ((trigger_level - hysteresis_level) > (trigger_edge * g_OscBuffer_Right[xtrig])) {
-          break;
-        }
-        xtrig++;
-      }
-      while (xtrig < m_OscBufferLength) {
-        if (trigger_level < (trigger_edge * g_OscBuffer_Right[xtrig])) {
-          break;
-        }
-        xtrig++;
-      }
-      break;
-    default:
-      // no trigger
-      break;
-  }
-  */
-
   // make a copy for oscilloscope
   inBuf = (float *)inputBuffer;
+
   if (!g_OscBufferChanged.load()) {
-    for (i = 0; i < nBufferFrames; i++) {
-      g_OscBuffer_Left[g_OscBufferPosition] = *inBuf++;
+    // trigger
+    xtrig = 0;
+    switch (aRWAudioClass->m_channel) {
+      case 1:
+        // left channel - look for the value under hysteresis point and then over 0
+        while (xtrig < nBufferFrames) {
+          if ((aRWAudioClass->m_level - aRWAudioClass->m_hyst) >
+              (aRWAudioClass->m_edge * inBuf[xtrig])) {
+            break;
+          }
+          xtrig++;
+          if (aRWAudioClass->m_channels_in > 1) xtrig++;
+        }
+        while (xtrig < nBufferFrames) {
+          if (aRWAudioClass->m_level < (aRWAudioClass->m_edge * inBuf[xtrig])) {
+            break;
+          }
+          xtrig++;
+          if (aRWAudioClass->m_channels_in > 1) xtrig++;
+        }
+        break;
+      case 2:
+        // right channel
+        while (xtrig < nBufferFrames) {
+          xtrig++;
+          if ((aRWAudioClass->m_level - aRWAudioClass->m_hyst) >
+              (aRWAudioClass->m_edge * inBuf[xtrig])) {
+            xtrig--;
+            break;
+          }
+          xtrig++;
+        }
+        while (xtrig < nBufferFrames) {
+          xtrig++;
+          if (aRWAudioClass->m_level < (aRWAudioClass->m_edge * inBuf[xtrig])) {
+            xtrig--;
+            break;
+          }
+          xtrig++;
+        }
+        break;
+      default:
+        // no trigger
+        break;
+    }
+
+    for (i = xtrig; i < nBufferFrames; i++) {
+      g_OscBuffer_Left[g_OscBufferPosition] = inBuf[xtrig++];
       if (aRWAudioClass->m_channels_in > 1)
-        g_OscBuffer_Right[g_OscBufferPosition] = *inBuf++;
+        g_OscBuffer_Right[g_OscBufferPosition] = inBuf[xtrig++];
       else
         g_OscBuffer_Right[g_OscBufferPosition] = 0;
 
@@ -267,6 +275,12 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
 RWAudio::RWAudio() {
   m_sampleRate = 0;
   stream_running = 0;
+  m_channel = 0;
+  ;
+  m_edge = 1.0;
+  m_level = 0.0;
+  m_hyst = 0.1;
+  m_pre = 0.0;
 }
 
 RWAudio::~RWAudio() {
