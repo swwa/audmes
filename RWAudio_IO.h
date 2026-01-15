@@ -70,6 +70,12 @@ class RWAudio {
   long int m_OscBufferLen;
   long int m_SpeBufferLen;
 
+  int m_channel;
+  double m_edge;
+  double m_level;
+  double m_hyst;
+  double m_pre;
+
  protected:
   RtAudio* m_AudioDriver;
 
@@ -77,11 +83,6 @@ class RWAudio {
   int stream_running;
   unsigned int cardrec, cardplay;
   int StartAudio(int recDevId, int playDevId);
-  int m_channel;
-  int m_edge;
-  double m_level;
-  double m_hyst;
-  double m_pre;
 };
 
 #endif  // RWAUDIO_IO_H
