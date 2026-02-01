@@ -47,6 +47,7 @@ extern std::atomic<bool> g_OscBufferChanged;
 extern std::atomic<bool> g_SpeBufferChanged;
 
 static double ph_wobble = 0.0;
+const int nrframes = 1024;
 
 /*
  * pseudo noise generator - linear feedback shift register
@@ -75,9 +76,8 @@ void catcherr(RtAudioError::Type WXUNUSED(type), const std::string &errorText) {
 int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
           double WXUNUSED(streamTime), RtAudioStreamStatus status, void *data) {
   RWAudio *aRWAudioClass = (RWAudio *)data;
-  unsigned i;
+  unsigned int i;
   float *inBuf;
-  unsigned xtrig;
 
   if (status) std::cerr << "Audio stream over/underflow detected." << std::endl;
 
@@ -86,61 +86,67 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
 
   if (!g_OscBufferChanged.load()) {
     // trigger
-    xtrig = 0;
-    switch (aRWAudioClass->m_channel) {
-      case 1:
-        // left channel - look for the value under hysteresis point and then over 0
-        while (xtrig < nBufferFrames) {
-          if ((aRWAudioClass->m_level - aRWAudioClass->m_hyst) >
-              (aRWAudioClass->m_edge * inBuf[xtrig])) {
-            break;
+    i = 0;
+    if (!aRWAudioClass->m_triggered) {
+      switch (aRWAudioClass->m_channel) {
+        case 1:
+          // left channel - look for the value under hysteresis point and then over 0
+          while (i < nBufferFrames) {
+            i++;
+            if ((aRWAudioClass->m_level - aRWAudioClass->m_hyst) >
+                (aRWAudioClass->m_edge * (*inBuf++))) {
+              if (aRWAudioClass->m_channels_in > 1) inBuf++;
+              break;
+            }
+            if (aRWAudioClass->m_channels_in > 1) inBuf++;
           }
-          xtrig++;
-          if (aRWAudioClass->m_channels_in > 1) xtrig++;
-        }
-        while (xtrig < nBufferFrames) {
-          if (aRWAudioClass->m_level < (aRWAudioClass->m_edge * inBuf[xtrig])) {
-            break;
+          while (i < nBufferFrames) {
+            i++;
+            if (aRWAudioClass->m_level < (aRWAudioClass->m_edge * (*inBuf++))) {
+              aRWAudioClass->m_triggered = true;
+              if (aRWAudioClass->m_channels_in > 1) inBuf++;
+              break;
+            }
+            if (aRWAudioClass->m_channels_in > 1) inBuf++;
           }
-          xtrig++;
-          if (aRWAudioClass->m_channels_in > 1) xtrig++;
-        }
-        break;
-      case 2:
-        // right channel
-        while (xtrig < nBufferFrames) {
-          xtrig++;
-          if ((aRWAudioClass->m_level - aRWAudioClass->m_hyst) >
-              (aRWAudioClass->m_edge * inBuf[xtrig])) {
-            xtrig--;
-            break;
+          break;
+        case 2:
+          // right channel
+          while (i < nBufferFrames) {
+            inBuf++;
+            if ((aRWAudioClass->m_level - aRWAudioClass->m_hyst) >
+                (aRWAudioClass->m_edge * *inBuf++)) {
+              break;
+            }
+            i++;
           }
-          xtrig++;
-        }
-        while (xtrig < nBufferFrames) {
-          xtrig++;
-          if (aRWAudioClass->m_level < (aRWAudioClass->m_edge * inBuf[xtrig])) {
-            xtrig--;
-            break;
+          while (i < nBufferFrames) {
+            inBuf++;
+            if (aRWAudioClass->m_level < (aRWAudioClass->m_edge * *inBuf++)) {
+              aRWAudioClass->m_triggered = true;
+              break;
+            }
+            i++;
           }
-          xtrig++;
-        }
-        break;
-      default:
-        // no trigger
-        break;
+          break;
+        default:
+          // no trigger
+          aRWAudioClass->m_triggered = false;
+          break;
+      }
     }
 
-    for (i = xtrig; i < nBufferFrames; i++) {
-      g_OscBuffer_Left[g_OscBufferPosition] = inBuf[xtrig++];
+    while (i < nBufferFrames && !g_OscBufferChanged.load()) {
+      g_OscBuffer_Left[g_OscBufferPosition] = *inBuf++;
       if (aRWAudioClass->m_channels_in > 1)
-        g_OscBuffer_Right[g_OscBufferPosition] = inBuf[xtrig++];
+        g_OscBuffer_Right[g_OscBufferPosition] = *inBuf++;
       else
         g_OscBuffer_Right[g_OscBufferPosition] = 0;
 
-      g_OscBufferPosition++;
+      g_OscBufferPosition++; i++;
       if (g_OscBufferPosition == aRWAudioClass->m_OscBufferLen) {
         g_OscBufferPosition = 0;
+        aRWAudioClass->m_triggered = false;
         g_OscBufferChanged.store(true);
         break;
       }
@@ -158,7 +164,7 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
         g_SpeBuffer_Right[g_SpeBufferPosition] = 0;
 
       g_SpeBufferPosition++;
-      if (g_SpeBufferPosition == aRWAudioClass->m_SpeBufferLen) {
+      if (g_SpeBufferPosition >= aRWAudioClass->m_SpeBufferLen) {
         g_SpeBufferPosition = 0;
         g_SpeBufferChanged.store(true);
         break;
@@ -276,7 +282,7 @@ RWAudio::RWAudio() {
   m_sampleRate = 0;
   stream_running = 0;
   m_channel = 0;
-  ;
+  m_triggered = false;
   m_edge = 1.0;
   m_level = 0.0;
   m_hyst = 0.1;
@@ -398,7 +404,7 @@ int RWAudio::StartAudio(int recDevId, int playDevId) {
   RtAudio::StreamParameters iParams;
   RtAudio::StreamParameters oParams;
   RtAudio::StreamOptions rtAOptions;
-  unsigned int bufferFrames = 2048;
+  unsigned int bufferFrames = nrframes;
 
   iParams.deviceId = recDevId;
   oParams.deviceId = playDevId;
