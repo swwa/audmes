@@ -71,6 +71,7 @@ class RWAudio {
   long int m_SpeBufferLen;
 
   int m_channel;
+  bool m_triggered;
   double m_edge;
   double m_level;
   double m_hyst;
