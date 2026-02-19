@@ -1134,7 +1134,7 @@ void MainFrame::OnGeneratorChanged(wxCommandEvent& WXUNUSED(event)) {
 void MainFrame::OnOscChoiceChanged(wxCommandEvent& WXUNUSED(event)) {
   trigger_channel = choice_osc_trig_source->GetSelection();
   trigger_edge = (0 == choice_osc_trig_edge->GetSelection()) ? 1.0 : -1.0;
-  m_RWAudio->SetTrigger(trigger_channel, trigger_edge, 0.0, 0.1, 0.0);
+  m_RWAudio->SetTrigger(trigger_channel, trigger_edge, 0.0, 0.02, 0.0);
 }
 
 void MainFrame::OnGenScrollLChanged(wxScrollEvent& WXUNUSED(event)) {
