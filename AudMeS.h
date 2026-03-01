@@ -136,8 +136,11 @@ class MainFrame : public wxFrame {
   wxChoice* choice_osc_r_off;
   wxStaticText* label_osc_trig;
   wxChoice* choice_osc_trig_edge;
+  wxStaticText* label_osc_level;
+  wxChoice* choice_osc_level;
   wxToggleButton* button_osc_start;
   wxPanel* notebook_1_osc;
+
   wxStaticText* label_5;
   wxChoice* choice_fft;
   wxStaticText* label_9;

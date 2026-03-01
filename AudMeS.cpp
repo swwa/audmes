@@ -206,16 +206,20 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
                                 choice_osc_swp_choices, 0);
   label_osc_time = new wxStaticText(notebook_1_osc, -1, wxT("Time [us/div]: "));
 
-  // triggering control
-  label_8 = new wxStaticText(notebook_1_osc, -1, wxT("Trigger: "));
-  const wxString choice_osc_trig_source_choices[] = {wxT("Off"), wxT("Left channel"),
-                                                     wxT("Right channel")};
+  // trigger control
+  label_osc_trig = new wxStaticText(notebook_1_osc, -1, wxT("Trigger: "));
+  const wxString choice_osc_trig_source_choices[] = {wxT("Off"), wxT("Ch 1"), wxT("Ch 2")};
   choice_osc_trig_source = new wxChoice(notebook_1_osc, ID_OSCLTRIG, wxDefaultPosition,
                                         wxDefaultSize, 3, choice_osc_trig_source_choices, 0);
-  label_osc_trig = new wxStaticText(notebook_1_osc, -1, wxT("Trigger edge: "));
-  const wxString choice_osc_trig_edge_choices[] = {wxT("Rising edge"), wxT("Falling edge")};
+  const wxString choice_osc_trig_edge_choices[] = {wxT("Rising"), wxT("Falling")};
   choice_osc_trig_edge = new wxChoice(notebook_1_osc, ID_OSCRTRIG, wxDefaultPosition, wxDefaultSize,
                                       2, choice_osc_trig_edge_choices, 0);
+  label_osc_level = new wxStaticText(notebook_1_osc, -1, wxT("Level: "));
+  const wxString choice_osc_level_choices[] = {wxT("1"),    wxT("0.8"),  wxT("0.6"),  wxT("0.4"),
+                                               wxT("0.2"),  wxT("0"),    wxT("-0.2"), wxT("-0.4"),
+                                               wxT("-0.6"), wxT("-0.8"), wxT("-1")};
+  choice_osc_level = new wxChoice(notebook_1_osc, ID_OSCRTRIG, wxDefaultPosition, wxDefaultSize, 11,
+                                  choice_osc_level_choices, 0);
 
   button_osc_start = new wxToggleButton(notebook_1_osc, ID_OSCSTART, wxT("Start"));
 
@@ -285,6 +289,7 @@ void MainFrame::set_properties() {
   choice_osc_r_res->SetSelection(0);
   choice_osc_r_off->SetSelection(0);
   choice_osc_trig_edge->SetSelection(0);
+  choice_osc_level->SetSelection(5);
   choice_fft->SetSelection(1);
   choice_fftlength->SetSelection(4);
   choice_fftrx->SetSelection(1);
@@ -431,16 +436,17 @@ void MainFrame::do_layout() {
   sizer_13->Add(choice_osc_swp, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);  // 20, 50....50000
   sizer_12H->Add(sizer_13, 1, wxEXPAND, 0);
 
-  sizer_16L->Add(label_8, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);  // Trigger
-  sizer_16L->Add(5, 5, 1, 0, 0);                                   // spacer
+  sizer_16L->Add(label_osc_trig, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);  // Trigger
+  sizer_16L->Add(5, 5, 1, 0, 0);                                          // spacer
   sizer_16L->Add(choice_osc_trig_source, 0, wxALL | wxALIGN_CENTER_VERTICAL,
-                 5);  // Off, Left, ... Channel
+                 5);  // Off, Channel
+  sizer_16L->Add(choice_osc_trig_edge, 0, wxALL | wxALIGN_CENTER_VERTICAL,
+                 5);  // Rising, falling
   sizer_12H->Add(sizer_16L, 1, wxEXPAND, 0);
 
-  sizer_16R->Add(label_osc_trig, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);  // Trigger Edge
-  sizer_16R->Add(5, 5, 1, 0, 0);                                          // spacer
-  sizer_16R->Add(choice_osc_trig_edge, 0, wxALL | wxALIGN_CENTER_VERTICAL,
-                 5);  // Rising, ... edge
+  sizer_16R->Add(label_osc_level, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);   // Trigger Edge
+  sizer_16R->Add(5, 5, 1, 0, 0);                                            // spacer
+  sizer_16R->Add(choice_osc_level, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);  // level
   sizer_12H->Add(sizer_16R, 1, wxEXPAND, 0);
 
   sizer_11->Add(sizer_12H, 0, wxALL | wxEXPAND, 5);
@@ -561,6 +567,10 @@ void MainFrame::set_custom_props() {
   window_osc->SetXRange(0, sweep_div * 10E-6, 0);
   window_osc->SetYRange(-1, 1, 0);
   window_osc->SetNumOfVerticals(10);
+  trigger_channel = 0;
+  trigger_edge = 1.0;
+  trigger_level = 0.0;
+  trigger_pre = 0;
 
   /* analyzer */
   window_1_spe->SetXRange(20, 20000, 1);
@@ -1134,7 +1144,8 @@ void MainFrame::OnGeneratorChanged(wxCommandEvent& WXUNUSED(event)) {
 void MainFrame::OnOscChoiceChanged(wxCommandEvent& WXUNUSED(event)) {
   trigger_channel = choice_osc_trig_source->GetSelection();
   trigger_edge = (0 == choice_osc_trig_edge->GetSelection()) ? 1.0 : -1.0;
-  m_RWAudio->SetTrigger(trigger_channel, trigger_edge, 0.0, 0.02, 0.0);
+  trigger_level = (choice_osc_level->GetSelection() - 5) / -5.0;
+  m_RWAudio->SetTrigger(trigger_channel, trigger_edge, trigger_level, 0.02, trigger_pre);
 }
 
 void MainFrame::OnGenScrollLChanged(wxScrollEvent& WXUNUSED(event)) {
