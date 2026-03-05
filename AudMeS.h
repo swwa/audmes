@@ -69,6 +69,7 @@ class MainFrame : public wxFrame {
   void OnGenScrollLChanged(wxScrollEvent& event);
   void OnGenScrollRChanged(wxScrollEvent& event);
   void OnOscChoiceChanged(wxCommandEvent& event);
+  void OnOscScrollChanged(wxScrollEvent& event);
   void SendGenSettings(void);
   void OnSelectSndCard(wxCommandEvent& event);
   void OnTxtFreqLChanged(wxCommandEvent& event);
@@ -137,7 +138,7 @@ class MainFrame : public wxFrame {
   wxStaticText* label_osc_trig;
   wxChoice* choice_osc_trig_edge;
   wxStaticText* label_osc_level;
-  wxChoice* choice_osc_level;
+  wxSlider* slide_osc_level;
   wxToggleButton* button_osc_start;
   wxPanel* notebook_1_osc;
 
