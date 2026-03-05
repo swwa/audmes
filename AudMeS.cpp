@@ -55,8 +55,8 @@ wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_COMMAND_SCROLL(ID_GENRFREQ, MainFrame::OnGenScrollRChanged)
   EVT_COMMAND_SCROLL(ID_GENLAMP, MainFrame::OnGenScrollChanged)
   EVT_COMMAND_SCROLL(ID_GENRAMP, MainFrame::OnGenScrollChanged)
-  EVT_CHOICE(ID_OSCLTRIG, MainFrame::OnOscChoiceChanged)
-  EVT_CHOICE(ID_OSCRTRIG, MainFrame::OnOscChoiceChanged)
+  EVT_CHOICE(ID_OSCTRIG, MainFrame::OnOscChoiceChanged)
+  EVT_COMMAND_SCROLL(ID_OSCLEVEL, MainFrame::OnOscScrollChanged)
   EVT_TEXT_ENTER(ID_TXT_FREQ_L, MainFrame::OnTxtFreqLChanged)
   EVT_TEXT_ENTER(ID_TXT_FREQ_R, MainFrame::OnTxtFreqRChanged)
   EVT_CHOICE(ID_GENSHP_L, MainFrame::OnGeneratorChanged)
@@ -209,17 +209,13 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
   // trigger control
   label_osc_trig = new wxStaticText(notebook_1_osc, -1, wxT("Trigger: "));
   const wxString choice_osc_trig_source_choices[] = {wxT("Off"), wxT("Ch 1"), wxT("Ch 2")};
-  choice_osc_trig_source = new wxChoice(notebook_1_osc, ID_OSCLTRIG, wxDefaultPosition,
+  choice_osc_trig_source = new wxChoice(notebook_1_osc, ID_OSCTRIG, wxDefaultPosition,
                                         wxDefaultSize, 3, choice_osc_trig_source_choices, 0);
   const wxString choice_osc_trig_edge_choices[] = {wxT("Rising"), wxT("Falling")};
-  choice_osc_trig_edge = new wxChoice(notebook_1_osc, ID_OSCRTRIG, wxDefaultPosition, wxDefaultSize,
+  choice_osc_trig_edge = new wxChoice(notebook_1_osc, ID_OSCTRIG, wxDefaultPosition, wxDefaultSize,
                                       2, choice_osc_trig_edge_choices, 0);
-  label_osc_level = new wxStaticText(notebook_1_osc, -1, wxT("Level: "));
-  const wxString choice_osc_level_choices[] = {wxT("1"),    wxT("0.8"),  wxT("0.6"),  wxT("0.4"),
-                                               wxT("0.2"),  wxT("0"),    wxT("-0.2"), wxT("-0.4"),
-                                               wxT("-0.6"), wxT("-0.8"), wxT("-1")};
-  choice_osc_level = new wxChoice(notebook_1_osc, ID_OSCRTRIG, wxDefaultPosition, wxDefaultSize, 11,
-                                  choice_osc_level_choices, 0);
+  label_osc_level = new wxStaticText(notebook_1_osc, -1, wxT("Level: [-1.0...+1.0]: 0.0"));
+  slide_osc_level = new wxSlider(notebook_1_osc, ID_OSCLEVEL, 0, -10, +10);
 
   button_osc_start = new wxToggleButton(notebook_1_osc, ID_OSCSTART, wxT("Start"));
 
@@ -284,12 +280,11 @@ void MainFrame::set_properties() {
   choice_r_wav->SetSelection(0);
   choice_osc_swp->SetSelection(6);
   choice_osc_l_res->SetSelection(0);
-  choice_osc_l_off->SetSelection(0);
+  choice_osc_l_off->SetSelection(5);
   choice_osc_trig_source->SetSelection(0);
   choice_osc_r_res->SetSelection(0);
-  choice_osc_r_off->SetSelection(0);
+  choice_osc_r_off->SetSelection(5);
   choice_osc_trig_edge->SetSelection(0);
-  choice_osc_level->SetSelection(5);
   choice_fft->SetSelection(1);
   choice_fftlength->SetSelection(4);
   choice_fftrx->SetSelection(1);
@@ -444,9 +439,9 @@ void MainFrame::do_layout() {
                  5);  // Rising, falling
   sizer_12H->Add(sizer_16L, 1, wxEXPAND, 0);
 
-  sizer_16R->Add(label_osc_level, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);   // Trigger Edge
-  sizer_16R->Add(5, 5, 1, 0, 0);                                            // spacer
-  sizer_16R->Add(choice_osc_level, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);  // level
+  sizer_16R->Add(label_osc_level, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);  // Trigger Edge
+  sizer_16R->Add(5, 5, 1, 0, 0);                                           // spacer
+  sizer_16R->Add(slide_osc_level, 0, wxEXPAND, 5);                         // level
   sizer_12H->Add(sizer_16R, 1, wxEXPAND, 0);
 
   sizer_11->Add(sizer_12H, 0, wxALL | wxEXPAND, 5);
@@ -554,11 +549,6 @@ void MainFrame::set_custom_props() {
   m_PlayDev = 0;
   m_RecordDev = 0;
   m_SamplingFreq = 44100;
-
-  choice_osc_l_res->SetSelection(0);
-  choice_osc_r_res->SetSelection(0);
-  choice_osc_l_off->SetSelection(5);
-  choice_osc_r_off->SetSelection(5);
 
   sweep_div = wxAtoi(choice_osc_swp->GetString(choice_osc_swp->GetSelection()));
   setoscbuf();
@@ -1144,7 +1134,14 @@ void MainFrame::OnGeneratorChanged(wxCommandEvent& WXUNUSED(event)) {
 void MainFrame::OnOscChoiceChanged(wxCommandEvent& WXUNUSED(event)) {
   trigger_channel = choice_osc_trig_source->GetSelection();
   trigger_edge = (0 == choice_osc_trig_edge->GetSelection()) ? 1.0 : -1.0;
-  trigger_level = (choice_osc_level->GetSelection() - 5) / -5.0;
+  m_RWAudio->SetTrigger(trigger_channel, trigger_edge, trigger_level, 0.02, trigger_pre);
+}
+
+void MainFrame::OnOscScrollChanged(wxScrollEvent& WXUNUSED(event)) {
+  wxString bla;
+  trigger_level = slide_osc_level->GetValue() / 10.0;
+  bla.Printf(wxT("Level: [-1.0...+1.0]: %2.1f"), trigger_level);
+  label_osc_level ->SetLabel(bla);
   m_RWAudio->SetTrigger(trigger_channel, trigger_edge, trigger_level, 0.02, trigger_pre);
 }
 
