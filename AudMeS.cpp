@@ -213,7 +213,7 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
   const wxString choice_osc_trig_edge_choices[] = {wxT("Rising"), wxT("Falling")};
   choice_osc_trig_edge = new wxChoice(notebook_1_osc, ID_OSCTRIG, wxDefaultPosition, wxDefaultSize,
                                       2, choice_osc_trig_edge_choices, 0);
-  label_osc_level = new wxStaticText(notebook_1_osc, wxID_ANY, wxT("Level: [-1.0...+1.0]: 0.0"));
+  label_osc_level = new wxStaticText(notebook_1_osc, wxID_ANY, wxT("Level [-1.0...+1.0]: 0.0"));
   slide_osc_level = new wxSlider(notebook_1_osc, ID_OSCLEVEL, 0, -10, +10);
 
   button_osc_start = new wxToggleButton(notebook_1_osc, ID_OSCSTART, wxT("Start"));
@@ -439,8 +439,7 @@ void MainFrame::do_layout() {
   sizer_12H->Add(sizer_16L, 1, wxEXPAND, 0);
 
   sizer_16R->Add(label_osc_level, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);  // Trigger Edge
-  sizer_16R->Add(5, 5, 1, 0, 0);                                           // spacer
-  sizer_16R->Add(slide_osc_level, 0, wxEXPAND, 5);                         // level
+  sizer_16R->Add(slide_osc_level, 1, wxEXPAND, 5);                         // level
   sizer_12H->Add(sizer_16R, 1, wxEXPAND, 0);
 
   sizer_11->Add(sizer_12H, 0, wxALL | wxEXPAND, 5);
@@ -1225,10 +1224,10 @@ void MainFrame::SendGenSettings() {
 }
 
 void MainFrame::TriggerSettings() {
-  auto tl = trigger_level*range_div;
+  auto tl = trigger_level * range_div;
   auto hl = 0.05 * range_div;
   if (trigger_channel == 2) {
-    tl = trigger_level*range_div2;
+    tl = trigger_level * range_div2;
     hl = 0.05 * range_div2;
   }
   m_RWAudio->SetTrigger(trigger_channel, trigger_edge, tl, hl, trigger_pre);
