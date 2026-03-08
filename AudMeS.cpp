@@ -93,20 +93,20 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
                      const wxSize& size, long WXUNUSED(style))
     : wxFrame(parent, id, title, pos, size, wxDEFAULT_FRAME_STYLE | wxFULL_REPAINT_ON_RESIZE) {
   // begin wxGlade: MainFrame::MainFrame
-  notebook_1 = new wxNotebook(this, -1, wxDefaultPosition, wxDefaultSize, wxNB_BOTTOM);
+  notebook_1 = new wxNotebook(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNB_BOTTOM);
   notebook_1_spe = new wxPanel(notebook_1, -1);
   notebook_1_osc = new wxPanel(notebook_1, -1);
   notebook_1_gen = new wxPanel(notebook_1, -1);
   notebook_1_frm = new wxPanel(notebook_1, -1);
-  sizer_gen_l_staticbox = new wxStaticBox(notebook_1_gen, -1, wxT("Left channel"));
-  sizer_gen_r_staticbox = new wxStaticBox(notebook_1_gen, -1, wxT("Right channel"));
-  sizer_osc_l_staticbox = new wxStaticBox(notebook_1_osc, -1, wxT("Vertical Left"));
-  sizer_osc_r_staticbox = new wxStaticBox(notebook_1_osc, -1, wxT("Vertical Right"));
-  sizer_osc_h_staticbox = new wxStaticBox(notebook_1_osc, -1, wxT("Horizontal"));
-  sizer_spe_fft_staticbox = new wxStaticBox(notebook_1_spe, -1, wxT("FFT"));
-  sizer_spe_disp_staticbox = new wxStaticBox(notebook_1_spe, -1, wxT("Display"));
-  sizer_spe_scale_staticbox = new wxStaticBox(notebook_1_spe, -1, wxT("Scale"));
-  sizer_frm_prop_staticbox = new wxStaticBox(notebook_1_frm, -1, wxT("Properties"));
+  sizer_gen_l_staticbox = new wxStaticBox(notebook_1_gen, wxID_ANY, wxT("Left channel"));
+  sizer_gen_r_staticbox = new wxStaticBox(notebook_1_gen, wxID_ANY, wxT("Right channel"));
+  sizer_osc_l_staticbox = new wxStaticBox(notebook_1_osc, wxID_ANY, wxT("Vertical Left"));
+  sizer_osc_r_staticbox = new wxStaticBox(notebook_1_osc, wxID_ANY, wxT("Vertical Right"));
+  sizer_osc_h_staticbox = new wxStaticBox(notebook_1_osc, wxID_ANY, wxT("Horizontal"));
+  sizer_spe_fft_staticbox = new wxStaticBox(notebook_1_spe, wxID_ANY, wxT("FFT"));
+  sizer_spe_disp_staticbox = new wxStaticBox(notebook_1_spe, wxID_ANY, wxT("Display"));
+  sizer_spe_scale_staticbox = new wxStaticBox(notebook_1_spe, wxID_ANY, wxT("Scale"));
+  sizer_frm_prop_staticbox = new wxStaticBox(notebook_1_frm, wxID_ANY, wxT("Properties"));
   frame_1_menubar = new wxMenuBar();
   wxMenu* wxglade_tmp_menu_1 = new wxMenu();
   wxglade_tmp_menu_1->Append(wxID_OPEN, wxT("&Open config...\tAlt+O"), wxT(""), wxITEM_NORMAL);
@@ -132,31 +132,31 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
 
   /* generator panel */
   checkbox_l_en = new wxCheckBox(notebook_1_gen, ID_GENLENB, wxT("Enable Output"));
-  label_gen_wave_l = new wxStaticText(notebook_1_gen, -1, wxT("Waveform: "));
+  label_gen_wave_l = new wxStaticText(notebook_1_gen, wxID_ANY, wxT("Waveform: "));
   const wxString choice_l_wav_choices[] = {wxT("Sine"),     wxT("Rectangular"), wxT("Saw"),
                                            wxT("Triangle"), wxT("Wh-Noise"),    wxT("Wobble")};
   choice_l_wav = new wxChoice(notebook_1_gen, ID_GENSHP_L, wxDefaultPosition, wxDefaultSize, 6,
                               choice_l_wav_choices, 0);
-  label__gen_freq_l = new wxStaticText(notebook_1_gen, -1, wxT("Frequency [20..20000Hz]: "));
+  label__gen_freq_l = new wxStaticText(notebook_1_gen, wxID_ANY, wxT("Frequency [20..20000Hz]: "));
   slide_l_fr = new wxSlider(notebook_1_gen, ID_GENLFREQ, 80, 0, 200);
-  label_gen_ampl_l = new wxStaticText(notebook_1_gen, -1, wxT("Amplitude [0..-60dB]: "));
+  label_gen_ampl_l = new wxStaticText(notebook_1_gen, wxID_ANY, wxT("Amplitude [0..-60dB]: "));
   slide_l_am = new wxSlider(notebook_1_gen, ID_GENLAMP, -3, -60, 0);
 
   checkbox_r_en = new wxCheckBox(notebook_1_gen, ID_GENRENB, wxT("Enable Output"));
-  label_gen_wave_r = new wxStaticText(notebook_1_gen, -1, wxT("Waveform: "));
+  label_gen_wave_r = new wxStaticText(notebook_1_gen, wxID_ANY, wxT("Waveform: "));
   const wxString choice_r_wav_choices[] = {wxT("Sine"),     wxT("Rectangular"), wxT("Saw"),
                                            wxT("Triangle"), wxT("Wh-Noise"),    wxT("Wobble")};
   choice_r_wav = new wxChoice(notebook_1_gen, ID_GENSHP_R, wxDefaultPosition, wxDefaultSize, 6,
                               choice_r_wav_choices, 0);
-  label_gen_freq_r = new wxStaticText(notebook_1_gen, -1, wxT("Frequency [20..20000Hz]: "));
+  label_gen_freq_r = new wxStaticText(notebook_1_gen, wxID_ANY, wxT("Frequency [20..20000Hz]: "));
   slide_r_fr = new wxSlider(notebook_1_gen, ID_GENRFREQ, 80, 0, 200);
-  label_gen_ampl_r = new wxStaticText(notebook_1_gen, -1, wxT("Amplitude [0..-60dB]: "));
+  label_gen_ampl_r = new wxStaticText(notebook_1_gen, wxID_ANY, wxT("Amplitude [0..-60dB]: "));
   slide_r_am = new wxSlider(notebook_1_gen, ID_GENRAMP, -3, -60, 0);
   button_gen_start = new wxToggleButton(notebook_1_gen, ID_GENSTART, wxT("Start"));
 
   checkbox_gen_sync = new wxCheckBox(notebook_1_gen, ID_GENSYNC, wxT("L and R are synchronized"));
   label_gen_sync =
-      new wxStaticText(notebook_1_gen, -1, wxT("Phase between L and R [0..360 degrees]: "));
+      new wxStaticText(notebook_1_gen, wxID_ANY, wxT("Phase between L and R [0..360 degrees]: "));
   text_gen_sync = new wxTextCtrl(notebook_1_gen, ID_GENPHASE, wxT("0"), wxDefaultPosition,
                                  wxDefaultSize, wxTE_PROCESS_ENTER);
 
@@ -167,32 +167,32 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
 
   /* oscilloscope panel */
   window_osc = new CtrlOScope(notebook_1_osc, _T(""), _T(""));
-  label_osc_div_l = new wxStaticText(notebook_1_osc, -1, wxT("[V/div]: "));
+  label_osc_div_l = new wxStaticText(notebook_1_osc, wxID_ANY, wxT("[V/div]: "));
   const wxString choice_osc_l_res_choices[] = {
       wxT("0.2"), wxT("0.1"),  wxT("50m"),  wxT("20m"),  wxT("10m"), wxT("5m"),  wxT("2m"),
       wxT("1m"),  wxT("500u"), wxT("200u"), wxT("100u"), wxT("50u"), wxT("20u"), wxT("10u"),
   };
-  choice_osc_l_res = new wxChoice(notebook_1_osc, -1, wxDefaultPosition, wxDefaultSize, 14,
+  choice_osc_l_res = new wxChoice(notebook_1_osc, wxID_ANY, wxDefaultPosition, wxDefaultSize, 14,
                                   choice_osc_l_res_choices, 0);
-  label_osc_off_l = new wxStaticText(notebook_1_osc, -1, wxT("Offset: "));
+  label_osc_off_l = new wxStaticText(notebook_1_osc, wxID_ANY, wxT("Offset: "));
   const wxString choice_osc_l_off_choices[] = {wxT("1"),    wxT("0.8"),  wxT("0.6"),  wxT("0.4"),
                                                wxT("0.2"),  wxT("0"),    wxT("-0.2"), wxT("-0.4"),
                                                wxT("-0.6"), wxT("-0.8"), wxT("-1")};
-  choice_osc_l_off = new wxChoice(notebook_1_osc, -1, wxDefaultPosition, wxDefaultSize, 11,
+  choice_osc_l_off = new wxChoice(notebook_1_osc, wxID_ANY, wxDefaultPosition, wxDefaultSize, 11,
                                   choice_osc_l_off_choices, 0);
 
-  label_osc_div_r = new wxStaticText(notebook_1_osc, -1, wxT("[V/div]: "));
+  label_osc_div_r = new wxStaticText(notebook_1_osc, wxID_ANY, wxT("[V/div]: "));
   const wxString choice_osc_r_res_choices[] = {
       wxT("0.2"), wxT("0.1"),  wxT("50m"),  wxT("20m"),  wxT("10m"), wxT("5m"),  wxT("2m"),
       wxT("1m"),  wxT("500u"), wxT("200u"), wxT("100u"), wxT("50u"), wxT("20u"), wxT("10u"),
   };
-  choice_osc_r_res = new wxChoice(notebook_1_osc, -1, wxDefaultPosition, wxDefaultSize, 14,
+  choice_osc_r_res = new wxChoice(notebook_1_osc, wxID_ANY, wxDefaultPosition, wxDefaultSize, 14,
                                   choice_osc_r_res_choices, 0);
-  label_osc_off_r = new wxStaticText(notebook_1_osc, -1, wxT("Offset: "));
+  label_osc_off_r = new wxStaticText(notebook_1_osc, wxID_ANY, wxT("Offset: "));
   const wxString choice_osc_r_off_choices[] = {wxT("1"),    wxT("0.8"),  wxT("0.6"),  wxT("0.4"),
                                                wxT("0.2"),  wxT("0"),    wxT("-0.2"), wxT("-0.4"),
                                                wxT("-0.6"), wxT("-0.8"), wxT("-1")};
-  choice_osc_r_off = new wxChoice(notebook_1_osc, -1, wxDefaultPosition, wxDefaultSize, 11,
+  choice_osc_r_off = new wxChoice(notebook_1_osc, wxID_ANY, wxDefaultPosition, wxDefaultSize, 11,
                                   choice_osc_r_off_choices, 0);
 
   button_autocalibrate = new wxButton(notebook_1_osc, ID_AUTOCAL, wxT("V Autorange"));
@@ -204,52 +204,52 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
   };
   choice_osc_swp = new wxChoice(notebook_1_osc, ID_OSCXSCALE, wxDefaultPosition, wxDefaultSize, 12,
                                 choice_osc_swp_choices, 0);
-  label_osc_time = new wxStaticText(notebook_1_osc, -1, wxT("Time [us/div]: "));
+  label_osc_time = new wxStaticText(notebook_1_osc, wxID_ANY, wxT("Time [us/div]: "));
 
   // trigger control
-  label_osc_trig = new wxStaticText(notebook_1_osc, -1, wxT("Trigger: "));
+  label_osc_trig = new wxStaticText(notebook_1_osc, wxID_ANY, wxT("Trigger: "));
   const wxString choice_osc_trig_source_choices[] = {wxT("Off"), wxT("Ch 1"), wxT("Ch 2")};
   choice_osc_trig_source = new wxChoice(notebook_1_osc, ID_OSCTRIG, wxDefaultPosition,
                                         wxDefaultSize, 3, choice_osc_trig_source_choices, 0);
   const wxString choice_osc_trig_edge_choices[] = {wxT("Rising"), wxT("Falling")};
   choice_osc_trig_edge = new wxChoice(notebook_1_osc, ID_OSCTRIG, wxDefaultPosition, wxDefaultSize,
                                       2, choice_osc_trig_edge_choices, 0);
-  label_osc_level = new wxStaticText(notebook_1_osc, -1, wxT("Level: [-1.0...+1.0]: 0.0"));
+  label_osc_level = new wxStaticText(notebook_1_osc, wxID_ANY, wxT("Level: [-1.0...+1.0]: 0.0"));
   slide_osc_level = new wxSlider(notebook_1_osc, ID_OSCLEVEL, 0, -10, +10);
 
   button_osc_start = new wxToggleButton(notebook_1_osc, ID_OSCSTART, wxT("Start"));
 
   /* Spectrum analyzer */
-  label_5 = new wxStaticText(notebook_1_spe, -1, wxT("FFT Window Type:"));
+  label_5 = new wxStaticText(notebook_1_spe, wxID_ANY, wxT("FFT Window Type:"));
   const wxString choice_fft_choices[] = {wxT("Rect"), wxT("Hanning"), wxT("Blackman"),
                                          wxT("BlackHarr")};
   choice_fft = new wxChoice(notebook_1_spe, ID_FFTWINDOW, wxDefaultPosition, wxDefaultSize, 4,
                             choice_fft_choices, 0);
 
-  label_9 = new wxStaticText(notebook_1_spe, -1, wxT("Number of samples:"));
+  label_9 = new wxStaticText(notebook_1_spe, wxID_ANY, wxT("Number of samples:"));
   const wxString choice_fftlength_choices[] = {wxT("128"),   wxT("256"),  wxT("512"),  wxT("1024"),
                                                wxT("2048"),  wxT("4096"), wxT("8192"), wxT("16384"),
                                                wxT("32768"), wxT("65536")};
   choice_fftlength = new wxChoice(notebook_1_spe, ID_FFTLENGTH, wxDefaultPosition, wxDefaultSize,
                                   10, choice_fftlength_choices, 0);
 
-  label_rx = new wxStaticText(notebook_1_spe, -1, wxT("Freq. Range: [Hz]"));
+  label_rx = new wxStaticText(notebook_1_spe, wxID_ANY, wxT("Freq. Range: [Hz]"));
   const wxString choice_fftry_choices[] = {wxT("2-2000"), wxT("20-20k"), wxT("10-100k")};
   choice_fftrx = new wxChoice(notebook_1_spe, ID_FFTWINDOW, wxDefaultPosition, wxDefaultSize, 3,
                               choice_fftry_choices, 0);
 
-  label_avg = new wxStaticText(notebook_1_spe, -1, wxT("Averaging (N):"));
+  label_avg = new wxStaticText(notebook_1_spe, wxID_ANY, wxT("Averaging (N):"));
   const wxString choice_fftavg_choices[] = {wxT("1"), wxT("2"), wxT("5"), wxT("10"), wxT("20")};
   choice_fftavg = new wxChoice(notebook_1_spe, ID_FFTAVG, wxDefaultPosition, wxDefaultSize, 5,
                                choice_fftavg_choices, 0);
 
-  label_spe_ref = new wxStaticText(notebook_1_spe, -1, wxT("Ref Level [dB]"));
+  label_spe_ref = new wxStaticText(notebook_1_spe, wxID_ANY, wxT("Ref Level [dB]"));
   const wxString choice_spe_ref_choices[] = {wxT("0"),   wxT("-10"), wxT("-20"),
                                              wxT("-30"), wxT("-40"), wxT("-50")};
   choice_spe_ref = new wxChoice(notebook_1_spe, ID_FFTREF, wxDefaultPosition, wxDefaultSize, 6,
                                 choice_spe_ref_choices, 0);
 
-  label_spe_dbdiv = new wxStaticText(notebook_1_spe, -1, wxT("Amplitude [dB/div]"));
+  label_spe_dbdiv = new wxStaticText(notebook_1_spe, wxID_ANY, wxT("Amplitude [dB/div]"));
   const wxString choice_spe_dbdiv_choices[] = {wxT("3"), wxT("5"), wxT("10")};
   choice_spe_dbdiv = new wxChoice(notebook_1_spe, ID_FFTDBDIV, wxDefaultPosition, wxDefaultSize, 3,
                                   choice_spe_dbdiv_choices, 0);
@@ -258,8 +258,8 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
   button_spe_start = new wxToggleButton(notebook_1_spe, ID_SPANSTART, wxT("Start"));
 
   /* Frequency response */
-  label_1_frm = new wxStaticText(notebook_1_frm, -1, wxT("Number of points (max 120):"));
-  text_ctrl1_frm = new wxTextCtrl(notebook_1_frm, -1, wxT(" 24"));
+  label_1_frm = new wxStaticText(notebook_1_frm, wxID_ANY, wxT("Number of points (max 120):"));
+  text_ctrl1_frm = new wxTextCtrl(notebook_1_frm, wxID_ANY, wxT(" 24"));
   button_frm_start = new wxToggleButton(notebook_1_frm, ID_FRMSTART, wxT("Start"));
   window_1_frm = new CtrlOScope(notebook_1_frm, _T("Hz"), _T("dB"));
 
@@ -1269,7 +1269,7 @@ wxIMPLEMENT_APP(AudMeSApp);
 
 bool AudMeSApp::OnInit() {
   wxInitAllImageHandlers();
-  MainFrame* frame_1 = new MainFrame(NULL, -1, wxT(""));
+  MainFrame* frame_1 = new MainFrame(NULL, wxID_ANY, wxT(""));
   SetTopWindow(frame_1);
   frame_1->Show();
   return true;
