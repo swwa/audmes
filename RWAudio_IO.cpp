@@ -92,8 +92,10 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
         case 1:
           // left channel - look for the value under hysteresis point and then over level
           while (i < nBufferFrames) {
-            if ((aRWAudioClass->m_level - aRWAudioClass->m_hyst) >
-                (aRWAudioClass->m_edge * (*inBuf++))) {
+            if ((aRWAudioClass->m_edge > 0.0 &&
+                 (*inBuf++) < aRWAudioClass->m_level - aRWAudioClass->m_hyst) ||
+                (aRWAudioClass->m_edge < 0.0 &&
+                 (*inBuf++) > aRWAudioClass->m_level + aRWAudioClass->m_hyst)) {
               inBuf--;
               break;
             }
@@ -101,7 +103,8 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
             i++;
           }
           while (i < nBufferFrames) {
-            if (aRWAudioClass->m_level < (aRWAudioClass->m_edge * (*inBuf++))) {
+            if ((aRWAudioClass->m_edge > 0.0 && (*inBuf++) >= aRWAudioClass->m_level) ||
+                (aRWAudioClass->m_edge < 0.0 && (*inBuf++) <= aRWAudioClass->m_level)) {
               aRWAudioClass->m_triggered = true;
               inBuf--;
               break;
@@ -114,8 +117,10 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
           // right channel
           while (i < nBufferFrames) {
             inBuf++;
-            if ((aRWAudioClass->m_level - aRWAudioClass->m_hyst) >
-                (aRWAudioClass->m_edge * *inBuf++)) {
+            if ((aRWAudioClass->m_edge > 0.0 &&
+                 (*inBuf++) < aRWAudioClass->m_level - aRWAudioClass->m_hyst) ||
+                (aRWAudioClass->m_edge < 0.0 &&
+                 (*inBuf++) > aRWAudioClass->m_level + aRWAudioClass->m_hyst)) {
               inBuf--;
               inBuf--;
               break;
@@ -124,8 +129,8 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
           }
           while (i < nBufferFrames) {
             inBuf++;
-            if (aRWAudioClass->m_level < (aRWAudioClass->m_edge * *inBuf++)) {
-              aRWAudioClass->m_triggered = true;
+            if ((aRWAudioClass->m_edge > 0.0 && (*inBuf++) >= aRWAudioClass->m_level) ||
+                (aRWAudioClass->m_edge < 0.0 && (*inBuf++) <= aRWAudioClass->m_level)) {
               inBuf--;
               inBuf--;
               break;
