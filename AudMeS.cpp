@@ -38,7 +38,7 @@
 wxIMPLEMENT_CLASS(MainFrame, wxFrame);
 
 wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
-  EVT_TOGGLEBUTTON(ID_SPANSTART, MainFrame::OnSpanStart)
+  EVT_TOGGLEBUTTON(ID_SPESTART, MainFrame::OnSpanStart)
   EVT_TOGGLEBUTTON(ID_GENSTART, MainFrame::OnGenStart)
   EVT_TOGGLEBUTTON(ID_OSCSTART, MainFrame::OnOscStart)
   EVT_TOGGLEBUTTON(ID_FRMSTART, MainFrame::OnFrmStart)
@@ -70,8 +70,7 @@ wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_MENU(ID_SAVE_OSC, MainFrame::OnSaveOSC)
   EVT_BUTTON(ID_AUTOCAL, MainFrame::OnAutoCalClick)
   EVT_TOGGLEBUTTON(ID_SINC, MainFrame::OnSincClick)
-  EVT_CHOICE(ID_OSCXSCALE, MainFrame::OnOscXScaleChanged)
-  EVT_CHOICE(ID_FFTLENGTH, MainFrame::OnOscXScaleChanged)
+  EVT_CHOICE(ID_XSCALE, MainFrame::OnXScaleChanged)
   EVT_CHOICE(ID_FFTAVG, MainFrame::OnFFTAvgChanged)
   EVT_CHOICE(ID_FFTREF, MainFrame::OnFFTScaleChanged)
   EVT_CHOICE(ID_FFTDBDIV, MainFrame::OnFFTScaleChanged)
@@ -172,13 +171,13 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
       wxT("0.2"), wxT("0.1"),  wxT("50m"),  wxT("20m"),  wxT("10m"), wxT("5m"),  wxT("2m"),
       wxT("1m"),  wxT("500u"), wxT("200u"), wxT("100u"), wxT("50u"), wxT("20u"), wxT("10u"),
   };
-  choice_osc_l_res = new wxChoice(notebook_1_osc, wxID_ANY, wxDefaultPosition, wxDefaultSize, 14,
+  choice_osc_l_res = new wxChoice(notebook_1_osc, ID_XSCALE, wxDefaultPosition, wxDefaultSize, 14,
                                   choice_osc_l_res_choices, 0);
   label_osc_off_l = new wxStaticText(notebook_1_osc, wxID_ANY, wxT("Offset: "));
   const wxString choice_osc_l_off_choices[] = {wxT("1"),    wxT("0.8"),  wxT("0.6"),  wxT("0.4"),
                                                wxT("0.2"),  wxT("0"),    wxT("-0.2"), wxT("-0.4"),
                                                wxT("-0.6"), wxT("-0.8"), wxT("-1")};
-  choice_osc_l_off = new wxChoice(notebook_1_osc, wxID_ANY, wxDefaultPosition, wxDefaultSize, 11,
+  choice_osc_l_off = new wxChoice(notebook_1_osc, ID_XSCALE, wxDefaultPosition, wxDefaultSize, 11,
                                   choice_osc_l_off_choices, 0);
 
   label_osc_div_r = new wxStaticText(notebook_1_osc, wxID_ANY, wxT("[V/div]: "));
@@ -186,13 +185,13 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
       wxT("0.2"), wxT("0.1"),  wxT("50m"),  wxT("20m"),  wxT("10m"), wxT("5m"),  wxT("2m"),
       wxT("1m"),  wxT("500u"), wxT("200u"), wxT("100u"), wxT("50u"), wxT("20u"), wxT("10u"),
   };
-  choice_osc_r_res = new wxChoice(notebook_1_osc, wxID_ANY, wxDefaultPosition, wxDefaultSize, 14,
+  choice_osc_r_res = new wxChoice(notebook_1_osc, ID_XSCALE, wxDefaultPosition, wxDefaultSize, 14,
                                   choice_osc_r_res_choices, 0);
   label_osc_off_r = new wxStaticText(notebook_1_osc, wxID_ANY, wxT("Offset: "));
   const wxString choice_osc_r_off_choices[] = {wxT("1"),    wxT("0.8"),  wxT("0.6"),  wxT("0.4"),
                                                wxT("0.2"),  wxT("0"),    wxT("-0.2"), wxT("-0.4"),
                                                wxT("-0.6"), wxT("-0.8"), wxT("-1")};
-  choice_osc_r_off = new wxChoice(notebook_1_osc, wxID_ANY, wxDefaultPosition, wxDefaultSize, 11,
+  choice_osc_r_off = new wxChoice(notebook_1_osc, ID_XSCALE, wxDefaultPosition, wxDefaultSize, 11,
                                   choice_osc_r_off_choices, 0);
 
   button_autocalibrate = new wxButton(notebook_1_osc, ID_AUTOCAL, wxT("V Autorange"));
@@ -202,7 +201,7 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
       wxT("10"),   wxT("20"),   wxT("50"),   wxT("100"),   wxT("200"),   wxT("500"),
       wxT("1000"), wxT("2000"), wxT("5000"), wxT("10000"), wxT("20000"), wxT("50000"),
   };
-  choice_osc_swp = new wxChoice(notebook_1_osc, ID_OSCXSCALE, wxDefaultPosition, wxDefaultSize, 12,
+  choice_osc_swp = new wxChoice(notebook_1_osc, ID_XSCALE, wxDefaultPosition, wxDefaultSize, 12,
                                 choice_osc_swp_choices, 0);
   label_osc_time = new wxStaticText(notebook_1_osc, wxID_ANY, wxT("Time [us/div]: "));
 
@@ -230,8 +229,8 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
   const wxString choice_fftlength_choices[] = {wxT("128"),   wxT("256"),  wxT("512"),  wxT("1024"),
                                                wxT("2048"),  wxT("4096"), wxT("8192"), wxT("16384"),
                                                wxT("32768"), wxT("65536")};
-  choice_fftlength = new wxChoice(notebook_1_spe, ID_FFTLENGTH, wxDefaultPosition, wxDefaultSize,
-                                  10, choice_fftlength_choices, 0);
+  choice_fftlength = new wxChoice(notebook_1_spe, ID_XSCALE, wxDefaultPosition, wxDefaultSize, 10,
+                                  choice_fftlength_choices, 0);
 
   label_rx = new wxStaticText(notebook_1_spe, wxID_ANY, wxT("Freq. Range: [Hz]"));
   const wxString choice_fftry_choices[] = {wxT("2-2000"), wxT("20-20k"), wxT("10-100k")};
@@ -255,7 +254,7 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
                                   choice_spe_dbdiv_choices, 0);
 
   window_1_spe = new CtrlOScope(notebook_1_spe, _T("Hz"), _T("dB"));
-  button_spe_start = new wxToggleButton(notebook_1_spe, ID_SPANSTART, wxT("Start"));
+  button_spe_start = new wxToggleButton(notebook_1_spe, ID_SPESTART, wxT("Start"));
 
   /* Frequency response */
   label_1_frm = new wxStaticText(notebook_1_frm, wxID_ANY, wxT("Number of points (max 120):"));
@@ -557,6 +556,10 @@ void MainFrame::set_custom_props() {
   window_osc->SetXRange(0, sweep_div * 10E-6, 0);
   window_osc->SetYRange(-1, 1, 0);
   window_osc->SetNumOfVerticals(10);
+  range_div = 1;
+  shft_val = 0;
+  range_div2 = 1;
+  shft_val2 = 0;
   trigger_channel = 0;
   trigger_edge = 1.0;
   trigger_level = 0.0;
@@ -740,6 +743,8 @@ void MainFrame::OnAutoCalClick(wxCommandEvent& WXUNUSED(event)) {
     lgdiff = log(diff) / log(2);
     if (lgdiff > 13) lgdiff = 13;
     choice_osc_r_res->SetSelection((int)lgdiff);
+    wxCommandEvent dummy;
+    OnXScaleChanged(dummy);
   } else {
     wxMessageBox(wxT("Please start recording"), _T("Could not auto calibrate"),
                  wxICON_INFORMATION | wxOK);
@@ -821,12 +826,6 @@ void MainFrame::DrawOscilloscope(void) {
   osc_lmagns.Clear();
   osc_rmagns.Clear();
   osc_times.Clear();
-
-  const double range[] = {1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000};
-  double range_div = 1 / range[choice_osc_l_res->GetSelection()];
-  double shft_val = 20.0 * (choice_osc_l_off->GetSelection() - 5) / 100.0;
-  double range_div2 = 1 / range[choice_osc_r_res->GetSelection()];
-  double shft_val2 = 20.0 * (choice_osc_r_off->GetSelection() - 5) / 100.0;
 
   for (unsigned long i = 0; i < m_OscBufferLength; i++) {
     osc_lmagns.Add(g_OscBuffer_Left[i] / range_div - shft_val);
@@ -1021,7 +1020,7 @@ void MainFrame::OnTimer(wxTimerEvent& WXUNUSED(event)) {
   }
 }
 
-void MainFrame::OnOscXScaleChanged(wxCommandEvent& WXUNUSED(event)) {
+void MainFrame::OnXScaleChanged(wxCommandEvent& WXUNUSED(event)) {
   sweep_div = wxAtoi(choice_osc_swp->GetString(choice_osc_swp->GetSelection()));
   setoscbuf();
   window_osc->SetXRange(0, sweep_div * 10E-6, 0);
@@ -1031,6 +1030,13 @@ void MainFrame::OnOscXScaleChanged(wxCommandEvent& WXUNUSED(event)) {
   m_RWAudio->ChangeBufLen((unsigned long)(m_OscBufferLength), m_SpeBufferLength);
   m_SMASpeLeft->SetNumRecords(m_SpeBufferLength >> 1);
   m_SMASpeRight->SetNumRecords(m_SpeBufferLength >> 1);
+
+  const double range[] = {1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000};
+  range_div = 1 / range[choice_osc_l_res->GetSelection()];
+  shft_val = 20.0 * (choice_osc_l_off->GetSelection() - 5) / 100.0;
+  range_div2 = 1 / range[choice_osc_r_res->GetSelection()];
+  shft_val2 = 20.0 * (choice_osc_r_off->GetSelection() - 5) / 100.0;
+  TriggerSettings();
 
   g_SpeBufferChanged.store(false);
   g_OscBufferChanged.store(false);
@@ -1134,15 +1140,15 @@ void MainFrame::OnGeneratorChanged(wxCommandEvent& WXUNUSED(event)) {
 void MainFrame::OnOscChoiceChanged(wxCommandEvent& WXUNUSED(event)) {
   trigger_channel = choice_osc_trig_source->GetSelection();
   trigger_edge = (0 == choice_osc_trig_edge->GetSelection()) ? 1.0 : -1.0;
-  m_RWAudio->SetTrigger(trigger_channel, trigger_edge, trigger_level, 0.02, trigger_pre);
+  TriggerSettings();
 }
 
 void MainFrame::OnOscScrollChanged(wxScrollEvent& WXUNUSED(event)) {
   wxString bla;
   trigger_level = slide_osc_level->GetValue() / 10.0;
   bla.Printf(wxT("Level: [-1.0...+1.0]: %2.1f"), trigger_level);
-  label_osc_level ->SetLabel(bla);
-  m_RWAudio->SetTrigger(trigger_channel, trigger_edge, trigger_level, 0.02, trigger_pre);
+  label_osc_level->SetLabel(bla);
+  TriggerSettings();
 }
 
 void MainFrame::OnGenScrollLChanged(wxScrollEvent& WXUNUSED(event)) {
@@ -1216,6 +1222,16 @@ void MainFrame::SendGenSettings() {
 
   m_RWAudio->PlaySetGenerator(freq_l, freq_r, shapeleft, shaperight, gain_l, gain_r);
   m_RWAudio->PlaySetPhaseDiff(phas2 * 3.14159 / 180.0);  // should be in degrees now
+}
+
+void MainFrame::TriggerSettings() {
+  auto tl = trigger_level*range_div;
+  auto hl = 0.05 * range_div;
+  if (trigger_channel == 2) {
+    tl = trigger_level*range_div2;
+    hl = 0.05 * range_div2;
+  }
+  m_RWAudio->SetTrigger(trigger_channel, trigger_edge, tl, hl, trigger_pre);
 }
 
 void MainFrame::OnSelectSndCard(wxCommandEvent& WXUNUSED(event)) {
