@@ -56,6 +56,11 @@ class MainFrame : public wxFrame {
   void setoscbuf();
   double calc_dc(const float* data, int size);
 
+  double range_div;
+  double shft_val;
+  double range_div2;
+  double shft_val2;
+
   void OnSpanStart(wxCommandEvent& event);
   void OnGenStart(wxCommandEvent& event);
   void OnOscStart(wxCommandEvent& event);
@@ -70,7 +75,6 @@ class MainFrame : public wxFrame {
   void OnGenScrollRChanged(wxScrollEvent& event);
   void OnOscChoiceChanged(wxCommandEvent& event);
   void OnOscScrollChanged(wxScrollEvent& event);
-  void SendGenSettings(void);
   void OnSelectSndCard(wxCommandEvent& event);
   void OnTxtFreqLChanged(wxCommandEvent& event);
   void OnTxtFreqRChanged(wxCommandEvent& event);
@@ -83,13 +87,15 @@ class MainFrame : public wxFrame {
   void OnSaveOSC(wxCommandEvent& event);
   void OnAutoCalClick(wxCommandEvent& event);
   void OnSincClick(wxCommandEvent& event);
-  void OnOscXScaleChanged(wxCommandEvent& event);
+  void OnXScaleChanged(wxCommandEvent& event);
   void OnFFTAvgChanged(wxCommandEvent& event);
   void OnFFTScaleChanged(wxCommandEvent& event);
   void DrawFreqResponse(void);
   void CalcFreqResponse(void);
   void DrawOscilloscope(void);
   void DrawSpectrum(void);
+  void SendGenSettings(void);
+  void TriggerSettings(void);
 
  protected:
   // begin wxGlade: MainFrame::attributes
