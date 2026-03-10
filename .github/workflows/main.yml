@@ -32,7 +32,7 @@ jobs:
             build/AudMeS-*.deb
 
   MacOS:
-    runs-on: macos-13
+    runs-on: macos-14
     env:
       CC: cc
       CXX: c++
@@ -63,7 +63,7 @@ jobs:
             build/AudMeS-*.dmg
 
   Windows:
-    runs-on: windows-latest
+    runs-on: windows-2022
     defaults:
       run:
         shell: msys2 {0}
