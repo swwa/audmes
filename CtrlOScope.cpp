@@ -98,9 +98,10 @@ void CtrlOScope::OnPaint(wxPaintEvent& WXUNUSED(event)) {
   // here will be the Double Buffer
   wxRect rec = GetClientRect();
 
-  wxBitmap* bmpBlit = new wxBitmap(rec.width, rec.height, 32);
+  double scale = GetContentScaleFactor();
+  wxBitmap* bmpBlit = new wxBitmap(rec.width * scale, rec.height * scale, 32);
   wxMemoryDC* memDC = new wxMemoryDC();
-  // clear the memdc with a certain background color
+  memDC->SetUserScale(scale, scale);
   memDC->SelectObject(*bmpBlit);
   memDC->Clear();
 
