@@ -16,6 +16,7 @@ set(CPP_SOURCES
 	RWAudio_IO.h
 	sma_2d.cpp
 	sma_2d.h
+	event_ids.h
 	)
 
 set(AM_SOURCES
