@@ -5,3 +5,4 @@ xcode
 .vs
 libfccp
 cpp-analyze-cppcheck-build-dir
+.cache
