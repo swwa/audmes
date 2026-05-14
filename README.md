@@ -109,12 +109,12 @@ Package and install
 
 Download Msys2 from <https://www.msys2.org/>
 
-Run `mingw32` terminal and install packages:
+Run `mingw64` terminal and install packages:
 
-    pacman -S git mingw-w64-i686-gcc mingw-w64-i686-cmake mingw-w64-i686-make
-    pacman -S mingw-w64-i686-wxwidgets3.2-msw
+    pacman -S git mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake mingw-w64-x86_64-make
+    pacman -S mingw-w64-x86_64-wxwidgets3.2-msw
 
-Do not install packages for other than i686 targets.
+Do not install packages for other than x86_64 targets.
 
 Get code:
 
@@ -131,7 +131,7 @@ Compiling:
     mkdir build
     cd build
     cmake ..
-    cmake --build . 
+    cmake --build .
 
 Run the program:
 

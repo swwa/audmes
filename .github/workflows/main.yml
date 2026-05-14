@@ -14,7 +14,7 @@ jobs:
           sudo apt-get -y install libwxgtk3.2-dev cmake libfccp-dev libpulse-dev libasound2-dev
 
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Compile and package
         run: |
@@ -24,7 +24,7 @@ jobs:
           cmake --build . --target package
 
       - name: Archive build result
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: linux-binary
           path: |
@@ -44,7 +44,7 @@ jobs:
           brew install wxwidgets
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Compile and package
         run: |
@@ -55,7 +55,7 @@ jobs:
           cmake --build . --target package
 
       - name: Archive build result
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: macos-binary
           path: |
@@ -76,17 +76,17 @@ jobs:
       - name: Install dependencies
         uses: msys2/setup-msys2@v2
         with:
-          msystem: MINGW32
+          msystem: MINGW64
           install: >-
             base-devel
             git
-            mingw-w64-i686-gcc
-            mingw-w64-i686-cmake
-            mingw-w64-i686-make
-            mingw-w64-i686-wxwidgets3.2-msw
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-make
+            mingw-w64-x86_64-wxwidgets3.2
 
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Compile and package
         run: |
@@ -97,7 +97,7 @@ jobs:
           cmake --build . --target package
 
       - name: Archive build result
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: win-binary
           path: |

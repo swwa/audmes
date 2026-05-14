@@ -26,6 +26,15 @@
   </kudos>
 
   <releases>
+    <release version="2026.05.14" date="2026-06-14">
+      <description>
+        <ul>
+          <li>Enhanced trigger</li>
+          <li>Alligned style in all views</li>
+          <li>High DPI scaling</li>
+        </ul>
+      </description>
+    </release>
     <release version="2025.04.05" date="2025-04-05">
       <description>
         <ul>
