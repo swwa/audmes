@@ -42,11 +42,16 @@ wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_TOGGLEBUTTON(ID_GENSTART, MainFrame::OnGenStart)
   EVT_TOGGLEBUTTON(ID_OSCSTART, MainFrame::OnOscStart)
   EVT_TOGGLEBUTTON(ID_FRMSTART, MainFrame::OnFrmStart)
+  EVT_TOGGLEBUTTON(ID_AUD_START, MainFrame::OnAudiogramStart)
+  EVT_BUTTON(ID_AUD_HEARED, MainFrame::OnAudiogramHeared)
+  EVT_MENU(ID_SAVE_AUD, MainFrame::OnSaveAUD)
+  EVT_MENU(ID_LOAD_AUD, MainFrame::OnLoadAUD)
   EVT_MENU(wxID_ABOUT, MainFrame::OnAboutClick)
   EVT_MENU(wxID_EXIT, MainFrame::OnExitClick)
   EVT_CLOSE(MainFrame::OnClose)
   EVT_MENU(ID_SNDCARD, MainFrame::OnSelectSndCard)
   EVT_TIMER(ID_TIMERID, MainFrame::OnTimer)
+  EVT_KEY_DOWN(MainFrame::OnKeyDown)
   EVT_CHECKBOX(ID_GENLENB, MainFrame::OnGeneratorChanged)
   EVT_CHECKBOX(ID_GENRENB, MainFrame::OnGeneratorChanged)
   EVT_CHECKBOX(ID_GENSYNC, MainFrame::OnGeneratorChanged)
@@ -115,6 +120,8 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
   wxglade_tmp_menu_1->Append(ID_SAVE_FRM, wxT("Save freq.resp."), wxT(""), wxITEM_NORMAL);
   wxglade_tmp_menu_1->Append(ID_SAVE_SPE, wxT("Save spectrum"), wxT(""), wxITEM_NORMAL);
   wxglade_tmp_menu_1->Append(ID_SAVE_OSC, wxT("Save oscillogram"), wxT(""), wxITEM_NORMAL);
+  wxglade_tmp_menu_1->Append(ID_LOAD_AUD, wxT("Load audiogram CSV..."), wxT(""), wxITEM_NORMAL);
+  wxglade_tmp_menu_1->Append(ID_SAVE_AUD, wxT("Save audiogram CSV..."), wxT(""), wxITEM_NORMAL);
   wxglade_tmp_menu_1->AppendSeparator();
   wxglade_tmp_menu_1->Append(wxID_EXIT, wxT("&Close\tAlt+F4"), wxT(""), wxITEM_NORMAL);
   frame_1_menubar->Append(wxglade_tmp_menu_1, wxT("&File"));
@@ -261,6 +268,17 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
   text_ctrl1_frm = new wxTextCtrl(notebook_1_frm, wxID_ANY, wxT(" 24"));
   button_frm_start = new wxToggleButton(notebook_1_frm, ID_FRMSTART, wxT("Start"));
   window_1_frm = new CtrlOScope(notebook_1_frm, _T("Hz"), _T("dB"));
+
+  /* Audiogram */
+  notebook_1_aud = new wxPanel(notebook_1, -1);
+  label_aud_status = new wxStaticText(notebook_1_aud, wxID_ANY, wxT("Ready."), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
+  button_aud_start = new wxToggleButton(notebook_1_aud, ID_AUD_START, wxT("Start"));
+    button_aud_start->Bind(wxEVT_SET_FOCUS, &MainFrame::OnAudiogramStartFocus, this);
+  button_aud_heared = new wxButton(notebook_1_aud, ID_AUD_HEARED, wxT("I heard it!"));
+  window_1_aud = new CtrlOScope(notebook_1_aud, _T("Hz"), _T("% loudness (log)"));
+
+  const wxString freqset_choices[] = {wxT("ISO 389 Basic (8 freqs)"), wxT("ISO 389 Full (13 freqs)"), wxT("Fine-grained 200 Hz steps (80 freqs)")};
+  choice_aud_freqset = new wxChoice(notebook_1_aud, ID_AUD_FREQ_SET, wxDefaultPosition, wxDefaultSize, 3, freqset_choices);
 
   set_properties();
   do_layout();
@@ -514,11 +532,32 @@ void MainFrame::do_layout() {
   sizer_9_frm->Fit(notebook_1_frm);
   sizer_9_frm->SetSizeHints(notebook_1_frm);
 
+  // audiogram panel layout — graph on top, controls below (matches other tabs)
+  wxBoxSizer* sizer_aud_main = new wxBoxSizer(wxVERTICAL);
+  wxBoxSizer* sizer_aud_ctrl = new wxBoxSizer(wxHORIZONTAL);
+  wxBoxSizer* sizer_aud_buttons = new wxBoxSizer(wxVERTICAL);
+
+  // graph takes all available space at top
+  sizer_aud_main->Add(window_1_aud, 1, wxEXPAND, 0);
+
+// controls below: status line (centered text), frequency selector, then buttons
+   sizer_aud_main->Add(label_aud_status, 0, wxALL | wxEXPAND, 5);
+  sizer_aud_ctrl->Add(choice_aud_freqset, 1, wxALL | wxEXPAND, 5);
+  sizer_aud_main->Add(sizer_aud_ctrl, 0, wxEXPAND, 0);
+  sizer_aud_buttons->Add(button_aud_start, 0, wxALL | wxALIGN_CENTER_HORIZONTAL, 5);
+  sizer_aud_buttons->Add(button_aud_heared, 0, wxALL | wxALIGN_CENTER_HORIZONTAL, 5);
+  sizer_aud_main->Add(sizer_aud_buttons, 0, wxALIGN_CENTER_HORIZONTAL, 0);
+  notebook_1_aud->SetAutoLayout(true);
+  notebook_1_aud->SetSizer(sizer_aud_main);
+  sizer_aud_main->Fit(notebook_1_aud);
+  sizer_aud_main->SetSizeHints(notebook_1_aud);
+
   // main notebook
   notebook_1->AddPage(notebook_1_gen, wxT("Generator"));
   notebook_1->AddPage(notebook_1_osc, wxT("Oscilloscope"));
   notebook_1->AddPage(notebook_1_spe, wxT("Spectrum Analyzer"));
   notebook_1->AddPage(notebook_1_frm, wxT("Frequency Response"));
+  notebook_1->AddPage(notebook_1_aud, wxT("Audiogram"));
   sizer_notebook->Add(notebook_1, 1, wxEXPAND, 0);
   SetAutoLayout(true);
   SetSizer(sizer_notebook);
@@ -574,6 +613,17 @@ void MainFrame::set_custom_props() {
   frm_measure = 0;
   frm_istep = 0;
 
+  /* audiogram */
+  window_1_aud->SetInterp(CtrlOScope::MARKER);
+  window_1_aud->SetXRange(80, 20000, 1);
+  window_1_aud->SetYRange(0, 100, 0); // Y=100 at top (best hearing/quietest threshold), Y=0 at bottom
+  choice_aud_freqset->SetSelection(0); // ISO 389 Basic by default
+
+   window_1_aud->SetYUnit(_T("%\nloud\n(log)"));
+   window_1_aud->SetLegend(_T("Left"), _T("Right"));
+
+   button_aud_heared->Enable(false);
+
   m_configfilename = wxT("");
 
   m_timer = new wxTimer(this, ID_TIMERID);
@@ -582,6 +632,32 @@ void MainFrame::set_custom_props() {
   m_SpeBufferLength = wxAtoi(choice_fftlength->GetString(choice_fftlength->GetSelection()));
 
   m_RWAudio = new RWAudio();
+
+  /* audiogram needs m_RWAudio to be initialized first */
+  m_audiogram = new Audiogram();
+  m_audiogram->SetAudio(m_RWAudio);
+  m_audiogram->SetCallbacks(
+[this](const wxString& msg) {
+         wxTheApp->CallAfter([this, msg]() {
+           label_aud_status->SetLabel(msg);
+           notebook_1_aud->Layout();
+         });
+       },
+      [this]() {
+        wxTheApp->CallAfter([this]() {
+          DrawAudiogram();
+          window_1_aud->Refresh();
+          window_1_aud->Update();
+        });
+      },
+      [this]() {
+        wxTheApp->CallAfter([this]() {
+          button_aud_start->SetLabel(_T("Start"));
+          button_aud_start->SetValue(false);
+          button_aud_heared->Enable(false);
+        });
+      });
+
   m_SMASpeLeft = new SMA_2D(m_SpeBufferLength >> 1, 1);
   m_SMASpeRight = new SMA_2D(m_SpeBufferLength >> 1, 1);
 
@@ -1270,6 +1346,129 @@ void MainFrame::OnTxtFreqLChanged(wxCommandEvent& WXUNUSED(event)) {
 void MainFrame::OnTxtFreqRChanged(wxCommandEvent& WXUNUSED(event)) {
   if (button_gen_start->GetValue()) {
     SendGenSettings();
+  }
+}
+
+/* Audiogram: hearing threshold test */
+void MainFrame::DrawAudiogram(void) {
+   const auto& results = m_audiogram->GetResults();
+
+   // Build aligned track arrays: for each frequency, include a point only if at least
+   // one ear has data. Left and right tracks share the same X axis (frequency list).
+   // Y values are inverted threshold % so low threshold (best hearing) draws at top of graph.
+   wxArrayDouble xData, leftData, rightData;
+
+   for (const auto& r : results) {
+     double f = r.frequency;
+
+     // Check if this frequency already in xData
+     bool found = false;
+     for (size_t j = 0; j < xData.size(); j++) {
+       if (xData[j] == f) { found = true; break; }
+     }
+     if (!found) {
+       // Look up left and right threshold for this frequency
+        double leftVal = -1, rightVal = -1;
+        for (const auto& r2 : results) {
+          if (r2.frequency == f && (r2.ear == wxT("Left") || r2.ear == wxT("Both")))
+            leftVal = 100 - r2.thresholdPct; // invert: low % → high Y (top of graph = best hearing)
+          if (r2.frequency == f && (r2.ear == wxT("Right") || r2.ear == wxT("Both")))
+            rightVal = 100 - r2.thresholdPct;
+        }
+       // Only include this frequency if at least one ear has data
+       if (leftVal >= 0 || rightVal >= 0) {
+         xData.Add(f);
+         leftData.Add(leftVal >= 0 ? leftVal : NAN);
+         rightData.Add(rightVal >= 0 ? rightVal : NAN);
+       }
+     }
+   }
+
+   // Clear tracks first to prevent stale data from previous test causing crashes in PaintTrack
+   wxArrayDouble empty;
+   window_1_aud->SetTrackX(empty);
+   window_1_aud->SetTrack1(empty);
+   window_1_aud->SetTrack2(empty);
+
+   if (!xData.empty()) {
+     window_1_aud->SetInterp(CtrlOScope::MARKER); // Draw individual markers, not connected lines
+     window_1_aud->SetTrackX(xData);
+     window_1_aud->SetTrack1(leftData);
+     window_1_aud->SetTrack2(rightData);
+   }
+}
+
+void MainFrame::OnAudiogramHeared(wxCommandEvent& WXUNUSED(event)) { m_audiogram->RegisterHeard(); }
+
+void MainFrame::OnKeyDown(wxKeyEvent& event) {
+  if (event.GetKeyCode() == WXK_SPACE && notebook_1->GetSelection() == 4 && m_audiogram->IsRunning()) {
+    m_audiogram->RegisterHeard();
+    return;
+  }
+  event.Skip();
+}
+
+void MainFrame::OnAudiogramStartFocus(wxFocusEvent& WXUNUSED(event)) {
+  // Redirect focus away from Start/Stop during active tests so space bar activates "I heard it"
+  if (m_audiogram->IsRunning() && button_aud_heared->IsEnabled()) {
+    button_aud_heared->SetFocus();
+  }
+}
+
+void MainFrame::OnSaveAUD(wxCommandEvent& WXUNUSED(event)) {
+  wxFileDialog saveDialog(this, _("Save audiogram file"), "", "", "CSV files (*.csv)|*.csv",
+                          wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+  if (saveDialog.ShowModal() == wxID_CANCEL) return;
+
+  if (!m_audiogram->GetResults().empty()) {
+    m_audiogram->SaveCSV(saveDialog.GetPath());
+  } else {
+    wxMessageBox(wxT("No audiogram data to save. Run a test or import a file first."), _T("Nothing to save"),
+                 wxICON_INFORMATION | wxOK);
+  }
+}
+
+void MainFrame::OnLoadAUD(wxCommandEvent& WXUNUSED(event)) {
+  wxFileDialog openDialog(this, _("Open audiogram file"), "", "", "CSV files (*.csv)|*.csv",
+                          wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+  if (openDialog.ShowModal() == wxID_CANCEL) return;
+
+   if (m_audiogram->LoadCSV(openDialog.GetPath())) {
+     label_aud_status->SetLabel(wxT("Audiogram loaded successfully."));
+     DrawAudiogram();
+     window_1_aud->Refresh();
+     window_1_aud->Update();
+  } else {
+    wxMessageBox(wxT("Failed to load audiogram file."), _T("Load error"), wxICON_ERROR | wxOK);
+  }
+}
+
+void MainFrame::OnAudiogramStart(wxCommandEvent& WXUNUSED(event)) {
+  if (m_audiogram->IsRunning()) {
+    // Stop the test
+    m_audiogram->Stop();
+
+    button_aud_start->SetLabel(_T("Start"));
+    button_aud_heared->Enable(false);
+  } else {
+    button_aud_start->SetLabel(_T("Stop"));
+    button_aud_heared->Enable(true);
+    button_aud_heared->SetFocus(); // ensure space bar activates "I heard it", not Start/Stop
+
+    Audiogram::FreqSet freqset;
+    switch (choice_aud_freqset->GetSelection()) {
+      case 2:
+        freqset = Audiogram::FINE_200HZ;
+        break;
+      case 1:
+        freqset = Audiogram::ISO_389_FULL;
+        break;
+      default:
+        freqset = Audiogram::ISO_389_BASIC;
+        break;
+    }
+
+    m_audiogram->StartTest(freqset);
   }
 }
 

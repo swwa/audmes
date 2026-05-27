@@ -189,101 +189,109 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
   // fprintf(ddbg, "\n Frames: %d\n ", nBufferFrames);
 #endif
 
-  /* calculate the wave form according to the selected shape */
+  /* Software mixer: compute Generator tab and Audiogram tab independently, sum sample-by-sample */
   for (i = 0; i < nBufferFrames; i++) {
-    double y = 0;
-    double y2 = 0;
     bool noise = lfsr16();
 
-    /* left channel */
+    // ---- Compute Generator tab waveform (left) ----
+    double gen_y_l = 0;
     switch (aRWAudioClass->m_genShape_l) {
       case RWAudio::RECT:
-        if (aRWAudioClass->m_genPhase_l < M_PI) {
-          y = 1.0;
-        } else {
-          y = -1.0;
-        }
+        gen_y_l = (aRWAudioClass->m_genPhase_l < M_PI) ? 1.0 : -1.0;
         break;
       case RWAudio::SAW:
-        y = (aRWAudioClass->m_genPhase_l - M_PI) / M_PI;
+        gen_y_l = (aRWAudioClass->m_genPhase_l - M_PI) / M_PI;
         break;
       case RWAudio::TRI:
-        if (aRWAudioClass->m_genPhase_l < M_PI) {
-          y = 2 * (aRWAudioClass->m_genPhase_l - M_PI / 2) / M_PI;
-        } else {
-          y = 2 * (3 * M_PI / 2 - aRWAudioClass->m_genPhase_l) / M_PI;
-        }
+        gen_y_l = (aRWAudioClass->m_genPhase_l < M_PI) ? 2 * (aRWAudioClass->m_genPhase_l - M_PI / 2) / M_PI : 2 * (3 * M_PI / 2 - aRWAudioClass->m_genPhase_l) / M_PI;
         break;
       case RWAudio::NOISE:
-        if (noise) {
-          y = 1.0;
-        } else {
-          y = -1.0;
-        }
+        gen_y_l = noise ? 1.0 : -1.0;
         break;
       case RWAudio::WOBBLE:
-        y = sin(aRWAudioClass->m_genPhase_l + sin(ph_wobble));
+        gen_y_l = sin(aRWAudioClass->m_genPhase_l + sin(ph_wobble));
         break;
-      default: /* sine wave */
-        y = sin(aRWAudioClass->m_genPhase_l);
+      default:
+        gen_y_l = sin(aRWAudioClass->m_genPhase_l);
         break;
     }
-    /* right channel */
+
+    // ---- Compute Generator tab waveform (right) ----
+    double gen_y_r = 0;
     switch (aRWAudioClass->m_genShape_r) {
       case RWAudio::RECT:
-        if ((aRWAudioClass->m_genPhase_r - aRWAudioClass->m_genPhaseDif) < M_PI) {
-          y2 = 1;
-        } else {
-          y2 = -1;
-        }
+        gen_y_r = ((aRWAudioClass->m_genPhase_r - aRWAudioClass->m_genPhaseDif) < M_PI) ? 1.0 : -1.0;
         break;
       case RWAudio::SAW:
-        y2 = ((aRWAudioClass->m_genPhase_r - aRWAudioClass->m_genPhaseDif) - M_PI) / M_PI;
+        gen_y_r = ((aRWAudioClass->m_genPhase_r - aRWAudioClass->m_genPhaseDif) - M_PI) / M_PI;
         break;
       case RWAudio::TRI:
-        if (aRWAudioClass->m_genPhase_r < M_PI) {
-          y2 = 2 * (aRWAudioClass->m_genPhase_r - aRWAudioClass->m_genPhaseDif - M_PI / 2) / M_PI;
-        } else {
-          y2 = 2 * (3 * M_PI / 2 - aRWAudioClass->m_genPhase_r + aRWAudioClass->m_genPhaseDif) /
-               M_PI;
-        }
+        gen_y_r = (aRWAudioClass->m_genPhase_r < M_PI) ? 2 * (aRWAudioClass->m_genPhase_r - aRWAudioClass->m_genPhaseDif - M_PI / 2) / M_PI : 2 * (3 * M_PI / 2 - aRWAudioClass->m_genPhase_r + aRWAudioClass->m_genPhaseDif) / M_PI;
         break;
       case RWAudio::NOISE:
-        if (noise) {
-          y2 = 1.0;
-        } else {
-          y2 = -1.0;
-        }
+        gen_y_r = noise ? 1.0 : -1.0;
         break;
       case RWAudio::WOBBLE:
-        y2 = sin(aRWAudioClass->m_genPhase_r - aRWAudioClass->m_genPhaseDif + sin(ph_wobble));
+        gen_y_r = sin(aRWAudioClass->m_genPhase_r - aRWAudioClass->m_genPhaseDif + sin(ph_wobble));
         break;
-      default: /* sine wave */
-        y2 = sin(aRWAudioClass->m_genPhase_r - aRWAudioClass->m_genPhaseDif);
+      default:
+        gen_y_r = sin(aRWAudioClass->m_genPhase_r - aRWAudioClass->m_genPhaseDif);
         break;
     }
 
-    if (aRWAudioClass->m_genGain_l == 0.0)
+    // ---- Ramp Generator tab gains toward target ----
+    { float d = aRWAudioClass->m_genGainTarget_l - aRWAudioClass->m_genGain_l; if (d > 0.00005f || d < -0.00005f) aRWAudioClass->m_genGain_l += d * 0.1f; else aRWAudioClass->m_genGain_l = aRWAudioClass->m_genGainTarget_l; }
+    { float d = aRWAudioClass->m_genGainTarget_r - aRWAudioClass->m_genGain_r; if (d > 0.00005f || d < -0.00005f) aRWAudioClass->m_genGain_r += d * 0.1f; else aRWAudioClass->m_genGain_r = aRWAudioClass->m_genGainTarget_r; }
+
+    // ---- Advance Generator tab phases ----
+    if (aRWAudioClass->m_genGain_l != 0.0) {
+      aRWAudioClass->m_genPhase_l += (float)2.0 * M_PI * aRWAudioClass->m_genFR_l / aRWAudioClass->m_sampleRate;
+      if ((2.0 * M_PI) < aRWAudioClass->m_genPhase_l) aRWAudioClass->m_genPhase_l -= 2.0 * M_PI;
+    } else {
       aRWAudioClass->m_genPhase_l = 0.0;
-    else
-      aRWAudioClass->m_genPhase_l +=
-          (float)2.0 * M_PI * aRWAudioClass->m_genFR_l / aRWAudioClass->m_sampleRate;
-
-    if (aRWAudioClass->m_genGain_r == 0.0)
+    }
+    if (aRWAudioClass->m_genGain_r != 0.0) {
+      aRWAudioClass->m_genPhase_r += (float)2.0 * M_PI * aRWAudioClass->m_genFR_r / aRWAudioClass->m_sampleRate;
+      if ((2.0 * M_PI) < aRWAudioClass->m_genPhase_r) aRWAudioClass->m_genPhase_r -= 2.0 * M_PI;
+    } else {
       aRWAudioClass->m_genPhase_r = 0.0;
-    else
-      aRWAudioClass->m_genPhase_r +=
-          (float)2.0 * M_PI * aRWAudioClass->m_genFR_r / aRWAudioClass->m_sampleRate;
+    }
 
-    if ((2.0 * M_PI) < aRWAudioClass->m_genPhase_l) aRWAudioClass->m_genPhase_l -= 2.0 * M_PI;
-    if ((2.0 * M_PI) < aRWAudioClass->m_genPhase_r) aRWAudioClass->m_genPhase_r -= 2.0 * M_PI;
+    // ---- Compute Audiogram tab waveform (always SINE, independent phases/gains) ----
+    double aud_y_l = sin(aRWAudioClass->m_audgenPhase_l);
+    double aud_y_r = sin(aRWAudioClass->m_audgenPhase_r);
+
+    { float d = aRWAudioClass->m_audgenGainTarget_l - aRWAudioClass->m_audgenGain_l; if (d > 0.00005f || d < -0.00005f) aRWAudioClass->m_audgenGain_l += d * 0.1f; else aRWAudioClass->m_audgenGain_l = aRWAudioClass->m_audgenGainTarget_l; }
+    { float d = aRWAudioClass->m_audgenGainTarget_r - aRWAudioClass->m_audgenGain_r; if (d > 0.00005f || d < -0.00005f) aRWAudioClass->m_audgenGain_r += d * 0.1f; else aRWAudioClass->m_audgenGain_r = aRWAudioClass->m_audgenGainTarget_r; }
+
+    if (aRWAudioClass->m_audgenGain_l != 0.0) {
+      aRWAudioClass->m_audgenPhase_l += (float)2.0 * M_PI * aRWAudioClass->m_audgenFR_l / aRWAudioClass->m_sampleRate;
+      if ((2.0 * M_PI) < aRWAudioClass->m_audgenPhase_l) aRWAudioClass->m_audgenPhase_l -= 2.0 * M_PI;
+    } else {
+      aRWAudioClass->m_audgenPhase_l = 0.0;
+    }
+    if (aRWAudioClass->m_audgenGain_r != 0.0) {
+      aRWAudioClass->m_audgenPhase_r += (float)2.0 * M_PI * aRWAudioClass->m_audgenFR_r / aRWAudioClass->m_sampleRate;
+      if ((2.0 * M_PI) < aRWAudioClass->m_audgenPhase_r) aRWAudioClass->m_audgenPhase_r -= 2.0 * M_PI;
+    } else {
+      aRWAudioClass->m_audgenPhase_r = 0.0;
+    }
+
     ph_wobble += 30.0 / aRWAudioClass->m_sampleRate;
-    *outBuf++ = (float)(aRWAudioClass->m_genGain_l * y);
-    if (aRWAudioClass->m_channels_out > 1) *outBuf++ = (float)(aRWAudioClass->m_genGain_r * y2);
 
-#ifdef _DEBUG
-    // fprintf(ddbg,"%04X %04X ",(float)(32768.f * y), (float)(32768.f * y2));
-#endif
+    // ---- Mix both generators and clip to [-1, +1] ----
+    float out_l = (float)(aRWAudioClass->m_genGain_l * gen_y_l + aRWAudioClass->m_audgenGain_l * aud_y_l);
+    if (out_l > 1.0f) out_l = 1.0f;
+    else if (out_l < -1.0f) out_l = -1.0f;
+
+    *outBuf++ = out_l;
+
+    if (aRWAudioClass->m_channels_out > 1) {
+      float out_r = (float)(aRWAudioClass->m_genGain_r * gen_y_r + aRWAudioClass->m_audgenGain_r * aud_y_r);
+      if (out_r > 1.0f) out_r = 1.0f;
+      else if (out_r < -1.0f) out_r = -1.0f;
+      *outBuf++ = out_r;
+    }
   }
   return 0;
 }
@@ -315,9 +323,15 @@ int RWAudio::InitSnd(long int oscbuflen, long int spebuflen, std::string &rtinfo
 
   m_genFR_l = m_genFR_r = 0.0;
   m_genShape_l = m_genShape_r = SINE;
-  m_genGain_l = m_genGain_r = 0.0;
+  m_genGainTarget_l = m_genGainTarget_r = 0.0;
+  m_genGain_l = m_genGain_r = 0.0; // Must init actual gain to avoid uninitialised reads (crash + clicks)
   m_genPhase_l = m_genPhase_r = 0.0;
   m_genPhaseDif = 0.0;
+
+  m_audgenFR_l = m_audgenFR_r = 0.0;
+  m_audgenGainTarget_l = m_audgenGainTarget_r = 0.0;
+  m_audgenGain_l = m_audgenGain_r = 0.0; // Must init actual gain to avoid uninitialised reads (crash + clicks)
+  m_audgenPhase_l = m_audgenPhase_r = 0.0;
 
   g_OscBufferPosition = 0;
   g_SpeBufferPosition = 0;
@@ -534,14 +548,41 @@ int RWAudio::PlaySetGenerator(float f1, float f2, Waveform s1, Waveform s2, floa
   m_genShape_r = s2;
 
   if (1.0 > g1) {
-    m_genGain_l = g1;
+    m_genGainTarget_l = g1;
   } else {
-    m_genGain_l = 0.99999;
+    m_genGainTarget_l = 0.99999;
   }
   if (1.0 > g2) {
-    m_genGain_r = g2;
+    m_genGainTarget_r = g2;
   } else {
-    m_genGain_r = 0.99999;
+    m_genGainTarget_r = 0.99999;
+  }
+
+  return 1;
+}
+
+/*
+ * Audiogram generator settings (independent state, mixed in callback)
+ */
+int RWAudio::PlaySetAudiogram(float freqL, float gainL, float freqR, float gainR) {
+  if (2 * freqL < m_sampleRate)
+    m_audgenFR_l = freqL;
+  else
+    m_audgenFR_l = m_sampleRate / 2;
+  if (2 * freqR < m_sampleRate)
+    m_audgenFR_r = freqR;
+  else
+    m_audgenFR_r = m_sampleRate / 2;
+
+  if (1.0 > gainL) {
+    m_audgenGainTarget_l = gainL;
+  } else {
+    m_audgenGainTarget_l = 0.99999;
+  }
+  if (1.0 > gainR) {
+    m_audgenGainTarget_r = gainR;
+  } else {
+    m_audgenGainTarget_r = 0.99999;
   }
 
   return 1;

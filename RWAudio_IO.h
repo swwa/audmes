@@ -57,11 +57,22 @@ class RWAudio {
     m_genPhase_r = m_genPhase_l;
   };
 
+  /* Generator tab + FRM test state */
   float m_genFR_l, m_genFR_r;
   Waveform m_genShape_l, m_genShape_r;
   float m_genGain_l, m_genGain_r;
+  float m_genGainTarget_l, m_genGainTarget_r;
   float m_genPhase_l, m_genPhase_r;
   float m_genPhaseDif;
+
+  /* Audiogram tab state (independent, mixed in callback) */
+  float m_audgenFR_l, m_audgenFR_r;
+  float m_audgenGain_l, m_audgenGain_r;
+  float m_audgenGainTarget_l, m_audgenGainTarget_r;
+  float m_audgenPhase_l, m_audgenPhase_r;
+
+  /* Audiogram-only generator (always SINE) */
+  int PlaySetAudiogram(float freqL, float gainL, float freqR, float gainR);
 
   unsigned int m_sampleRate;
   int m_channels_in;

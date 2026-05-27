@@ -156,10 +156,18 @@ void CtrlOScope::PaintGraph(wxDC& dc) {
 
   /* spocitat vysku pisma pro spodni odstup a sirky pto odstup zleva */
   /* calculate space for legend */
-  if (!m_YUnit.empty()) {
-    dc.GetTextExtent(m_YUnit, &tw, &th);
-    udist = tw;
-  }
+if (!m_YUnit.empty()) {
+     // Split on newlines and use widest line for margin calculation
+     wxString rem = m_YUnit;
+     while (!rem.IsEmpty()) {
+       size_t pos = rem.Find('\n');
+       wxString token = (pos == (size_t)wxNOT_FOUND) ? rem : rem.Left((int)pos);
+       dc.GetTextExtent(token, &tw, &th);
+       if (tw > udist) udist = tw;
+       if (pos == (size_t)wxNOT_FOUND) break;
+       rem = rem.Mid(pos + 1);
+     }
+   }
   bla.Printf(wxT("%.1f"), m_MinYValue);
   dc.GetTextExtent(bla, &tw, &th);
   ldist = udist + tw + 8;
@@ -177,8 +185,26 @@ void CtrlOScope::PaintGraph(wxDC& dc) {
 
   /* tisk legendy - display legend */
   dc.SetBrush(wxBrush(m_plColor, wxBRUSHSTYLE_SOLID));
-  dc.DrawText(m_YUnit, 4, rec.height / 2);
-  dc.DrawText(m_XUnit, rec.width / 2, rec.height - udist);
+
+// Draw Y-unit label (supports newlines for wrapping)
+   if (!m_YUnit.empty()) {
+     int yCenter = rec.height / 2;
+     wxString remY = m_YUnit;
+     int nLinesY = 0;
+     { wxString tmp = m_YUnit; while (!tmp.IsEmpty()) { size_t p = tmp.Find('\n'); nLinesY++; if (p == (size_t)wxNOT_FOUND) break; tmp = tmp.Mid(p + 1); } }
+     int lineH = fSize + 1; // approximate char height from font size
+     int startY = yCenter - ((nLinesY - 1) * lineH) / 2;
+     while (!remY.IsEmpty()) {
+       size_t pos = remY.Find('\n');
+       wxString token = (pos == (size_t)wxNOT_FOUND) ? remY : remY.Left((int)pos);
+       dc.DrawText(token, 4, startY);
+       startY += lineH;
+       if (pos == (size_t)wxNOT_FOUND) break;
+       remY = remY.Mid(pos + 1);
+     }
+   }
+
+   dc.DrawText(m_XUnit, rec.width / 2, rec.height - udist);
 
   int ydiv = 10; /* number of horizontal lines */
   if (m_MaxYValue - m_MinYValue > 19) ydiv = (m_MaxYValue - m_MinYValue) / 10;
@@ -194,32 +220,37 @@ void CtrlOScope::PaintGraph(wxDC& dc) {
   }
 
   /* spocitat jak casto se budou kreslit vertikalni cary */
-  /* vertical lines depending on linear or log scale  */
-  if (m_LogX) {
-    /* draw vertical lines with log distance */
-    xstep = (rec.width - ldist - rdist) / log10(m_MaxXValue / m_MinXValue);
-    if (m_MinXValue < 1) m_MinXValue = 1;  // avoid log10(0) and rounding errors
-    int decade = log10(m_MinXValue);
-    double freq = m_MinXValue;
-    while (freq <= m_MaxXValue) {
-      dc.DrawLine((int)(ldist + xstep * log10(freq / m_MinXValue)), tdist,
-                  (int)(ldist + xstep * log10(freq / m_MinXValue)), rec.height - bdist);
-      if (log10(freq) == decade || log10(freq / 2) == decade || log10(freq / 5) == decade) {
-        int cf = (int)freq;
-        int cfk = cf / 1000;
-        if (cfk >= 1)
-          bla.Printf(wxT("%dk"), cfk);
-        else
-          bla.Printf(wxT("%d"), cf);
-        dc.GetTextExtent(bla, &tw, &th);
-        dc.DrawText(bla, (int)(ldist + xstep * log10(freq / m_MinXValue) - tw / 2),
-                    rec.height - bdist + 8);
-      }
-      freq += pow(10, decade);
-      if (log10(freq) - 1 >= decade) {
-        decade++;
-      }
-    }
+   /* vertical lines depending on linear or log scale  */
+   if (m_LogX) {
+     /* draw vertical lines with log distance, labeled at 1/2/5 per decade */
+     xstep = (rec.width - ldist - rdist) / log10(m_MaxXValue / m_MinXValue);
+     double minVal = m_MinXValue;
+     if (minVal < 1) minVal = 1;
+     int startDecade = (int)floor(log10(minVal));
+     int endDecade = (int)floor(log10(m_MaxXValue));
+
+     for (int dec = startDecade; dec <= endDecade; dec++) {
+       double base = pow(10.0, dec);
+       // Label at 1x, 2x, 5x each decade
+       const int multipliers[] = {1, 2, 5};
+       for (int m : multipliers) {
+         double freq = base * m;
+         if (freq < minVal || freq > m_MaxXValue) continue;
+         int xpos = ldist + xstep * log10(freq / minVal);
+
+         // Draw vertical grid line
+         dc.DrawLine(xpos, tdist, xpos, rec.height - bdist);
+
+         // Format label
+         int cf = (int)(freq + 0.5);
+         if (cf >= 1000)
+           bla.Printf(wxT("%dk"), cf / 1000);
+         else
+           bla.Printf(wxT("%d"), cf);
+         dc.GetTextExtent(bla, &tw, &th);
+         dc.DrawText(bla, xpos - tw / 2, rec.height - bdist + 8);
+       }
+     }
   } else {
     /* draw vertical lines with linear distance */
     xstep = (double)(rec.width - ldist - rdist) / m_NumberOfVerticals;
@@ -267,44 +298,69 @@ void CtrlOScope::PaintGraph(wxDC& dc) {
     if (ilow > 0) ilow--;
     if ((int)ihigh < ((int)m_pointsX.GetCount() - 1)) ihigh++;
 
-    // left channel
-    if (m_interp == SINC) {
-      wxArrayDouble xdata;
-      wxArrayDouble ydata;
-      sinc_interpolate(xdata, ydata, m_pointsX, m_points1);
-      PaintTrack(dc, ilow, ihigh * 5 - 1, xstep, m_trColor, xdata, ydata);
-      xdata.Clear();
-      ydata.Clear();
-    } else {
-      PaintTrack(dc, ilow, ihigh, xstep, m_trColor, m_pointsX, m_points1);
+    // left channel — only draw if there's data
+    if (!m_points1.empty()) {
+      if (m_interp == SINC) {
+        wxArrayDouble xdata;
+        wxArrayDouble ydata;
+        sinc_interpolate(xdata, ydata, m_pointsX, m_points1);
+        PaintTrack(dc, ilow, ihigh * 5 - 1, xstep, m_trColor, xdata, ydata);
+      } else {
+        PaintTrack(dc, ilow, ihigh, xstep, m_trColor, m_pointsX, m_points1);
+      }
     }
 
-    // right channel
-    if (m_interp == SINC) {
-      wxArrayDouble xdata;
-      wxArrayDouble ydata;
-      sinc_interpolate(xdata, ydata, m_pointsX, m_points2);
-      PaintTrack(dc, ilow, ihigh * 5 - 1, xstep, m_tr2Color, xdata, ydata);
-      xdata.Clear();
-      ydata.Clear();
-    } else {
-      PaintTrack(dc, ilow, ihigh, xstep, m_tr2Color, m_pointsX, m_points2);
+    // right channel — only draw if there's data
+    if (!m_points2.empty()) {
+      if (m_interp == SINC) {
+        wxArrayDouble xdata;
+        wxArrayDouble ydata;
+        sinc_interpolate(xdata, ydata, m_pointsX, m_points2);
+        PaintTrack(dc, ilow, ihigh * 5 - 1, xstep, m_tr2Color, xdata, ydata);
+      } else {
+        PaintTrack(dc, ilow, ihigh, xstep, m_tr2Color, m_pointsX, m_points2);
+      }
+    }
+
+    // draw color legend for tracks (top-left corner)
+    std::vector<std::pair<wxString, wxColour>> legends = {
+        {m_legend1, m_trColor},
+        {m_legend2, m_tr2Color}
+    };
+    int legX = ldist + 4;
+    int legY = tdist + 4;
+    int lineH = fSize + 2;
+    for (size_t li = 0; li < legends.size(); li++) {
+      wxString label = legends[li].first;
+      wxColour col = legends[li].second;
+      if (label.empty()) continue;
+      dc.SetPen(wxPen(col, 2, wxPENSTYLE_SOLID));
+      dc.DrawLine(legX, legY, legX + 14, legY);
+      dc.DrawCircle(legX + 7, legY, 3);
+      dc.SetTextForeground(m_whColor);
+      dc.DrawText(label, legX + 18, legY - fSize + 1);
+      legY += lineH;
     }
   }
 }
 
 void CtrlOScope::PaintTrack(wxDC& dc, size_t from, size_t to, double xstep, const wxColor& color,
                             wxArrayDouble& xpoints, wxArrayDouble& ypoints) {
+  // Guard against mismatched array sizes (e.g., audiogram with single-ear data)
+  if (xpoints.empty() || ypoints.empty()) return;
+
   dc.SetPen(wxPen(color, 1, wxPENSTYLE_SOLID));
   wxRect rec = GetClientRect();
   std::vector<wxPoint> pv;
   // iterate trough the data points in range
-  for (size_t i = from; i <= to; i++) {
+  for (size_t i = from; i <= to && i < ypoints.GetCount() && i < xpoints.GetCount(); i++) {
+    if (isnan(ypoints.Item(i))) continue; // skip missing-data markers (audiogram)
     int xpos;
+    double xval = m_LogX ? m_pointsX.Item(i) : xpoints.Item(i);
     if (m_LogX)
-      xpos = ldist + xstep * log10(m_pointsX.Item(i) / m_MinXValue);
+      xpos = ldist + xstep * log10(xval / m_MinXValue);
     else
-      xpos = ldist + xpoints.Item(i) * xstep * m_NumberOfVerticals / (m_MaxXValue - m_MinXValue);
+      xpos = ldist + xval * xstep * m_NumberOfVerticals / (m_MaxXValue - m_MinXValue);
     // find the point in the graph and limit to the graph area
     double ydatapoint = ypoints.Item(i);
     if (ydatapoint > m_MaxYValue) ydatapoint = m_MaxYValue;
@@ -315,7 +371,15 @@ void CtrlOScope::PaintTrack(wxDC& dc, size_t from, size_t to, double xstep, cons
     wxPoint pt = {xpos, (int)ypoint};
     pv.push_back(pt);
   }
-  if (pv.size() > 1) dc.DrawLines(pv.size(), &pv[0]);
+  if (m_interp == MARKER) {
+     for (size_t i = 0; i < pv.size(); i++) {
+       int sz = 5;
+       dc.DrawLine(pv[i].x - sz, pv[i].y - sz, pv[i].x + sz, pv[i].y + sz);
+       dc.DrawLine(pv[i].x + sz, pv[i].y - sz, pv[i].x - sz, pv[i].y + sz);
+     }
+   } else if (pv.size() > 1) {
+     dc.DrawLines(pv.size(), &pv[0]);
+   }
 
   if (wxT("") != m_UserText) {
     dc.SetTextForeground(m_whColor);

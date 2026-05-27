@@ -25,6 +25,7 @@
 // end wxGlade
 #include <wx/tglbtn.h>
 
+#include "audiogram.h"
 #include "CtrlOScope.h"
 #include "RWAudio_IO.h"
 #include "sma_2d.h"
@@ -65,6 +66,11 @@ class MainFrame : public wxFrame {
   void OnGenStart(wxCommandEvent& event);
   void OnOscStart(wxCommandEvent& event);
   void OnFrmStart(wxCommandEvent& event);
+  void OnAudiogramStart(wxCommandEvent& event);
+  void OnAudiogramHeared(wxCommandEvent& event);
+  void OnSaveAUD(wxCommandEvent& event);
+  void OnLoadAUD(wxCommandEvent& event);
+  void DrawAudiogram(void);
   void OnAboutClick(wxCommandEvent& event);
   void OnExitClick(wxCommandEvent& event);
   void OnClose(wxCloseEvent& event);
@@ -195,6 +201,8 @@ class MainFrame : public wxFrame {
   double trigger_level;
   int trigger_pre;
 
+  void OnAudiogramStartFocus(wxFocusEvent& event);
+
   wxArrayDouble osc_times;
   wxArrayDouble osc_lmagns;
   wxArrayDouble osc_rmagns;
@@ -216,6 +224,17 @@ class MainFrame : public wxFrame {
   unsigned int m_PlayDev;
   unsigned int m_RecordDev;
   unsigned int m_SamplingFreq;
+
+  // Audiogram tab members
+  Audiogram* m_audiogram;
+  wxPanel* notebook_1_aud;
+  CtrlOScope* window_1_aud;
+  wxToggleButton* button_aud_start;
+  wxButton* button_aud_heared;
+  wxStaticText* label_aud_status;
+  wxChoice* choice_aud_freqset;
+
+  void OnKeyDown(wxKeyEvent& event);
 };
 
 #endif  // AUDMES_H

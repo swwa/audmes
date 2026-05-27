@@ -55,4 +55,11 @@ enum {
   ID_INDEV_CHO,
   ID_OUTDEV_CHO,
   ID_FREQ_CHO,
+
+  // Audiogram tab
+  ID_AUD_START,
+  ID_AUD_HEARED,
+  ID_AUD_FREQ_SET,
+  ID_SAVE_AUD,
+  ID_LOAD_AUD,
 };

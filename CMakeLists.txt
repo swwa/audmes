@@ -17,6 +17,8 @@ set(CPP_SOURCES
 	sma_2d.cpp
 	sma_2d.h
 	event_ids.h
+	audiogram.cpp
+	audiogram.h
 	)
 
 set(AM_SOURCES

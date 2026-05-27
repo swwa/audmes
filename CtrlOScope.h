@@ -37,7 +37,7 @@ class CtrlOScope : public wxControl {
   void SetXRange(double dLower, double dUpper, int logrange);
   void SetYRange(double dLower, double dUpper, int logrange);
 
-  enum Interpolation { DOT, LINE, SINC };
+  enum Interpolation { DOT, LINE, SINC, MARKER };
 
   void SetTrack1(wxArrayDouble const& ardbl);
   void SetTrack2(wxArrayDouble const& ardbl);
@@ -50,6 +50,14 @@ class CtrlOScope : public wxControl {
     m_UserTextPosX = xpos;
     m_UserTextPosY = ypos;
   };
+
+   void SetLegend(const wxString& text1, const wxString& text2) {
+     m_legend1 = text1;
+     m_legend2 = text2;
+   };
+
+   void SetYUnit(wxString const& unit) { m_YUnit = unit; }
+   void SetXUnit(wxString const& unit) { m_XUnit = unit; }
 
  protected:
   wxArrayDouble m_points1;
@@ -77,6 +85,9 @@ class CtrlOScope : public wxControl {
   int m_UserTextPosY;
 
   Interpolation m_interp;
+
+   wxString m_legend1; // track 1 legend text (drawn in trColor)
+   wxString m_legend2; // track 2 legend text (drawn in tr2Color)
 
  private:
   void PaintGraph(wxDC& dc);
