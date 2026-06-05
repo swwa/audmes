@@ -181,6 +181,8 @@ if (APPLE)
 		set(BU_CHMOD_BUNDLE_ITEMS ON)
 		fixup_bundle(\"${APPS}\" \"\" \"${DIRS}\")"
 		)
+	# Re-sign app bundle after fixup_bundle invalidates code signatures
+	install(CODE "execute_process(COMMAND codesign --deep --force --sign - \"${APPS}\")")
 	# Add files to top level dmg directoy
 	install(FILES "${CMAKE_SOURCE_DIR}/README.md" DESTINATION .)
 	install(FILES "${CMAKE_SOURCE_DIR}/NEWS" DESTINATION .)
