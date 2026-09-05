@@ -77,10 +77,8 @@ class RWAudio {
   double m_hyst;
   double m_pre;
 
- protected:
-  RtAudio* m_AudioDriver;
-
  private:
+  RtAudio* m_AudioDriver;
   int stream_running;
   unsigned int cardrec, cardplay;
   int StartAudio(int recDevId, int playDevId);

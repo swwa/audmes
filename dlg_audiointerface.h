@@ -35,6 +35,7 @@
  */
 
 #include "RWAudio_IO.h"
+#include <wx/wx.h>
 
 ////@begin includes
 ////@end includes
@@ -80,6 +81,7 @@ class AudioInterfaceDialog : public wxDialog {
   wxDECLARE_DYNAMIC_CLASS(AudioInterfaceDialog);
   wxDECLARE_EVENT_TABLE();
 
+  private:
   RWAudioDevList m_DevRecList;
   RWAudioDevList m_DevPlayList;
   AIStreamSettings m_StreamSettings;

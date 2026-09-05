@@ -9,6 +9,8 @@ Checks:
   - portability-*,
   - readability-*,
   - -readability-magic-numbers,
+  - -readability-math-missing-parentheses,
+  - -readability-braces-around-statements,
   - modernize-avoid-c-arrays,
   - modernize-use-using,
   - clang-diagnostic-*,

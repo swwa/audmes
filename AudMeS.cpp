@@ -27,6 +27,7 @@
 #endif
 #include <libfccp/csv.h>
 
+#include <algorithm>
 #include <atomic>
 #include <fstream>
 #include <iostream>
@@ -136,7 +137,7 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
                                            wxT("Triangle"), wxT("Wh-Noise"),    wxT("Wobble")};
   choice_l_wav = new wxChoice(notebook_1_gen, ID_GENSHP_L, wxDefaultPosition, wxDefaultSize, 6,
                               choice_l_wav_choices, 0);
-  label__gen_freq_l = new wxStaticText(notebook_1_gen, wxID_ANY, wxT("Frequency [20..20000Hz]: "));
+  label_gen_freq_l = new wxStaticText(notebook_1_gen, wxID_ANY, wxT("Frequency [20..20000Hz]: "));
   slide_l_fr = new wxSlider(notebook_1_gen, ID_GENLFREQ, 80, 0, 200);
   label_gen_ampl_l = new wxStaticText(notebook_1_gen, -1, wxT("Amplitude [0..-60dB]: "));
   slide_l_am = new wxSlider(notebook_1_gen, ID_GENLAMP, 0, -60, 0);
@@ -345,7 +346,7 @@ void MainFrame::do_layout() {
                     5);
   sizer_GenL->Add(label_gen_wave_l, 0, wxALL | wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL, 5);
   sizer_GenL->Add(choice_l_wav, 1, wxALL | wxEXPAND, 5);
-  sizer_GenL->Add(label__gen_freq_l, 0, wxALL | wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL, 5);
+  sizer_GenL->Add(label_gen_freq_l, 0, wxALL | wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL, 5);
   sizer_txtfreql->Add(slide_l_fr, 0, wxEXPAND, 5);
   sizer_txtfreql->Add(txt_freq_l, wxALL | wxEXPAND, 5);
   sizer_GenL->Add(sizer_txtfreql, 1, wxALL | wxEXPAND, 5);
@@ -537,7 +538,7 @@ void MainFrame::set_custom_props() {
   SetIcon(wxICON(AudMeSIcon));
 #endif
 
-#ifdef __LINUX__
+#ifdef __linux__
 #include "audmes.xpm"
   SetIcon(wxICON(audmes));
 #endif
@@ -570,7 +571,7 @@ void MainFrame::set_custom_props() {
   window_1_frm->SetXRange(20, 20000, 1);
   window_1_frm->SetYRange(-80, 0, 0);
 
-  frm_running = 0;
+  frm_running = false;
   frm_measure = 0;
   frm_istep = 0;
 
@@ -590,9 +591,10 @@ void MainFrame::set_custom_props() {
   ret = m_RWAudio->InitSnd((long int)(m_OscBufferLength), m_SpeBufferLength, m_rtinfo,
                            m_SamplingFreq);
 
-  if (ret)
+  if (ret) {
     wxMessageBox(_T("Sound card issue:\n\nPlease check\nTools -> Audio interface Configuration\n"),
                  _T("Alert"), wxICON_INFORMATION | wxOK);
+  }
 }
 
 void MainFrame::OnAboutClick(wxCommandEvent& WXUNUSED(event)) {
@@ -1089,13 +1091,13 @@ void MainFrame::OnOscStart(wxCommandEvent& WXUNUSED(event)) {
 
 void MainFrame::OnFrmStart(wxCommandEvent& WXUNUSED(event)) {
   if (button_frm_start->GetValue()) {
-    long ip;
+    long points;
     button_frm_start->SetLabel(_T("Stop"));
     wxString tpoints = text_ctrl1_frm->GetValue();
-    tpoints.ToLong(&ip, 10);
-    if (ip > 120) ip = 120;
-    if (ip < 1) ip = 1;
-    frm_ipoints = (int)ip;
+    tpoints.ToLong(&points, 10);
+    points = std::min<long>(points, 120);
+    points = std::max<long>(points, 1);
+    frm_ipoints = (int)points;
     frm_istep = 0;
 
     frm_freqs.Clear();
@@ -1256,7 +1258,7 @@ void MainFrame::OnSelectSndCard(wxCommandEvent& WXUNUSED(event)) {
     m_SMASpeLeft->SetNumRecords(m_SpeBufferLength >> 1);
     m_SMASpeRight->SetNumRecords(m_SpeBufferLength >> 1);
     setoscbuf();
-    m_RWAudio->ChangeBufLen((unsigned long)(m_OscBufferLength), m_SpeBufferLength);
+    m_RWAudio->ChangeBufLen(m_OscBufferLength, m_SpeBufferLength);
     g_OscBufferChanged.store(false);
   }
 }
@@ -1282,7 +1284,7 @@ wxIMPLEMENT_APP(AudMeSApp);
 
 bool AudMeSApp::OnInit() {
   wxInitAllImageHandlers();
-  MainFrame* frame_1 = new MainFrame(NULL, wxID_ANY, wxT(""));
+  auto* frame_1 = new MainFrame(nullptr, wxID_ANY, wxT(""));
   SetTopWindow(frame_1);
   frame_1->Show();
   return true;

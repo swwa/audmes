@@ -21,9 +21,7 @@
 #ifndef __CTRLOSCOPE_H__
 #define __CTRLOSCOPE_H__
 
-#include <wx/dynarray.h>
 #include <wx/wx.h>
-#include <vector>
 
 class CtrlOScope : public wxControl {
  public:
@@ -42,7 +40,7 @@ class CtrlOScope : public wxControl {
   void SetTrack1(wxArrayDouble const& ardbl);
   void SetTrack2(wxArrayDouble const& ardbl);
   void SetTrackX(wxArrayDouble const& ardbl);
-  void SetInterp(const CtrlOScope::Interpolation interp);
+  void SetInterp(CtrlOScope::Interpolation interp);
   void SetNumOfVerticals(int num) { m_NumberOfVerticals = num; };
 
   void ShowUserText(wxString const& text, int xpos, int ypos) {
@@ -51,7 +49,7 @@ class CtrlOScope : public wxControl {
     m_UserTextPosY = ypos;
   };
 
- protected:
+ private:
   wxArrayDouble m_points1;
   wxArrayDouble m_points2;
   wxArrayDouble m_pointsX;
@@ -78,7 +76,6 @@ class CtrlOScope : public wxControl {
 
   Interpolation m_interp;
 
- private:
   void PaintGraph(wxDC& dc);
   void PaintTrack(wxDC& dc, size_t from, size_t to, double xstep, const wxColor& color,
                   wxArrayDouble& xpoints, wxArrayDouble& ypoints);

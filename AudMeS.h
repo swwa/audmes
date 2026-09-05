@@ -18,7 +18,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <wx/image.h>
 #include <wx/wx.h>
 // begin wxGlade: ::dependencies
 #include <wx/notebook.h>
@@ -97,7 +96,6 @@ class MainFrame : public wxFrame {
   void SendGenSettings(void);
   void TriggerSettings(void);
 
- protected:
   // begin wxGlade: MainFrame::attributes
   wxStaticBox* sizer_osc_r_staticbox;
   wxStaticBox* sizer_osc_l_staticbox;
@@ -114,7 +112,7 @@ class MainFrame : public wxFrame {
   wxCheckBox* checkbox_l_en;
   wxStaticText* label_gen_wave_l;
   wxChoice* choice_l_wav;
-  wxStaticText* label__gen_freq_l;
+  wxStaticText* label_gen_freq_l;
   wxSlider* slide_l_fr;
   wxStaticText* label_gen_ampl_l;
   wxSlider* slide_l_am;

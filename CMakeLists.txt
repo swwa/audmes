@@ -72,7 +72,7 @@ message("libfccp found ${FCCP}")
 add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${AM_SOURCES})
 
 if (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Linux")
-	add_definitions(-D__LINUX_ALSA__ -D__LINUX_PULSE__ -D__LINUX__ -DHAVE_GETTIMEOFDAY)
+	add_definitions(-D__LINUX_ALSA__ -D__LINUX_PULSE__ -DHAVE_GETTIMEOFDAY)
 	target_link_libraries(${PROJECT_NAME} ${wxWidgets_LIBRARIES} asound pulse pulse-simple)
 	target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra)
 endif()

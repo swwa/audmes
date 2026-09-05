@@ -34,6 +34,7 @@
 
 #include "CtrlOScope.h"
 
+#include <algorithm>
 #include <cmath>
 #include <vector>
 
@@ -113,11 +114,10 @@ void CtrlOScope::OnPaint(wxPaintEvent& WXUNUSED(event)) {
   delete memDC;
 }
 
-inline double sinc(double x) {
+inline static double sinc(double x) {
   if (x == 0.0)
     return 1.0;
-  else
-    return sin(x * M_PI) / (x * M_PI);
+  return sin(x * M_PI) / (x * M_PI);
 }
 
 static void sinc_interpolate(wxArrayDouble& xdata, wxArrayDouble& ydata, wxArrayDouble& xpoints,
@@ -165,9 +165,7 @@ void CtrlOScope::PaintGraph(wxDC& dc) {
   ldist = udist + tw + 8;
   bla.Printf(wxT("%.1f"), m_MaxYValue);
   dc.GetTextExtent(bla, &tw, &th);
-  if (ldist < (udist + tw + 8)) {
-    ldist = udist + tw + 8;
-  }
+  ldist = std::max(ldist, udist + tw + 8);
   if (!m_XUnit.empty()) {
     dc.GetTextExtent(_T("T"), &tw, &th);
     udist = th;
@@ -198,7 +196,7 @@ void CtrlOScope::PaintGraph(wxDC& dc) {
   if (m_LogX) {
     /* draw vertical lines with log distance */
     xstep = (rec.width - ldist - rdist) / log10(m_MaxXValue / m_MinXValue);
-    if (m_MinXValue < 1) m_MinXValue = 1;  // avoid log10(0) and rounding errors
+    m_MinXValue = std::max<double>(m_MinXValue, 1);  // avoid log10(0) and rounding errors
     int decade = log10(m_MinXValue);
     double freq = m_MinXValue;
     while (freq <= m_MaxXValue) {
@@ -307,15 +305,15 @@ void CtrlOScope::PaintTrack(wxDC& dc, size_t from, size_t to, double xstep, cons
       xpos = ldist + xpoints.Item(i) * xstep * m_NumberOfVerticals / (m_MaxXValue - m_MinXValue);
     // find the point in the graph and limit to the graph area
     double ydatapoint = ypoints.Item(i);
-    if (ydatapoint > m_MaxYValue) ydatapoint = m_MaxYValue;
-    if (ydatapoint < m_MinYValue) ydatapoint = m_MinYValue;
+    ydatapoint = std::min(ydatapoint, m_MaxYValue);
+    ydatapoint = std::max(ydatapoint, m_MinYValue);
     double ypoint =
         rec.height - bdist -
         (rec.height - bdist - tdist) * (ydatapoint - m_MinYValue) / (m_MaxYValue - m_MinYValue);
     wxPoint pt = {xpos, (int)ypoint};
     pv.push_back(pt);
   }
-  if (pv.size() > 1) dc.DrawLines(pv.size(), &pv[0]);
+  if (pv.size() > 1) dc.DrawLines(pv.size(), pv.data());
 
   if (wxT("") != m_UserText) {
     dc.SetTextForeground(m_whColor);
