@@ -6,6 +6,7 @@ Checks:
   - clang-analyzer-*,
   - misc-*,
   - performance-*,
+  - -performance-enum-size,
   - portability-*,
   - readability-*,
   - -readability-magic-numbers,

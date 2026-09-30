@@ -25,7 +25,6 @@
 #include "RWAudio_IO.h"
 
 #include <cmath>
-#include <stdio.h>
 
 #include <atomic>
 #include <map>
@@ -53,7 +52,7 @@ const int nrframes = 2048;
  * pseudo noise generator - linear feedback shift register
  * derived from https://en.wikipedia.org/wiki/Linear-feedback_shift_register
  */
-bool lfsr16() {
+static bool lfsr16() {
   uint16_t bit;             /* Must be 16-bit to allow bit<<15 later in the code */
   static uint16_t lfsr = 1; /* Must not be 0 */
 
@@ -73,9 +72,8 @@ void catcherr(RtAudioError::Type WXUNUSED(type), const std::string &errorText) {
 /*
  * callback function to fetch audio input and generate tones
  */
-int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
-          double WXUNUSED(streamTime), RtAudioStreamStatus status, void *data) {
-  RWAudio *aRWAudioClass = (RWAudio *)data;
+int RWAudio::inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
+                   double WXUNUSED(streamTime), RtAudioStreamStatus status) {
   unsigned int i;
   float *inBuf;
 
@@ -87,29 +85,27 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
   if (!g_OscBufferChanged.load()) {
     // trigger
     i = 0;
-    if (!aRWAudioClass->m_triggered) {
-      switch (aRWAudioClass->m_channel) {
+    if (!m_triggered) {
+      switch (m_channel) {
         case 1:
           // left channel - look for the value under hysteresis point and then over level
           while (i < nBufferFrames) {
-            if ((aRWAudioClass->m_edge > 0.0 &&
-                 (*inBuf++) < aRWAudioClass->m_level - aRWAudioClass->m_hyst) ||
-                (aRWAudioClass->m_edge < 0.0 &&
-                 (*inBuf++) > aRWAudioClass->m_level + aRWAudioClass->m_hyst)) {
+            if ((m_edge > 0.0 && (*inBuf++) < m_level - m_hyst) ||
+                (m_edge < 0.0 && (*inBuf++) > m_level + m_hyst)) {
               inBuf--;
               break;
             }
-            if (aRWAudioClass->m_channels_in > 1) inBuf++;
+            if (m_channels_in > 1) inBuf++;
             i++;
           }
           while (i < nBufferFrames) {
-            if ((aRWAudioClass->m_edge > 0.0 && (*inBuf++) >= aRWAudioClass->m_level) ||
-                (aRWAudioClass->m_edge < 0.0 && (*inBuf++) <= aRWAudioClass->m_level)) {
-              aRWAudioClass->m_triggered = true;
+            if ((m_edge > 0.0 && (*inBuf++) >= m_level) ||
+                (m_edge < 0.0 && (*inBuf++) <= m_level)) {
+              m_triggered = true;
               inBuf--;
               break;
             }
-            if (aRWAudioClass->m_channels_in > 1) inBuf++;
+            if (m_channels_in > 1) inBuf++;
             i++;
           }
           break;
@@ -117,10 +113,8 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
           // right channel
           while (i < nBufferFrames) {
             inBuf++;
-            if ((aRWAudioClass->m_edge > 0.0 &&
-                 (*inBuf++) < aRWAudioClass->m_level - aRWAudioClass->m_hyst) ||
-                (aRWAudioClass->m_edge < 0.0 &&
-                 (*inBuf++) > aRWAudioClass->m_level + aRWAudioClass->m_hyst)) {
+            if ((m_edge > 0.0 && (*inBuf++) < m_level - m_hyst) ||
+                (m_edge < 0.0 && (*inBuf++) > m_level + m_hyst)) {
               inBuf--;
               inBuf--;
               break;
@@ -129,8 +123,8 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
           }
           while (i < nBufferFrames) {
             inBuf++;
-            if ((aRWAudioClass->m_edge > 0.0 && (*inBuf++) >= aRWAudioClass->m_level) ||
-                (aRWAudioClass->m_edge < 0.0 && (*inBuf++) <= aRWAudioClass->m_level)) {
+            if ((m_edge > 0.0 && (*inBuf++) >= m_level) ||
+                (m_edge < 0.0 && (*inBuf++) <= m_level)) {
               inBuf--;
               inBuf--;
               break;
@@ -140,23 +134,23 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
           break;
         default:
           // no trigger
-          aRWAudioClass->m_triggered = false;
+          m_triggered = false;
           break;
       }
     }
 
     while (i < nBufferFrames && !g_OscBufferChanged.load()) {
       g_OscBuffer_Left[g_OscBufferPosition] = *inBuf++;
-      if (aRWAudioClass->m_channels_in > 1)
+      if (m_channels_in > 1)
         g_OscBuffer_Right[g_OscBufferPosition] = *inBuf++;
       else
         g_OscBuffer_Right[g_OscBufferPosition] = 0;
 
       g_OscBufferPosition++;
       i++;
-      if (g_OscBufferPosition == aRWAudioClass->m_OscBufferLen) {
+      if (g_OscBufferPosition == m_OscBufferLen) {
         g_OscBufferPosition = 0;
-        aRWAudioClass->m_triggered = false;
+        m_triggered = false;
         g_OscBufferChanged.store(true);
         break;
       }
@@ -168,13 +162,13 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
   if (!g_SpeBufferChanged.load()) {
     for (i = 0; i < nBufferFrames; i++) {
       g_SpeBuffer_Left[g_SpeBufferPosition] = *inBuf++;
-      if (aRWAudioClass->m_channels_in > 1)
+      if (m_channels_in > 1)
         g_SpeBuffer_Right[g_SpeBufferPosition] = *inBuf++;
       else
         g_SpeBuffer_Right[g_SpeBufferPosition] = 0;
 
       g_SpeBufferPosition++;
-      if (g_SpeBufferPosition >= aRWAudioClass->m_SpeBufferLen) {
+      if (g_SpeBufferPosition >= m_SpeBufferLen) {
         g_SpeBufferPosition = 0;
         g_SpeBufferChanged.store(true);
         break;
@@ -196,22 +190,22 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
     bool noise = lfsr16();
 
     /* left channel */
-    switch (aRWAudioClass->m_genShape_l) {
+    switch (m_genShape_l) {
       case RWAudio::RECT:
-        if (aRWAudioClass->m_genPhase_l < M_PI) {
+        if (m_genPhase_l < M_PI) {
           y = 1.0;
         } else {
           y = -1.0;
         }
         break;
       case RWAudio::SAW:
-        y = (aRWAudioClass->m_genPhase_l - M_PI) / M_PI;
+        y = (m_genPhase_l - M_PI) / M_PI;
         break;
       case RWAudio::TRI:
-        if (aRWAudioClass->m_genPhase_l < M_PI) {
-          y = 2 * (aRWAudioClass->m_genPhase_l - M_PI / 2) / M_PI;
+        if (m_genPhase_l < M_PI) {
+          y = 2 * (m_genPhase_l - M_PI / 2) / M_PI;
         } else {
-          y = 2 * (3 * M_PI / 2 - aRWAudioClass->m_genPhase_l) / M_PI;
+          y = 2 * (3 * M_PI / 2 - m_genPhase_l) / M_PI;
         }
         break;
       case RWAudio::NOISE:
@@ -222,30 +216,29 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
         }
         break;
       case RWAudio::WOBBLE:
-        y = sin(aRWAudioClass->m_genPhase_l + sin(ph_wobble));
+        y = sin(m_genPhase_l + sin(ph_wobble));
         break;
       default: /* sine wave */
-        y = sin(aRWAudioClass->m_genPhase_l);
+        y = sin(m_genPhase_l);
         break;
     }
     /* right channel */
-    switch (aRWAudioClass->m_genShape_r) {
+    switch (m_genShape_r) {
       case RWAudio::RECT:
-        if ((aRWAudioClass->m_genPhase_r - aRWAudioClass->m_genPhaseDif) < M_PI) {
+        if ((m_genPhase_r - m_genPhaseDif) < M_PI) {
           y2 = 1;
         } else {
           y2 = -1;
         }
         break;
       case RWAudio::SAW:
-        y2 = ((aRWAudioClass->m_genPhase_r - aRWAudioClass->m_genPhaseDif) - M_PI) / M_PI;
+        y2 = ((m_genPhase_r - m_genPhaseDif) - M_PI) / M_PI;
         break;
       case RWAudio::TRI:
-        if (aRWAudioClass->m_genPhase_r < M_PI) {
-          y2 = 2 * (aRWAudioClass->m_genPhase_r - aRWAudioClass->m_genPhaseDif - M_PI / 2) / M_PI;
+        if (m_genPhase_r < M_PI) {
+          y2 = 2 * (m_genPhase_r - m_genPhaseDif - M_PI / 2) / M_PI;
         } else {
-          y2 = 2 * (3 * M_PI / 2 - aRWAudioClass->m_genPhase_r + aRWAudioClass->m_genPhaseDif) /
-               M_PI;
+          y2 = 2 * (3 * M_PI / 2 - m_genPhase_r + m_genPhaseDif) / M_PI;
         }
         break;
       case RWAudio::NOISE:
@@ -256,30 +249,28 @@ int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
         }
         break;
       case RWAudio::WOBBLE:
-        y2 = sin(aRWAudioClass->m_genPhase_r - aRWAudioClass->m_genPhaseDif + sin(ph_wobble));
+        y2 = sin(m_genPhase_r - m_genPhaseDif + sin(ph_wobble));
         break;
       default: /* sine wave */
-        y2 = sin(aRWAudioClass->m_genPhase_r - aRWAudioClass->m_genPhaseDif);
+        y2 = sin(m_genPhase_r - m_genPhaseDif);
         break;
     }
 
-    if (aRWAudioClass->m_genGain_l == 0.0)
-      aRWAudioClass->m_genPhase_l = 0.0;
+    if (m_genGain_l == 0.0)
+      m_genPhase_l = 0.0;
     else
-      aRWAudioClass->m_genPhase_l +=
-          (float)2.0 * M_PI * aRWAudioClass->m_genFR_l / aRWAudioClass->m_sampleRate;
+      m_genPhase_l += (float)2.0 * M_PI * m_genFR_l / m_sampleRate;
 
-    if (aRWAudioClass->m_genGain_r == 0.0)
-      aRWAudioClass->m_genPhase_r = 0.0;
+    if (m_genGain_r == 0.0)
+      m_genPhase_r = 0.0;
     else
-      aRWAudioClass->m_genPhase_r +=
-          (float)2.0 * M_PI * aRWAudioClass->m_genFR_r / aRWAudioClass->m_sampleRate;
+      m_genPhase_r += (float)2.0 * M_PI * m_genFR_r / m_sampleRate;
 
-    if ((2.0 * M_PI) < aRWAudioClass->m_genPhase_l) aRWAudioClass->m_genPhase_l -= 2.0 * M_PI;
-    if ((2.0 * M_PI) < aRWAudioClass->m_genPhase_r) aRWAudioClass->m_genPhase_r -= 2.0 * M_PI;
-    ph_wobble += 30.0 / aRWAudioClass->m_sampleRate;
-    *outBuf++ = (float)(aRWAudioClass->m_genGain_l * y);
-    if (aRWAudioClass->m_channels_out > 1) *outBuf++ = (float)(aRWAudioClass->m_genGain_r * y2);
+    if ((2.0 * M_PI) < m_genPhase_l) m_genPhase_l -= 2.0 * M_PI;
+    if ((2.0 * M_PI) < m_genPhase_r) m_genPhase_r -= 2.0 * M_PI;
+    ph_wobble += 30.0 / m_sampleRate;
+    *outBuf++ = (float)(m_genGain_l * y);
+    if (m_channels_out > 1) *outBuf++ = (float)(m_genGain_r * y2);
 
 #ifdef _DEBUG
     // fprintf(ddbg,"%04X %04X ",(float)(32768.f * y), (float)(32768.f * y2));
@@ -427,7 +418,7 @@ int RWAudio::StartAudio(int recDevId, int playDevId) {
 
   try {
     m_AudioDriver->openStream(&oParams, &iParams, RTAUDIO_FLOAT32, m_sampleRate, &bufferFrames,
-                              &inout, (void *)this, &rtAOptions, &catcherr);
+                              &RWAudio::inoutStatic, (void *)this, &rtAOptions, &catcherr);
   } catch (RtAudioError &e) {
     // std::cerr << '\n' << e.getMessage() << '\n' << std::endl;
     return 1;

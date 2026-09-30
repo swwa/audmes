@@ -36,7 +36,7 @@ class RWAudio {
   RWAudio();
   ~RWAudio();
 
-  int InitSnd(long int oscbuflen, long int spebuflen, std::string& rtinfo, unsigned int srate);
+  int InitSnd(long int oscbuflen, long int spebuflen, std::string &rtinfo, unsigned int srate);
   int StartSnd();
   int StopSnd();
 
@@ -46,7 +46,7 @@ class RWAudio {
 
   void SetTrigger(int channel, int edge, double level, double hyst, int pre);
 
-  int GetRWAudioDevices(RWAudioDevList* play, RWAudioDevList* record);
+  int GetRWAudioDevices(RWAudioDevList *play, RWAudioDevList *record);
 
   /* generator */
   enum Waveform { SINE, RECT, SAW, TRI, NOISE, WOBBLE };
@@ -56,6 +56,18 @@ class RWAudio {
     m_genPhaseDif = i_fi;
     m_genPhase_r = m_genPhase_l;
   };
+
+ private:
+  /*
+   * RtAudio requires a C-style callback, so you register a static trampoline that forwards to a private member inout
+   */
+  static int inoutStatic(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
+                         double streamTime, RtAudioStreamStatus status, void *data) {
+    return static_cast<RWAudio *>(data)->inout(outputBuffer, inputBuffer, nBufferFrames, streamTime,
+                                               status);
+  }
+  int inout(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames, double streamTime,
+            RtAudioStreamStatus status);
 
   float m_genFR_l, m_genFR_r;
   Waveform m_genShape_l, m_genShape_r;
@@ -77,8 +89,7 @@ class RWAudio {
   double m_hyst;
   double m_pre;
 
- private:
-  RtAudio* m_AudioDriver;
+  RtAudio *m_AudioDriver;
   int stream_running;
   unsigned int cardrec, cardplay;
   int StartAudio(int recDevId, int playDevId);
